@@ -250,14 +250,18 @@ stages 1-5 done on the dev printer):
     [docs/1x_port_plan.md](docs/1x_port_plan.md). Done 11-21: stage 1 (a
     Debian root with Klipper on the SD card), stage 2 (read-only look at
     the live shared memory), stage 3 (our look-only probe ran on both
-    UPC cores), most of stage 0. **Next: stage 4** (a 1X build of the
-    Klipper UPC firmware, inputs only, owner present). The stock 1X keeps
+    UPC cores), stage 4 (Klipper connected to both cores, reading
+    thermistors and the X/Y home sensors; fork 3dcad7d8), most of
+    stage 0. **Next: stage 5** (outputs one at a time, owner present):
+    it needs the 1X PWM control register, the stepper blocks and the
+    TMC2224 UART worked out on paper first. The stock 1X keeps
     nozzle 80 °C and bed 50 °C at idle and the microcode goes on heating
     when the engine dies: every stop sequence must switch the heater
     outputs off itself. Paper work left: which PWM block is which heater
-    or fan, the ADC scaling per channel, the microstep pins of the TMC2224s, the
-    contact-probe input, the inputs on the GPIO block (XIRD is unused),
-    which motor group is which axis. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
+    or fan (5 and 28 are the two live heaters), the microstep pins of
+    the TMC2224s, the Z home and nozzle-contact inputs, which stepper
+    block is which axis (blocks 3 to 5 are set up differently from 0
+    to 2), the sign of the stock X coordinate. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
     `1x-dev`, ext4, mounted by hand at `/tmp/sd`), not on its eMMC.
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).

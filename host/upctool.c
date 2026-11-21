@@ -17,6 +17,9 @@
 // Global options (before the subcommand):
 //   --dtcm ADDR    physical DTCM base (default: auto-detect + verify)
 //   --force        allow running while the stock printer app is running
+//   --passive      load/stop without writing PWM or stepper registers (set
+//                  by itself on the 88PA6270 boards: 3DWOX 1X, 2X)
+//   --ro           read-only 'dump' of a running stock system
 //
 // Copyright (C) 2026  This file may be distributed under the terms of the
 // GNU GPLv3 license.
@@ -235,6 +238,7 @@ dtcm_candidates(unsigned long *out, int max)
     // Fallbacks derived from the reported ITCM addresses (UNVERIFIED)
     out[n++] = 0xf9270000;
     out[n++] = 0xf9280000;
+    out[n++] = 0xf9880000;      // 88PA6270 (3DWOX 1X): from its device tree
     return n;
 }
 
@@ -776,6 +780,10 @@ main(int argc, char **argv)
     }
     if (i >= argc)
         usage();
+    // The 88PA6270 boards (3DWOX 1X, 2X; their kernel has this file) lay
+    // out the PWM and stepper registers differently: never write them.
+    if (access("/sys/kernel/board_name", F_OK) == 0)
+        opt_passive = 1;
     const char *cmd = argv[i++];
     if (opt_ro && strcmp(cmd, "dump"))
         die("--ro allows only 'dump'");

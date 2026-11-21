@@ -6,6 +6,15 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X port, stage 4** (owner at the printer): Klipper connected to our
+  firmware on both UPC cores of the 1X, look-only. Fork 3dcad7d8 adds
+  input pins on the SoC GPIO block (`CONFIG_UPC_GPIO_BLOCK`,
+  `config/x1_*.config`); FORK pin moved to it (the DP200 builds are
+  unchanged by it). New: `install/x1/x1_stop.sh` (safe stop with heater
+  outputs off), `install/x1/x1_stage4.sh`, `klipper/config/x1/x1_stage4.cfg`,
+  `tools/x1_query.py`; `upctool` is passive by itself on 88PA6270
+  boards. Thermistors read through the DP200's ADC code and tables;
+  X home is GPIO 99 and Y home GPIO 82, both high at home.
 - **1X port, stage 3** (owner at the printer): Sindoh's engine stopped,
   the UPC cores held, a look-only probe (`make X1=1`,
   `prebuilt/probe_x1_*.bin`) loaded with the new `upctool --passive`,

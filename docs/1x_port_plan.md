@@ -1,8 +1,8 @@
 # Klipper on the Sindoh 3DWOX 1X: port plan
 
-**Status (2026-11-21): stages 1, 2 and 3 done; stage 0 mostly done. Our
-look-only probe has run on both UPC cores; nothing of ours has driven a
-motor or a heater.** The
+**Status (2026-11-21): stages 1 to 4 done. Klipper runs on the 1X with
+our firmware on both UPC cores and reads its thermistors and home
+sensors; nothing of ours has driven a motor or a heater yet.** The
 owner's 1X is on stock firmware `ROD1X_200916_2` with a root serial
 console and (after the USB stick tool) SSH. Everything known about the
 machine is in [sindoh: 1x.md](https://github.com/catawalks/sindoh/blob/main/docs/1x.md);
@@ -156,6 +156,32 @@ off; on the DP200 they do). Check: the probe report matches stage 0.
 1X build (`config/x1_fm.config`, `x1_io.config`: 6270 map, stepper
 offsets). Both MCUs connect to klippy; read thermistors, endstops, fan
 tach and filament sensors. No outputs enabled in the config.
+
+**Done 2026-11-21** (owner at the printer, printer cooled by its power
+saving mode first):
+- Fork commit 3dcad7d8: `CONFIG_UPC_GPIO_BLOCK` adds read-only input
+  pins `gpio0`..`gpio255` on the SoC GPIO block (level register at
+  bank + 0x00, checked against the kernel's view of seven lines);
+  `config/x1_fm.config`, `x1_io.config` (398 MHz timer). Both images fit
+  the 16 KB the DP200 build uses (12.6 and 12.8 KB).
+- **The ADC needed no change:** the 1X's microcode programs it exactly
+  as the DP200's does, and the thermistor tables use the DP200's index
+  bases (nozzle 110, bed 381). Mux select 1 is the nozzle, 2 and 3 both
+  read the bed, 4 is open on the 1X. Klipper showed nozzle 25.8 °C and
+  bed 35.6 °C a few minutes after the stock firmware's own values of
+  28.8 and 38.2 °C while cooling.
+- `install/x1/x1_stop.sh` stops the engine, holds the cores and stops
+  the heater PWM blocks; `install/x1/x1_stage4.sh start|status|stop`
+  loads the firmware, runs `upctool bridge` and klippy in the SD card's
+  Debian root with `klipper/config/x1/x1_stage4.cfg` (no outputs
+  defined). `tools/x1_query.py` prints the state from Klipper's API
+  socket. `upctool` is passive by itself on these boards.
+- Both MCUs connect (398.04 MHz measured by Klipper). The home sensors
+  follow the owner's hand: **X home is GPIO 99, Y home is GPIO 82, both
+  high at home.** The four filament sensor lines read; which level means
+  "filament present" is not checked yet.
+- Not done in stage 4: fan tach inputs, the Z home sensor and the
+  nozzle-contact input (not found yet).
 
 **5. Outputs one at a time (owner present each time).** Fans, lamp,
 beeper; TMC2224 UART (read registers before writing any); one motor at a
