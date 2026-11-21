@@ -349,6 +349,14 @@ fits the abnormal press travel; a filament tip catching at the extruder
 entry would look the same. To settle it: a stock load after a clean
 stock boot with no Klipper feed-motor moves in between.
 
+**Second attempt, same day, after a clean stock boot: jammed again**,
+earlier in the sequence: "Load 411Error, Step:440476" 17 s after the
+load started, while the cartridge feed motor was still pushing alone
+and with no unusual press move before it. That weakens the press
+explanation and points at something mechanical in the rear feed path
+(the owner switched the printer off to open the rear gear train).
+Whether our long retract left something behind there is open.
+
 The filament was then pulled back under Klipper, cold, with both
 motors in the stock retract direction (direction checked first):
 1057 mm in total before it was out. GPIO 120 changed after about
