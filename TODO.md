@@ -222,6 +222,12 @@ stages 1-5 done on the dev printer):
     and the broken-root prompt on hardware.
 36. **Stage 8:** the work printer.
 37. **Stage 9:** release checklist (PROJECTS #10).
+39. **Repo split follow-ups** (11-20): the fork's
+    `config/sindoh-dp200/README.md` still points at
+    catawalks/sindoh `klipper_port/klipper/config/` (fix with the next
+    fork commit; now catawalks/sindoh-klipper `klipper/config/`). Optional:
+    move the kernel/NAND/U-Boot test scripts from `tools/` to
+    sindoh-kernel ([tools/README.md](tools/README.md) lists them).
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).
     Each firmware line (RODIN_, RODUP_, the 6270 models) is treated as its
