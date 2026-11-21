@@ -255,7 +255,7 @@ stages 1-5 done on the dev printer):
     nozzle 80 °C and bed 50 °C at idle and the microcode goes on heating
     when the engine dies: every stop sequence must switch the heater
     outputs off itself. Paper work left: which PWM block is which heater
-    or fan, the ADC scaling per channel, the TMC2224 register setup, the
+    or fan, the ADC scaling per channel, the microstep pins of the TMC2224s, the
     contact-probe input, the inputs on the GPIO block (XIRD is unused),
     which motor group is which axis. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
     `1x-dev`, ext4, mounted by hand at `/tmp/sd`), not on its eMMC.

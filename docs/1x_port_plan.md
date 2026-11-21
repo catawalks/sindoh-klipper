@@ -69,8 +69,10 @@ Still to do:
   step/dir/enable wiring of each stepper block.
 - The thermistor tables as Klipper `[adc_temperature]` sections
   (`tools/gen_thermistors.py`).
-- The TMC2224 setup the engine sends (registers and values), and the
-  select-line code for each motor.
+- Done 2026-11-21: the TMC2224 setup the engine sends and the
+  select-line code ([sindoh: 1x.md](https://github.com/catawalks/sindoh/blob/main/docs/1x.md),
+  "What the engine writes to each TMC2224"). Current comes from VREF
+  (PWM), microstepping from the MS pins.
 
 **1. A Debian root on the 1X (no hardware touched).** A Debian armhf
 root on an **SD card in the mainboard's slot** (owner, 2026-11-21: a
