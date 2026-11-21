@@ -361,9 +361,9 @@ Whether our long retract left something behind there is open.
 open (photos on the dev PC, `Mainboard_Photos/RODIN_1X/rear_gear_train_20261121`)
 the owner saw the second feed stage's gear standing still. Both feed
 motors ran under Klipper when stepped one at a time, with clean driver
-status: engine 4 is the **initial feed motor**, engine 3 the **rear
-(second-stage) feed motor**; what earlier notes call "the extruder" is
-this rear motor. The recordings then showed the stock load's staged
+status: engine 4 is the **initial feed motor**, engine 3 the
+**extruder motor**, which sits at the rear as well (no motor comes
+after it). The recordings then showed the stock load's staged
 checks: in the good cartridge load "Pass411" came 0.8 s after the start,
 when the cartridge-side filament sensor (GPIO 80) changed, and the rear
 motor started in the second the filament reached GPIO 120. In the

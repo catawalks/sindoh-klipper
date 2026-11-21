@@ -264,10 +264,11 @@ stages 1-5 done on the dev printer):
     engines; 458.8 steps/mm). Two stock open-filament loads jammed afterwards; cause
     found, not ours: the filament was fed past the cartridge-bay switch
     (GPIO 80), which the stock load needs before it starts the rear feed
-    motor (docs/1x_port_plan.md). Naming: engine 4 = initial feed motor,
-    engine 3 = rear feed motor ("extruder" in earlier notes).
+    motor (docs/1x_port_plan.md). Engine 4 = initial feed motor, engine 3 = the extruder
+    (both at the rear). GPIO 80 = bay switch (filament through the
+    opening port or a cartridge), GPIO 120 = filament at the extruder.
     **Next (owner present): a Klipper load routine that uses GPIO 120
-    as its stop; the rear motor
+    as its stop; the extruder
     alone in open-filament mode with another filament; the
     nozzle-contact probe; then turn `x1_printer_draft.cfg` into a real
     config** (stage 6). **Next (owner present): homing with the sensors
