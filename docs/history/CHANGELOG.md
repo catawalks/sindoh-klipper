@@ -6,6 +6,16 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X port, stage 3** (owner at the printer): Sindoh's engine stopped,
+  the UPC cores held, a look-only probe (`make X1=1`,
+  `prebuilt/probe_x1_*.bin`) loaded with the new `upctool --passive`,
+  report read, printer rebooted to stock. Both cores run our code; timer
+  1 runs at 398.04 MHz; the XENA inputs are unused on the 1X. Found on
+  the way: the stock 1X holds nozzle 80 °C and bed 50 °C at idle, the
+  microcode keeps heating after the engine dies, and a hold freezes the
+  PWM outputs, so the heater blocks are stopped by hand after the hold.
+  The 1X's PWM control register differs from the DP200's. Details in
+  docs/1x_port_plan.md.
 - **1X port, stages 1 and 2** (owner asleep; no motion, no heat): a
   Debian armhf root with Klipper, Moonraker and Mainsail on an SD card in
   the 1X's slot (`install/x1/`), nothing started, the eMMC not written;

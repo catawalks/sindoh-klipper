@@ -1,6 +1,7 @@
 # UPC probe firmware: builds probe_fm.bin and probe_io.bin
 #
 #   make                         # needs arm-none-eabi-gcc
+#   make X1=1                    # look-only build for the 3DWOX 1X
 #
 # Reuses the Klipper port's start.S (vectors, stacks, setjmp) and
 # linker script so the probe exercises the same startup path.
@@ -14,6 +15,9 @@ PORT = $(KLIPPER)/src/upc
 COMMON = ../../common
 CFLAGS = -march=armv5te -marm -mfloat-abi=soft -Os -Wall -ffreestanding \
          -fno-builtin -ffunction-sections -fdata-sections -I$(COMMON)
+ifdef X1
+CFLAGS += -DPROBE_X1=1
+endif
 LDFLAGS = -nostdlib -nostartfiles -static -Wl,--gc-sections -lgcc
 
 all: probe_fm.bin probe_io.bin

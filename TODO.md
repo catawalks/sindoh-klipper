@@ -249,11 +249,15 @@ stages 1-5 done on the dev printer):
 41. **1X port** (owner 11-20: start): plan and stages in
     [docs/1x_port_plan.md](docs/1x_port_plan.md). Done 11-21: stage 1 (a
     Debian root with Klipper on the SD card), stage 2 (read-only look at
-    the live shared memory), most of stage 0. **Next needs the owner at
-    the printer: stage 3** (stop Sindoh's engine, load the passive probe).
-    Paper work left: which PWM channel is which heater or fan, the
-    TMC2224 register setup, the contact-probe input, which motor group is
-    which axis, the 1X build of the UPC firmware. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
+    the live shared memory), stage 3 (our look-only probe ran on both
+    UPC cores), most of stage 0. **Next: stage 4** (a 1X build of the
+    Klipper UPC firmware, inputs only, owner present). The stock 1X keeps
+    nozzle 80 °C and bed 50 °C at idle and the microcode goes on heating
+    when the engine dies: every stop sequence must switch the heater
+    outputs off itself. Paper work left: which PWM block is which heater
+    or fan, the ADC scaling per channel, the TMC2224 register setup, the
+    contact-probe input, the inputs on the GPIO block (XIRD is unused),
+    which motor group is which axis. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
     `1x-dev`, ext4, mounted by hand at `/tmp/sd`), not on its eMMC.
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).

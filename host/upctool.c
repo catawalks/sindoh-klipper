@@ -60,6 +60,7 @@
 
 static int opt_force;
 static unsigned long opt_dtcm;
+static int opt_passive;  // --passive: never write a PWM or stepper register
 static int opt_ro;   // --ro: look only (no driver calls, DTCM mapped read-only)
 static volatile uint8_t *dtcm;
 static volatile uint8_t *pwm_regs, *smot_regs;
@@ -296,6 +297,8 @@ periph_attach(void)
 static void
 do_safe(void)
 {
+    if (opt_passive)
+        return;     // other models: register layout not confirmed
     periph_attach();
     for (int n = PWM_FIRST_BLOCK; n <= PWM_NUM_BLOCKS; n++) {
         uint32_t off = 0x100 * n + PWM_CTRL;
@@ -746,7 +749,8 @@ static void
 usage(void)
 {
     fprintf(stderr,
-        "usage: upctool [--dtcm ADDR] [--ro] [--force] COMMAND ...\n"
+        "usage: upctool [--dtcm ADDR] [--passive] [--ro] [--force] COMMAND ...\n"
+        "  --passive: load/stop without touching PWM or stepper registers\n"
         "  --ro: read-only look at a running system; only 'dump' is allowed\n"
         "  info | safe | stop | load IO.bin|- FM.bin|- | probe [secs]\n"
         "  bridge [-f FM_PTY|tcp:PORT] [-i IO_PTY|tcp:PORT] [-p POLL_US]\n"
@@ -763,6 +767,8 @@ main(int argc, char **argv)
             opt_force = 1;
         else if (!strcmp(argv[i], "--ro"))
             opt_ro = 1;
+        else if (!strcmp(argv[i], "--passive"))
+            opt_passive = 1;
         else if (!strcmp(argv[i], "--dtcm") && i + 1 < argc)
             opt_dtcm = strtoul(argv[++i], NULL, 0);
         else

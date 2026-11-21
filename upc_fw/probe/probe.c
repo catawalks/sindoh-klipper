@@ -14,6 +14,12 @@
 //   - raw ADC FIFO contents for mux select 0 (nozzle) and 1 (bed).
 // It is passive: it forces heaters/fans/clutch off and stepper drivers
 // disabled, and never enables any output.
+//
+// PROBE_X1=1 builds it for the 3DWOX 1X (88PA6270) and makes it strictly
+// look-only: no write to any PWM, stepper, ADC or GPIO register (their
+// 1X layout is not confirmed, so the outputs stay exactly as the stock
+// firmware left them). It writes only the console UART, the two spare
+// timers and its report in the DTCM.
 
 #include <stdint.h>
 #include "upc_hw.h"
@@ -21,6 +27,16 @@
 
 #ifndef PROBE_TCM
  #define PROBE_TCM 0
+#endif
+#ifndef PROBE_X1
+ #define PROBE_X1 0
+#endif
+#if PROBE_X1
+ // 1X console UART (16550 style, 4-byte register spacing)
+ #undef UART_THR
+ #undef UART_LSR
+ #define UART_THR 0xd4030000u
+ #define UART_LSR 0xd4030014u
 #endif
 #ifndef PROBE_DTCM_EXEC
  #define PROBE_DTCM_EXEC 0
@@ -107,7 +123,9 @@ step(char n)
 static void
 outputs_off(void)
 {
-#if !PROBE_CORE_FM
+#if PROBE_X1
+    // look-only on the 1X
+#elif !PROBE_CORE_FM
     for (uint32_t n = PWM_FIRST_BLOCK; n <= PWM_NUM_BLOCKS; n++) {
         uint32_t b = PWM_BLOCK(n), c = rd(b + PWM_CTRL);
         wr(b + PWM_CTRL, c & ~PWM_CTRL_LEVEL);
@@ -204,7 +222,13 @@ probe_tcm_sizes(struct probe_report *r)
  * Counter candidates
  ****************************************************************/
 
-static const uint32_t counter_addrs[] = {
+static const uint32_t counter_addrs[PROBE_NUM_COUNTERS] = {
+#if PROBE_X1
+    // Only registers the stock 1X microcode is known to use
+    XENA_TIMER(0), XENA_TIMER(1), XENA_TIMER(2), XENA_TIMER(3),
+};
+static const uint32_t unused_counter_addrs[] __attribute__((unused)) = {
+#endif
     XENA_PERFMON0_TIMER, XENA_PERFMON1_TIMER,
     XENA_TIMER(0), XENA_TIMER(1), XENA_TIMER(2), XENA_TIMER(3),
     XENA_PHASE(0), XENA_PHASE(1), XENA_PHASE(2), XENA_PHASE(3),
@@ -224,6 +248,8 @@ counters_init(struct probe_report *r)
     for (int i = 0; i < PROBE_NUM_COUNTERS - PROBE_CORE_FM; i++) {
         struct probe_counter *c = &r->ctr[i];
         c->addr = counter_addrs[i];
+        if (!c->addr)
+            continue;
         probing = 1;
         c->first = c->last = rd(c->addr);
         probing = 0;
@@ -238,7 +264,7 @@ counters_init(struct probe_report *r)
 #define T1_LABEL 0x1e1e0001
 #define T1_RELOAD_BELOW 0x40000000u
 
-static void
+static void __attribute__((unused))
 timer1_extended(struct probe_report *r)
 {
     static uint32_t acc;
@@ -269,6 +295,8 @@ counters_poll(struct probe_report *r)
 #endif
     for (int i = 0; i < PROBE_NUM_COUNTERS - PROBE_CORE_FM; i++) {
         struct probe_counter *c = &r->ctr[i];
+        if (!c->addr)
+            continue;
         uint32_t v = rd(c->addr);
         if (v != c->last) {
             c->changes++;
@@ -286,7 +314,7 @@ counters_poll(struct probe_report *r)
  ****************************************************************/
 
 #if !PROBE_CORE_FM
-static void
+static void __attribute__((unused))
 adc_init(void)
 {
     wr(ADC_BASE + 0x0c0, 0);
@@ -297,7 +325,7 @@ adc_init(void)
         wr(ADC_BASE + a, 0);
 }
 
-static void
+static void __attribute__((unused))
 adc_select(uint32_t sel)
 {
     uint32_t ctrl = rd(ADC_CTRL);
@@ -369,8 +397,10 @@ upc_main(void)
     r->xird_and = r->xird1_and = 0xffffffff;
 #if !PROBE_CORE_FM
     step('6');
+#if !PROBE_X1
     adc_init();
     adc_select(0);
+#endif
     r->adc_enabled = 1;
     uint32_t adc_sel = 0;
 #endif
@@ -395,8 +425,10 @@ upc_main(void)
         // Switch input every 4096 loops; capture just before switching
         if ((r->loops & 0xfff) == 0) {
             adc_capture(r, adc_sel);
+#if !PROBE_X1
             adc_sel ^= 1;
             adc_select(adc_sel);
+#endif
         }
 #endif
     }

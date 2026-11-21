@@ -1,7 +1,8 @@
 # Klipper on the Sindoh 3DWOX 1X: port plan
 
-**Status (2026-11-21): stages 1 and 2 done; stage 0 mostly done. Nothing
-of ours has touched the UPC cores, motors or heaters.** The
+**Status (2026-11-21): stages 1, 2 and 3 done; stage 0 mostly done. Our
+look-only probe has run on both UPC cores; nothing of ours has driven a
+motor or a heater.** The
 owner's 1X is on stock firmware `ROD1X_200916_2` with a root serial
 console and (after the USB stick tool) SSH. Everything known about the
 machine is in [sindoh: 1x.md](https://github.com/catawalks/sindoh/blob/main/docs/1x.md);
@@ -107,6 +108,48 @@ nothing), read the report, reboot. Before stopping the engine: confirm
 what its outputs do when it dies (heaters and motor enables must go
 off; on the DP200 they do). Check: the probe report matches stage 0.
 
+**Done 2026-11-21** (owner at the printer). What it showed:
+- **The stock 1X keeps its heaters on when idle** (owner: the screen
+  shows nozzle 80 °C, bed 50 °C, all the time; boot log: `T.Cfg N:0 T:80`,
+  `N:1 T:80`, `N:2 T:50`). Two PWM blocks with period 1000 (5 and 28,
+  counted as on the DP200: block N at 0xF9304000 + 0x100*N) run at a few
+  percent duty that changes every second. The screen's power saving
+  setting (owner set it to 5 minutes) is the stock way to cool down.
+- **The engine's death does not switch the heaters off.** After
+  `kill -TERM` the microcode goes on regulating to the last targets. The
+  engine stays as a zombie under UIManager; nothing reacts
+  (`watchdog_reason` stays 2, the hardware watchdog is fed by a separate
+  `watchdog` process, `recovery.check.sh` only prints a line).
+- **Holding the cores freezes every PWM output as it is**, so a running
+  heater output must be stopped right after the hold. Clearing bit 0 of
+  the block's control register (0x29 -> 0x28, the value the microcode
+  itself uses for a stopped channel) does it; the bed reading fell
+  afterwards. While the microcode runs it puts the bit back at once.
+- The 1X's PWM control register is not the DP200's (values seen: 0x28,
+  0x29, 0x2C, 0x0A, 0x0B, 0x18, 0x6C), so the DP200's "safe" writes must
+  not be used here: `upctool --passive` skips them and the probe has a
+  look-only build (`make X1=1` in `upc_fw/probe`, `prebuilt/probe_x1_*.bin`).
+- The engine uses the same four driver calls as `upctool` (0xC0017522
+  hold, 0xC0017521 run, 0x7523 ITCM, 0xC0047524 DTCM offset), and loads
+  in the same order (hold, zero the ITCMs, write, run).
+- **Probe report:** both cores start our code from the ITCM and report
+  through the DTCM at 0xF9880000. CP15 ID 0x56051012 (FM) and 0x56151012
+  (IO), TCM status 0x2C01C0, Thumb works, no aborts, about 1.2 million
+  loops a second. XENA timer 1 counts down at 398.04 MHz and the
+  reload-and-extend scheme of the Klipper timer works. The console UART
+  at 0xD4030000 prints.
+- **The XENA input registers (XIRD) read all zero** on both cores: the
+  1X's inputs do not come in that way. Stage 4 has to read them from the
+  GPIO block (0xD4019000) instead.
+- The ADC keeps converting with the cores held, on the channel selected
+  last. Result words carry a channel tag in the upper bits and a 10-bit
+  value below (for example 0x0007C33F).
+- Sequence used: `kill -TERM` the engine; `upctool --passive --force
+  stop`; clear bit 0 of PWM blocks 5, 25 and 28 with `devmem`;
+  `upctool --passive --force --dtcm 0xf9880000 load probe_x1_io.bin
+  probe_x1_fm.bin`; `upctool --dtcm 0xf9880000 probe 5`; `reboot`. The
+  reboot brought stock back with no complaint.
+
 **4. Klipper firmware, inputs only (owner present).** The fork gets a
 1X build (`config/x1_fm.config`, `x1_io.config`: 6270 map, stepper
 offsets). Both MCUs connect to klippy; read thermistors, endstops, fan
@@ -126,10 +169,12 @@ the target, hook into the boot, stock backup and remover.
 
 ## Open questions
 
-- What the engine's death does to heaters and motors (stage 3 gate).
-- Does a watchdog or `recovery_watchdog.sh` react when the engine or
-  UIManager is stopped? (`recovery.check.sh --post-process-integrity`
-  restarts programs; it must be paused for our tests, not fought.)
+- Which of PWM blocks 5 and 28 is the nozzle and which the bed, and how
+  the ADC values map onto the two thermistor tables (the bed channel
+  fits the bed table by plain index; the nozzle channel is not matched
+  yet). The owner suspects two heater cartridges in the hot end.
+- What the motor drivers do when the cores are held (they stayed as they
+  were; not looked at closely).
 - Bed leveling hardware on the 1X (`gp_En_LevelSensor`, the active
   leveling tables) and the "clutch" and "solenoid" the engine drives.
 - Which stepper block is which axis, and the 1X's kinematics limits.
