@@ -235,8 +235,31 @@ part of the stock recording) and slipped the belt for 5 mm; no damage
 reported. Rule since: no move toward a stop before the direction is
 confirmed by a move away from it.
 
-Still to do in stage 5: homing with the real sensors, the extruder and
-cartridge motors (engines 3 and 4, pins known), then the heaters. Open: how the extruder and
+**Homing attempt stopped, 2026-11-21: the head was driven into the left
+wall.** Reloading the config (to add the home sensors as endstops)
+restarted the firmware. Its restart path sets bit 0 of each engine's
+configuration register (the DP200's "driver disabled" bit) and, with the
+1X's drivers enabled by GPIO lines, nothing cleared it again. With that
+bit set the X direction pin (GPIO 163) stayed high whatever the control
+register said, so the "move away" of 15 mm and six 1 mm test moves all
+went left, into the stop. The owner called it; motors off, printer
+rebooted to stock. Fork 0938457c clears the bit when an engine is
+claimed and never sets it on these boards: **built, not yet run on the
+printer** (the FORK pin stays at e3e1b356 until it is).
+
+Rules from the two motion mistakes of this stage:
+- After every firmware restart or config reload, check each axis's
+  direction again before any real move: step with the driver disabled
+  (enable line high) and read the direction pin, then one 1 mm move
+  with the owner watching.
+- Never move toward a stop unless the direction has just been confirmed
+  by a move away from it and the sensor has been seen to release.
+- If a move does not do what was commanded, stop and switch the motors
+  off before investigating; do not send more moves to find out.
+
+Still to do in stage 5: verify 0938457c with the drivers disabled,
+homing with the real sensors, the extruder and cartridge motors
+(engines 3 and 4, pins known), then the heaters. Open: how the extruder and
 cartridge motors are stepped.
 
 Plan as first written: Fans, lamp,

@@ -255,7 +255,11 @@ stages 1-5 done on the dev printer):
     stage 0. stage 5a (lights, beeper, all five fans switched by Klipper; fork
     8ceef800). Stage 5b first half done (drivers read over the UART: 16
     microsteps, X/Y/Z/E/C at motor numbers 0/2/3/4/6). Stage 5b second half done: X, Y, Z moved by Klipper (fork
-    e3e1b356). **Next (owner present): homing with the sensors
+    e3e1b356). **Known bug in e3e1b356 on the 1X: after a firmware
+    restart every move goes one way (head hit the left wall 11-21);
+    fix 0938457c is built but not run on the printer. Verify it with
+    the drivers disabled before any motion** (docs/1x_port_plan.md,
+    rules). **Next (owner present): homing with the sensors
     (GPIO 99/82/83), then extruder and cartridge motors, then
     heaters.** Open: the stepper engine clock against the timer
     (step batching is off on the 1X until measured). The DP200 firmware builds from 8ceef800 are

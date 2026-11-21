@@ -6,6 +6,11 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: homing attempt stopped after the head hit the left wall.** A
+  firmware restart left the engines' "disable" bit set, which on the 1X
+  pins the direction line high. Fork 0938457c (not yet on the printer,
+  FORK pin unchanged) never sets that bit on 88PA6270 boards. Motion
+  rules added to docs/1x_port_plan.md.
 - **1X port, stage 5b: first motion under Klipper** (owner at the
   printer): X, Y and Z each moved 5 mm and back through the stock
   stepper engines. Fork e3e1b356 (FORK pin moved): 1X stepper register
