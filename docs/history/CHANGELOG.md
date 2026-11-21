@@ -11,7 +11,9 @@ files in this folder; `git log` has the rest.
   PC-tested with stand-in commands; not on a printer, not released.
   Installer and remover now refuse to delete `/klipper` with a mount
   inside it. v0.1.0's release notes list internal-only storage as a known
-  issue.
+  issue. **Test payload `32ec81c0`** (build `75734d4`) built on the dev
+  printer, audited, and written to the USB stick for the work printer;
+  v0.1.0 kept beside it. Not public.
 - **Repositories split** (owner): this repository is now
   catawalks/sindoh-klipper (installer, configs, screen app, tools, docs).
   The kernel work (`kernel/m1`, `docs/kernel`, the kernel history, the SD

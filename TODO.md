@@ -241,8 +241,11 @@ stages 1-5 done on the dev printer):
     remover with the stick in (G-code on the stick must survive); the SD
     slot. Still to build: space management on the internal flash (refuse
     what doesn't fit, show free space), logs on the storage, a screen
-    message when storage is in use. Needs a payload rebuild on the dev
-    printer (offline 11-20).
+    message when storage is in use. **Test payload `32ec81c0`** (build
+    `75734d4`, fork and firmware as v0.1.0, content audit clean) is on
+    the USB stick's `_update_rodin_KlipperInstall` with the new remover
+    since 11-20; v0.1.0 (`0ee46f50`) is kept next to it in
+    `_update_rodin_KlipperInstall_v0.1.0`. Not installed anywhere yet.
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).
     Each firmware line (RODIN_, RODUP_, the 6270 models) is treated as its
