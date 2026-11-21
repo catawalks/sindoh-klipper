@@ -1,6 +1,7 @@
 # Klipper on the Sindoh 3DWOX 1X: port plan
 
-**Status (2026-11-20): planning. Nothing of ours has run on the 1X.** The
+**Status (2026-11-21): stages 1 and 2 done; stage 0 mostly done. Nothing
+of ours has touched the UPC cores, motors or heaters.** The
 owner's 1X is on stock firmware `ROD1X_200916_2` with a root serial
 console and (after the USB stick tool) SSH. Everything known about the
 machine is in [sindoh: 1x.md](https://github.com/catawalks/sindoh/blob/main/docs/1x.md);
@@ -46,7 +47,12 @@ It is the owner's working 1X, on stock firmware.
 Each stage ends with something checked, and the next one does not start
 before it.
 
-**0. Paper work (PC only).** Done so far: the comparison above. To do:
+**0. Paper work (PC only).** Done: the comparison above; the microcode
+start-up emulated (`tools/x1_ucode_probe.py`: PWM, ADC and GPIO set-up,
+motor driver pins); thermistor tables (the DP200's, value for value);
+axes, limits, homing and the nozzle-contact bed leveling
+([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md)).
+Still to do:
 - `upc_6270.ko`'s ioctls against the DP200's (`host/upctool.c`).
   **First look, 2026-11-20** (`tools/kodis.py upc_ioctl` on both
   modules): the 1X driver handles the same four command numbers `upctool`
@@ -78,6 +84,10 @@ is written to the eMMC), built with the DP200's
   179 33`. Its old contents are backed up on the owner's PC
   (`sd_card_backups/`).
 - 1.7 GB holds the runtime, not a full build system: compile elsewhere.
+- **Done 2026-11-21** (`install/x1/build_root_1x.sh`): Debian trixie
+  armhf, Klipper (fork 9b174ab), Moonraker, Mainsail; `chelper` built,
+  klippy and Moonraker import; nothing started; 790 MB left on the card.
+  Sindoh's programs kept running throughout.
 Klipper, Moonraker and Mainsail installed but not started. Check: the
 chroot runs, Python and the Klipper host code import, nothing of Sindoh's
 is disturbed.
@@ -85,6 +95,11 @@ is disturbed.
 **2. Look, don't touch (stock engine running).** `upctool` built for the
 1X map, read-only commands only (`info`, `dump` of the shared DTCM): do
 our tools see the stock firmware's state the way they do on the DP200?
+**Done 2026-11-21** with `upctool --dtcm 0xf9880000 --ro dump` (the new
+read-only mode: no driver call, memory mapped read-only): the shared
+memory starts with the nozzle thermistor table (first entry 299819, as in
+the engine), and the table checksum and its complement sit at 0xA728 and
+0xA72C, exactly where the emulated microcode looks for them.
 
 **3. Passive probe on the UPCs (owner present).** Stop Sindoh's engine,
 load our probe firmware (`upc_fw/probe`, reads registers, drives

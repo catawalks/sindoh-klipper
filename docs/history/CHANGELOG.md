@@ -5,6 +5,17 @@ one. The detail for everything up to 2026-11-12 is in
 [TODO_archive_2026-11-12.md](TODO_archive_2026-11-12.md) and the other
 files in this folder; `git log` has the rest.
 
+## 2026-11-21
+- **1X port, stages 1 and 2** (owner asleep; no motion, no heat): a
+  Debian armhf root with Klipper, Moonraker and Mainsail on an SD card in
+  the 1X's slot (`install/x1/`), nothing started, the eMMC not written;
+  `upctool --ro` reads the live shared memory, which matches the
+  emulation. The 1X's UPC microcode start-up emulated on the PC
+  (`tools/x1_ucode_probe.py`); thermistor tables equal the DP200's;
+  axes, limits, homing and nozzle-contact bed leveling written up
+  (sindoh docs/1x_stock_routines.md). The spare SD card's old contents
+  are backed up on the PC.
+
 ## 2026-11-20
 - **1X port started** (owner): plan in docs/1x_port_plan.md, seven
   stages from paper work to the installer; the 1X has the DP200's design

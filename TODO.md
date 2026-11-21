@@ -247,10 +247,13 @@ stages 1-5 done on the dev printer):
     since 11-20; v0.1.0 (`0ee46f50`) is kept next to it in
     `_update_rodin_KlipperInstall_v0.1.0`. Not installed anywhere yet.
 41. **1X port** (owner 11-20: start): plan and stages in
-    [docs/1x_port_plan.md](docs/1x_port_plan.md). Now: stage 0 (PC only):
-    `upc_6270.ko` ioctls against `upctool`, emulate the 1X `fm`/`io`
-    microcode for the pin and channel map, thermistor tables, the TMC2224
-    setup. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
+    [docs/1x_port_plan.md](docs/1x_port_plan.md). Done 11-21: stage 1 (a
+    Debian root with Klipper on the SD card), stage 2 (read-only look at
+    the live shared memory), most of stage 0. **Next needs the owner at
+    the printer: stage 3** (stop Sindoh's engine, load the passive probe).
+    Paper work left: which PWM channel is which heater or fan, the
+    TMC2224 register setup, the contact-probe input, which motor group is
+    which axis, the 1X build of the UPC firmware. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
     `1x-dev`, ext4, mounted by hand at `/tmp/sd`), not on its eMMC.
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).
