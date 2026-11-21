@@ -66,8 +66,18 @@ before it.
   select-line code for each motor.
 
 **1. A Debian root on the 1X (no hardware touched).** A Debian armhf
-root in `/userdata/klipper` (owner's OK needed: first write to the eMMC),
-built with the DP200's `install/build_rootfs*.sh`, entered by chroot.
+root on an **SD card in the mainboard's slot** (owner, 2026-11-21: a
+spare 2 GB card as the development and staging area, so nothing of ours
+is written to the eMMC), built with the DP200's
+`install/build_rootfs*.sh`, entered by chroot.
+- The card: `/dev/mmcblk1p1`, ext4, label `1x-dev`, 1.7 GB free. The
+  stock system detects it but does not mount it (its `media.connect`
+  exits for SD cards), so we mount it ourselves at `/tmp/sd` (a RAM
+  folder: `/mnt/sd` would have to be created on the eMMC root). After a
+  repartition the `/dev` node can be missing: `mknod /dev/mmcblk1p1 b
+  179 33`. Its old contents are backed up on the owner's PC
+  (`sd_card_backups/`).
+- 1.7 GB holds the runtime, not a full build system: compile elsewhere.
 Klipper, Moonraker and Mainsail installed but not started. Check: the
 chroot runs, Python and the Klipper host code import, nothing of Sindoh's
 is disturbed.

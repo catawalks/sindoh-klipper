@@ -250,8 +250,8 @@ stages 1-5 done on the dev printer):
     [docs/1x_port_plan.md](docs/1x_port_plan.md). Now: stage 0 (PC only):
     `upc_6270.ko` ioctls against `upctool`, emulate the 1X `fm`/`io`
     microcode for the pin and channel map, thermistor tables, the TMC2224
-    setup. Needs the owner's OK before stage 1 (a Debian root in
-    `/userdata/klipper`: the first write to the 1X's eMMC).
+    setup. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
+    `1x-dev`, ext4, mounted by hand at `/tmp/sd`), not on its eMMC.
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).
     Each firmware line (RODIN_, RODUP_, the 6270 models) is treated as its
