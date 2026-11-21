@@ -223,7 +223,20 @@ leaves them, and they keep that while powered. So Klipper needs no TMC
 access for a first motor test: step, direction, enable and the current
 reference PWM are enough.
 
-Still to do in stage 5: one motor at a time, homing, then the heaters. Open: how the extruder and
+**5b, second half, done 2026-11-21: X, Y and Z moved by Klipper** (fork
+e3e1b356: the 1X's stepper register offsets, read from the stock FM
+microcode; `klipper/config/x1/x1_stage5b.cfg` with one `manual_stepper`
+per axis; step batching off in `x1_fm.config` until the engine clock is
+measured). 5 mm out and back on each axis with the owner watching;
+directions and pins in sindoh docs/1x_stock_routines.md. The drivers ran
+on the stock current reference and set-up, untouched. One mistake: the
+first Y move went toward the home stop (direction read from the wrong
+part of the stock recording) and slipped the belt for 5 mm; no damage
+reported. Rule since: no move toward a stop before the direction is
+confirmed by a move away from it.
+
+Still to do in stage 5: homing with the real sensors, the extruder and
+cartridge motors (engines 3 and 4, pins known), then the heaters. Open: how the extruder and
 cartridge motors are stepped.
 
 Plan as first written: Fans, lamp,

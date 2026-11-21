@@ -254,9 +254,11 @@ stages 1-5 done on the dev printer):
     thermistors and the X/Y home sensors; fork 3dcad7d8), most of
     stage 0. stage 5a (lights, beeper, all five fans switched by Klipper; fork
     8ceef800). Stage 5b first half done (drivers read over the UART: 16
-    microsteps, X/Y/Z/E/C at motor numbers 0/2/3/4/6). **Next (owner
-    present): one motor at a time**; the firmware needs the 1X's
-    stepper register offsets (+0x28) and enable lines first. The DP200 firmware builds from 8ceef800 are
+    microsteps, X/Y/Z/E/C at motor numbers 0/2/3/4/6). Stage 5b second half done: X, Y, Z moved by Klipper (fork
+    e3e1b356). **Next (owner present): homing with the sensors
+    (GPIO 99/82/83), then extruder and cartridge motors, then
+    heaters.** Open: the stepper engine clock against the timer
+    (step batching is off on the 1X until measured). The DP200 firmware builds from 8ceef800 are
     not yet run on a DP200 (pin arguments widened to 32 bit). The stock 1X keeps
     nozzle 80 °C and bed 50 °C at idle and the microcode goes on heating
     when the engine dies: every stop sequence must switch the heater

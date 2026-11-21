@@ -6,6 +6,12 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X port, stage 5b: first motion under Klipper** (owner at the
+  printer): X, Y and Z each moved 5 mm and back through the stock
+  stepper engines. Fork e3e1b356 (FORK pin moved): 1X stepper register
+  offsets; `x1_stage5b.cfg`. A stock cartridge load was recorded first:
+  extruder = engine 3 (GPIO 42/43), cartridge feeder = engine 4
+  (GPIO 48/49), filament encoder on GPIO 65/67.
 - **1X: motor drivers read over their UART** (`tools/x1_tmc.py`,
   read-only, from the printer's Linux): five TMC222x at motor numbers
   0, 2, 3, 4, 6 (X, Y, Z, extruder, cartridge), 16 microsteps, stock
