@@ -24,7 +24,7 @@ def call(method, params=None):
 info = call('info')
 print('klippy state:', info.get('state'), '-', (info.get('state_message') or '').strip().replace('\n', ' | '))
 names = call('objects/list').get('objects', [])
-want = [n for n in names if n.split()[0] in ('mcu', 'temperature_sensor', 'gcode_button')]
+want = [n for n in names if n.split()[0] in ('mcu', 'temperature_sensor', 'gcode_button', 'output_pin')]
 st = call('objects/query', {'objects': {n: None for n in want}}).get('status', {})
 for n in sorted(st):
     v = st[n]
@@ -34,5 +34,7 @@ for n in sorted(st):
             n, v.get('mcu_version'), ls.get('freq'), ls.get('mcu_awake'), ls.get('bytes_retransmit')))
     elif n.startswith('temperature_sensor'):
         print('%-28s %.1f C' % (n, v.get('temperature', float('nan'))))
+    elif n.startswith('output_pin'):
+        print('%-28s %s' % (n, v.get('value')))
     else:
         print('%-28s %s' % (n, v.get('state')))

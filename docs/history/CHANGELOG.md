@@ -6,6 +6,13 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X port, stage 5a** (owner at the printer): Klipper switched the
+  case lights, the beeper and every fan on the 1X, one at a time. Fork
+  8ceef800 (FORK pin moved): the 1X's PWM block map, writable `gpioN`
+  pins, 32-bit pin arguments. Part cooling = PWM 2, PSU fan = PWM 10,
+  back right exhaust = PWM 20, extruder fan = GPIO 188, back left
+  exhaust = GPIO 112, lights = PWM 7, beeper = PWM 19.
+  `x1_stage4.sh start` takes a config name; `tools/x1_gcode.py`.
 - **1X: motors and sensors recorded under stock** with the new
   read-only `host/regwatch.c` while the owner homed, jogged and ran bed
   leveling: X, Y, Z are stepper engines 0 to 2 (step, dir, enable and

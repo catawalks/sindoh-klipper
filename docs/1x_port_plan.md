@@ -197,7 +197,29 @@ saving mode first):
 - Not done in stage 4: fan tach inputs, the Z home sensor and the
   nozzle-contact input (not found yet).
 
-**5. Outputs one at a time (owner present each time).** Fans, lamp,
+**5. Outputs one at a time (owner present each time).**
+
+**5a done 2026-11-21: lights, beeper and fans** (fork 8ceef800: the 1X's
+PWM block map and writable `gpioN` pins; `klipper/config/x1/x1_stage5a.cfg`;
+`tools/x1_gcode.py` sends timed G-code). Each output was switched by
+Klipper with the owner watching:
+
+| Output | What it is (owner watching, 2026-11-21) |
+|---|---|
+| PWM block 2 | part cooling fan |
+| PWM block 10 | power supply fan (80 % whenever stock is up; enable GPIO 127) |
+| PWM block 20 | back right exhaust fan |
+| GPIO 188 (`gp_En_NozzleFan[1]`) | extruder (hot end) fan, on/off |
+| GPIO 112 (`gp_En_MainFan[1]`) | back left exhaust fan, on/off |
+| PWM block 7 | case lights (static level) |
+| PWM block 19 | beeper (period 250 = 4 kHz, duty 0.36 as stock) |
+| PWM blocks 14, 22; GPIO 225 | nothing on the 1X (the 2X's second head, our reading) |
+
+Still to do in stage 5: the TMC2224 UART (read before writing), one
+motor at a time, homing, then the heaters. Open: how the extruder and
+cartridge motors are stepped.
+
+Plan as first written: Fans, lamp,
 beeper; TMC2224 UART (read registers before writing any); one motor at a
 time at low current, bed empty; homing; then heaters with low limits.
 

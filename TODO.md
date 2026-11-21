@@ -252,9 +252,10 @@ stages 1-5 done on the dev printer):
     the live shared memory), stage 3 (our look-only probe ran on both
     UPC cores), stage 4 (Klipper connected to both cores, reading
     thermistors and the X/Y home sensors; fork 3dcad7d8), most of
-    stage 0. **Next: stage 5** (outputs one at a time, owner present):
-    it needs the 1X PWM control register, the stepper blocks and the
-    TMC2224 UART worked out on paper first. The stock 1X keeps
+    stage 0. stage 5a (lights, beeper, all five fans switched by Klipper; fork
+    8ceef800). **Next: stage 5b** (owner present): TMC2224 UART, then
+    one motor at a time. The DP200 firmware builds from 8ceef800 are
+    not yet run on a DP200 (pin arguments widened to 32 bit). The stock 1X keeps
     nozzle 80 °C and bed 50 °C at idle and the microcode goes on heating
     when the engine dies: every stop sequence must switch the heater
     outputs off itself. Paper work left: which PWM block is which heater

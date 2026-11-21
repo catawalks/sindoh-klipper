@@ -2,7 +2,8 @@
 # 3DWOX 1X, stage 4 of the port: our Klipper firmware on both UPC cores,
 # LOOK ONLY (klipper/config/x1/x1_stage4.cfg defines no output).
 # Run on the printer's own Linux as root, from the SD card:
-#   sh /tmp/sd/stage/x1_stage4.sh start|status|stop
+#   sh /tmp/sd/stage/x1_stage4.sh start [CONFIG]|status|stop
+# CONFIG is a file next to this script (default x1_stage4.cfg, look only).
 # "start" stops Sindoh's motion program (x1_stop.sh); only a reboot
 # brings the stock firmware back. Nothing is written to the eMMC.
 ROOT=/tmp/sd
@@ -37,9 +38,11 @@ start)
     mounts
     install -m 755 $U $ROOT/usr/local/bin/upctool
     mkdir -p $ROOT$K/printer_data/config $ROOT$K/printer_data/logs $ROOT$K/printer_data/comms
-    cp $ST/x1_stage4.cfg $ROOT$K/printer_data/config/printer.cfg
-    cp $ST/x1_query.py $ROOT$K/x1_query.py
-    inroot chown -R klipper:klipper $K/printer_data $K/x1_query.py
+    CFG=${2:-x1_stage4.cfg}
+    [ -f $ST/$CFG ] || { echo "no $ST/$CFG"; exit 1; }
+    cp $ST/$CFG $ROOT$K/printer_data/config/printer.cfg
+    cp $ST/x1_query.py $ST/x1_gcode.py $ROOT$K/
+    inroot chown -R klipper:klipper $K/printer_data $K/x1_query.py $K/x1_gcode.py
     $U --force --dtcm 0xf9880000 load $ST/fw/klipper_x1_io.bin $ST/fw/klipper_x1_fm.bin || exit 1
     rm -f $ROOT/tmp/klipper_upc_fm $ROOT/tmp/klipper_upc_io
     inroot /usr/local/bin/upctool --force --dtcm 0xf9880000 bridge \
