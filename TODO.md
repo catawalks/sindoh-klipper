@@ -278,6 +278,11 @@ stages 1-5 done on the dev printer):
     dir and home pins known: sindoh docs/1x_stock_routines.md), the
     sign of the stock X coordinate. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
     `1x-dev`, ext4, mounted by hand at `/tmp/sd`), not on its eMMC.
+42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
+    beeper): USB audio card 0 + amplifier enable GPIO 180, stock plays
+    MP3s with mplayer ([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md),
+    "The speaker"). To do: play a sound from the Debian root under
+    Klipper, then a `M300`-style macro or shell command for it.
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).
     Each firmware line (RODIN_, RODUP_, the 6270 models) is treated as its
