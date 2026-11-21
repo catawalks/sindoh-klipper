@@ -6,6 +6,13 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: motors and sensors recorded under stock** with the new
+  read-only `host/regwatch.c` while the owner homed, jogged and ran bed
+  leveling: X, Y, Z are stepper engines 0 to 2 (step, dir, enable and
+  home pins in sindoh docs/1x_stock_routines.md), Z home is GPIO 83,
+  the nozzle contact is GPIO 81, the beeper is PWM block 19.
+  `tools/x1_fbshot.py` turns a copy of the stock framebuffer into a
+  screenshot; `tools/x1_gpiolog.sh` is the first, slower input logger.
 - **1X port, stage 4** (owner at the printer): Klipper connected to our
   firmware on both UPC cores of the 1X, look-only. Fork 3dcad7d8 adds
   input pins on the SoC GPIO block (`CONFIG_UPC_GPIO_BLOCK`,

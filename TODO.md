@@ -259,9 +259,10 @@ stages 1-5 done on the dev printer):
     when the engine dies: every stop sequence must switch the heater
     outputs off itself. Paper work left: which PWM block is which heater
     or fan (5 and 28 are the two live heaters), the microstep pins of
-    the TMC2224s, the Z home and nozzle-contact inputs, which stepper
-    block is which axis (blocks 3 to 5 are set up differently from 0
-    to 2), the sign of the stock X coordinate. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
+    the TMC2224s, how the extruder and
+    cartridge motors are stepped (X, Y, Z are engines 0 to 2 with step,
+    dir and home pins known: sindoh docs/1x_stock_routines.md), the
+    sign of the stock X coordinate. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
     `1x-dev`, ext4, mounted by hand at `/tmp/sd`), not on its eMMC.
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).
