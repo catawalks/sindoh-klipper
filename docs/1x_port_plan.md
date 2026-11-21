@@ -127,10 +127,24 @@ off; on the DP200 they do). Check: the probe report matches stage 0.
   the block's control register (0x29 -> 0x28, the value the microcode
   itself uses for a stopped channel) does it; the bed reading fell
   afterwards. While the microcode runs it puts the bit back at once.
-- The 1X's PWM control register is not the DP200's (values seen: 0x28,
-  0x29, 0x2C, 0x0A, 0x0B, 0x18, 0x6C), so the DP200's "safe" writes must
-  not be used here: `upctool --passive` skips them and the probe has a
-  look-only build (`make X1=1` in `upc_fw/probe`, `prebuilt/probe_x1_*.bin`).
+- **The PWM block works like the DP200's; the block numbers differ.**
+  (Corrected later the same day: at first the unfamiliar values looked
+  like a different register.) Bit 0 is run, bit 2 the level when
+  stopped, the rest per-block configuration (0x28 fans and heaters,
+  0x0A motor references, 0x18, 0x68), and the enable word at 0xF9304000
+  has one bit per block in use. Blocks on the 1X, by period:
+  - 1000 (heaters): 5, 25, 28. 5 and 28 are the two that regulate; 25
+    never runs on the 1X (the 2X's second nozzle, our reading).
+  - 100 (fans): 2, 10, 14, 20, 22. Block 10 runs at 80 % at idle.
+  - 200 (motor driver references): 13, 21, 23, 29, 30, 31, 32 running;
+    8, 18, 24, 26 stopped.
+  - 250: block 19, stopped (our reading: the beeper, 4 kHz).
+  - Block 7: a static level, on at idle and off in power saving (the
+    case lights). Block 25 follows it.
+  The DP200's "safe" writes still must not be used here: its stepper
+  register offsets are wrong for the 1X. `upctool --passive` skips them
+  and the probe has a look-only build (`make X1=1` in `upc_fw/probe`,
+  `prebuilt/probe_x1_*.bin`).
 - The engine uses the same four driver calls as `upctool` (0xC0017522
   hold, 0xC0017521 run, 0x7523 ITCM, 0xC0047524 DTCM offset), and loads
   in the same order (hold, zero the ITCMs, write, run).
