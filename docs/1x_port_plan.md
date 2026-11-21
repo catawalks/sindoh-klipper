@@ -186,4 +186,7 @@ the target, hook into the boot, stock backup and remover.
   homes on the left, where the cleaning and filament stations are. So
   the firmware build keeps all eight motor slots and both nozzle heater
   channels, and the 1X config is written as the one-carriage case of a
-  two-carriage layout (Klipper `[dual_carriage]` for the 2X).
+  two-carriage layout (Klipper `[dual_carriage]` for the 2X). Each
+  head has its own filament dump station and cleaning area at its end,
+  so the cleaning, load and unload macros take the head as a parameter
+  and keep one set of positions per head.
