@@ -180,5 +180,10 @@ the target, hook into the boot, stock backup and remover.
 - Bed leveling hardware on the 1X (`gp_En_LevelSensor`, the active
   leveling tables) and the "clutch" and "solenoid" the engine drives.
 - Which stepper block is which axis, and the 1X's kinematics limits.
-- The 2X shares this code (two X carriages); keep the 1X work general
-  enough to add it.
+- **Build for the 2X from the start** (owner, 2026-11-21: a 2X is on
+  its way). Same board and chassis with a second head: one carriage
+  homes at each end of X. The 1X's head is the stock "X2" carriage and
+  homes on the left, where the cleaning and filament stations are. So
+  the firmware build keeps all eight motor slots and both nozzle heater
+  channels, and the 1X config is written as the one-carriage case of a
+  two-carriage layout (Klipper `[dual_carriage]` for the 2X).
