@@ -60,6 +60,7 @@
 
 static int opt_force;
 static unsigned long opt_dtcm;
+static int opt_ro;   // --ro: look only (no driver calls, DTCM mapped read-only)
 static volatile uint8_t *dtcm;
 static volatile uint8_t *pwm_regs, *smot_regs;
 static volatile int stop_requested;
@@ -97,10 +98,11 @@ now_sec(void)
 static volatile uint8_t *
 map_phys(unsigned long addr, size_t len)
 {
-    int fd = open("/dev/mem", O_RDWR | O_SYNC);
+    int fd = open("/dev/mem", (opt_ro ? O_RDONLY : O_RDWR) | O_SYNC);
     if (fd < 0)
         die("open /dev/mem: %s", strerror(errno));
-    void *p = mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, addr);
+    void *p = mmap(NULL, len, opt_ro ? PROT_READ : PROT_READ | PROT_WRITE,
+                   MAP_SHARED, fd, addr);
     close(fd);
     if (p == MAP_FAILED)
         die("mmap %#lx: %s", addr, strerror(errno));
@@ -240,6 +242,15 @@ dtcm_attach(void)
 {
     if (dtcm)
         return;
+    if (opt_ro) {
+        // Someone else's firmware is running (a stock system): no nonce
+        // through the driver, no write at all. The address must be given
+        // (1X: 0xf9880000, from its device tree).
+        if (!opt_dtcm)
+            die("--ro needs --dtcm ADDR");
+        dtcm = map_phys(opt_dtcm, DTCM_MAP_SIZE);
+        return;
+    }
     unsigned long cand[16];
     int n = opt_dtcm ? (cand[0] = opt_dtcm, 1) : dtcm_candidates(cand, 16);
     // Write a nonce through the driver, look for it through /dev/mem
@@ -735,7 +746,8 @@ static void
 usage(void)
 {
     fprintf(stderr,
-        "usage: upctool [--dtcm ADDR] [--force] COMMAND ...\n"
+        "usage: upctool [--dtcm ADDR] [--ro] [--force] COMMAND ...\n"
+        "  --ro: read-only look at a running system; only 'dump' is allowed\n"
         "  info | safe | stop | load IO.bin|- FM.bin|- | probe [secs]\n"
         "  bridge [-f FM_PTY|tcp:PORT] [-i IO_PTY|tcp:PORT] [-p POLL_US]\n"
         "  dump OFF LEN\n");
@@ -749,6 +761,8 @@ main(int argc, char **argv)
     for (; i < argc && !strncmp(argv[i], "--", 2); i++) {
         if (!strcmp(argv[i], "--force"))
             opt_force = 1;
+        else if (!strcmp(argv[i], "--ro"))
+            opt_ro = 1;
         else if (!strcmp(argv[i], "--dtcm") && i + 1 < argc)
             opt_dtcm = strtoul(argv[++i], NULL, 0);
         else
@@ -757,6 +771,8 @@ main(int argc, char **argv)
     if (i >= argc)
         usage();
     const char *cmd = argv[i++];
+    if (opt_ro && strcmp(cmd, "dump"))
+        die("--ro allows only 'dump'");
     if (!strcmp(cmd, "info")) {
         do_info();
     } else if (!strcmp(cmd, "safe")) {
