@@ -6,6 +6,11 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: heaters confirmed under Klipper** (PWM 5 nozzle, PWM 28 bed;
+  nozzle to 240 °C), `x1_stage5c.cfg`. **Extruder not working yet**
+  (`x1_stage5d.cfg`, `x1_stage5e.cfg`): its driver steps, nothing
+  feeds; stock has a motor-operated press and clutch to decode first.
+  `tools/x1_tmc.py` reads each driver's step counter (MSCNT).
 - **Docs cleanup** (owner: `touchscreen_options.md` was badly out of
   date): new [touchscreen.md](../touchscreen.md) describes the screen
   app as it is, page by page. Moved to history under their old names:

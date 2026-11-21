@@ -258,9 +258,13 @@ stages 1-5 done on the dev printer):
     e3e1b356). e3e1b356 had a 1X bug (after a firmware restart every
     move went one way; head hit the left wall 11-21); fixed and
     verified in 0938457c, and X and Y then homed on their sensors.
-    Motion rules: docs/1x_port_plan.md. Z homed too (11-21). **Next (owner present): extruder
-    and cartridge motors, then heaters** (on paper: PWM 5 nozzle, 28 bed; to be
-    confirmed with low limits), then a real `[stepper_*]` config. **Next (owner present): homing with the sensors
+    Motion rules: docs/1x_port_plan.md. Z homed too, and both heaters driven by Klipper (PWM 5
+    nozzle, 28 bed, confirmed 11-21). **Extruder: blocked on paper
+    work.** The motor's driver steps but nothing feeds: stock runs a
+    press and clutch sequence with the extruder and cartridge motors
+    (`StepperPressPositionToOn/Off`, `StepperPressClutchOn/Off`) that
+    must be decoded first; then record a stock extrusion. After that a
+    real `[stepper_*]`/`[extruder]` config. **Next (owner present): homing with the sensors
     (GPIO 99/82/83), then extruder and cartridge motors, then
     heaters.** Open: the stepper engine clock against the timer
     (step batching is off on the 1X until measured). The DP200 firmware builds from 8ceef800 are

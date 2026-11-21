@@ -274,9 +274,38 @@ again after the config reload: positive is down): upward at 2 mm/s in
 about 19 mm. The head was parked at the left, off the bed, so the gap
 to the nozzle at Z home was not seen.
 
-Still to do in stage 5: the extruder and cartridge motors (engines 3
-and 4, pins known), then the heaters (which of PWM blocks 5 and 28 is
-the nozzle and which the bed is still open). Open: how the extruder and
+**5c done 2026-11-21: both heaters driven by Klipper** (owner present;
+`x1_stage5c.cfg`: `heater_generic` with low limits, reduced power and
+`verify_heater`). PWM 5 at 40 % took the nozzle from 56.8 to 88.3 °C in
+45 s with the bed flat; PWM 28 at 60 % took the bed from 46.3 to
+56.6 °C in 75 s and held it, with the nozzle cooling. Later the nozzle
+went to 240 °C at 60 % in about 190 s under watermark control (peak
+243.4). The extruder fan (GPIO 188) ran as a `heater_fan`.
+
+**5d, extruder motor: not working yet, stopped** (`x1_stage5d.cfg`,
+`x1_stage5e.cfg`). Engine 3 stepped (its counter moved), the extruder's
+driver (number 4) was enabled and counted the steps (its MSCNT changed;
+the cartridge driver's did not), but nothing moved in the head and no
+filament came out, at 100, 500, 2000 and 20000 steps with the nozzle at
+240 °C. Reason found afterwards: **the extruder has a press and a clutch
+that the stock firmware works with the motors themselves**
+(`StepperPressPositionToOn/Off`, `StepperPressClutchOn/Off`,
+`engine_extrPressRelease`, `engine_extrPressAdjust`; console at wake-up:
+"PressToOffMovedStep, E:4296, C:2062", "PressToOnMovedStep, E:5075,
+C:2436"). The blind steps may have moved that mechanism; the printer
+was rebooted to stock, which re-synchronizes it at start-up. **No more
+extruder steps under Klipper until those routines are understood on
+paper** and a stock extrusion has been recorded.
+
+Also learned: **never send Ctrl-C to the 1X's console.** Sindoh's
+engine takes it as its exit signal ("GOT SIGNAL EXIT ... Maybe
+Ctrl-C"); it happened once here, to free a console blocked by a
+download from a PC file server that had stopped. The microcode kept
+regulating and `x1_stop.sh` took over from there. Downloads on the
+printer now use `wget -T`.
+
+Still to do in stage 5: the extruder's press and clutch (paper first),
+the cartridge motor, the nozzle-contact probe. Open: how the extruder and
 cartridge motors are stepped.
 
 Plan as first written: Fans, lamp,

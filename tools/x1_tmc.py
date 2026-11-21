@@ -21,7 +21,8 @@ TTY = '/dev/ttyS2'
 SEL = (149, 147, 146)       # most significant bit first
 GATE = 152
 REGS = [(0x00, 'GCONF'), (0x01, 'GSTAT'), (0x02, 'IFCNT'), (0x06, 'IOIN'),
-        (0x10, 'IHOLD_IRUN'), (0x13, 'TPWMTHRS'), (0x6c, 'CHOPCONF'),
+        (0x10, 'IHOLD_IRUN'), (0x13, 'TPWMTHRS'), (0x6a, 'MSCNT'),
+        (0x6c, 'CHOPCONF'),
         (0x6f, 'DRV_STATUS'), (0x70, 'PWMCONF')]
 
 
