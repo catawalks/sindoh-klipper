@@ -47,8 +47,14 @@ Each stage ends with something checked, and the next one does not start
 before it.
 
 **0. Paper work (PC only).** Done so far: the comparison above. To do:
-- `upc_6270.ko`'s ioctl numbers and structures against the DP200's
-  (`host/upctool.c`), from the two modules.
+- `upc_6270.ko`'s ioctls against the DP200's (`host/upctool.c`).
+  **First look, 2026-11-20** (`tools/kodis.py upc_ioctl` on both
+  modules): the 1X driver handles the same four command numbers `upctool`
+  uses (0x7521 run, 0x7522 hold, 0x7523 select ITCM, 0x7524 select DTCM
+  offset) and the same mailbox calls, plus two new ones (0x7530, 0x7531,
+  not decoded). Still to check: the direction and size bits of each
+  number, the 32 KB ITCM limit, and what the new `upc_seek` and
+  `upc_write_align` change for writes.
 - The 1X `fm`/`io` microcode's start-up: what it writes to the PWM, ADC,
   GPIO and stepper blocks (emulate it, as `tools/fmprobe.py` and
   `pwmprobe.py` do for the DP200). This gives the heater PWM channels,
