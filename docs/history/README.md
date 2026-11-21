@@ -14,3 +14,11 @@ describes the current state: that is [../STATUS.md](../STATUS.md).
 Each file starts with a `**Status:**` line. Links inside these files are
 as they were written and may point at paths that have since moved; the
 file names are unchanged, so search for the name.
+- [touchscreen_options.md](touchscreen_options.md): why we wrote
+  our own screen app, and its build notes.
+- [test_print_plan.md](test_print_plan.md): the steps to the
+  first test prints.
+- [mainline_userspace.md](mainline_userspace.md): what the
+  Debian root needed to boot on our kernel.
+- [usb_installer_2026-10-20_mtd5_target.md](usb_installer_2026-10-20_mtd5_target.md):
+  the dropped mtd5 install target.

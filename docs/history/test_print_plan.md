@@ -1,5 +1,9 @@
 # First test print: action items
 
+**Status: DONE** (moved 2026-11-21). The first test prints were made in
+2026-10 and 2026-11; both printers print. What runs today:
+[../STATUS.md](../STATUS.md); how to test: [../dev_printer_testing.md](../dev_printer_testing.md).
+
 Work through these **one at a time, in order**. Each item says who does what
 and what "done" looks like. Items with heat or motion only happen with the
 user at the printer.

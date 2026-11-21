@@ -1,5 +1,11 @@
 # Klipper on internal storage (no SD card) - plan
 
+**Status (2026-11-21):** the plan stands. The stick install into the
+stock root is released as v0.1.0 (beta); the kernel swap is the end-goal
+install, tracked stage by stage in
+[end_goal_install_plan.md](end_goal_install_plan.md). What runs on each
+printer: [STATUS.md](STATUS.md).
+
 User requirement (2026-10-18): stock DP200s have no usable microSD card, so
 the installable firmware must live entirely on the internal NAND, and be
 installed from a USB stick (see usb_installer.md).

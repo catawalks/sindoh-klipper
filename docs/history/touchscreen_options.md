@@ -1,5 +1,9 @@
 # DP200 built-in touch panel: options
 
+**Status: HISTORY** (moved 2026-11-21). The option study of 2026-10 and the
+build notes up to 2026-11-12. Option A was built; the app as it is now is
+described in [../touchscreen.md](../touchscreen.md).
+
 **Update 2026-10-20 (later):** option A is implemented as
 `install/display/dp200_screen.py` and runs as the `screen` service of
 `rc.dp200`; `SCREEN_ENABLED=0` in `/etc/dp200/screen.conf` turns it off.
@@ -23,7 +27,7 @@ Measurements:
   with the touch-calibration taps, so the first real button presses should
   happen with the user present.
 
-![home](../install/display/dp200_screen_home.png)
+![home](../../install/display/dp200_screen_home.png)
 
 Status 2026-10-20: investigated, proof of concept drawing on the panel.
 Nothing is installed to start automatically yet.
@@ -109,7 +113,7 @@ Debian's `python3-pil` (the moonraker-env Pillow lacks FreeType):
 chroot /mnt/sd /usr/bin/python3 /usr/src/dp200/display/fb_status_poc.py --loop
 ```
 
-![framebuffer grab](../install/display/fb_status_poc_screenshot.png)
+![framebuffer grab](../../install/display/fb_status_poc_screenshot.png)
 
 (Grabbed from `/dev/fb0` with `tools/fb_grab.py`.)
 

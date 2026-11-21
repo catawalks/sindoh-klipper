@@ -6,6 +6,14 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **Docs cleanup** (owner: `touchscreen_options.md` was badly out of
+  date): new [touchscreen.md](../touchscreen.md) describes the screen
+  app as it is, page by page. Moved to history under their old names:
+  `touchscreen_options.md` (the option study), `test_print_plan.md`
+  (done), `mainline_userspace.md` (done); the dropped mtd5 target cut
+  out of `usb_installer.md` into
+  `history/usb_installer_2026-10-20_mtd5_target.md`. STATUS.md brought
+  up to date (release, repository split, the 1X, the fork pin).
 - **1X: Z homed on its sensor** (GPIO 83, high at home) in 2 mm
   sections, bed empty, owner watching.
 - **1X: stuck-direction fix verified; X and Y homed on their sensors**

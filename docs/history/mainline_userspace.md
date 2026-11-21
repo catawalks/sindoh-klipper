@@ -1,5 +1,10 @@
 # Running our Klipper stack on the mainline kernel (audit, 2026-10-29)
 
+**Status: DONE** (moved 2026-11-21). An audit of 2026-10-29 of what the
+Debian root needed to boot directly on our kernel. The dev printer has
+booted that way from NAND since 2026-11 ([../STATUS.md](../STATUS.md));
+kernel-side documents are in the sindoh-kernel repo.
+
 Today, stock Linux 3.2 boots from NAND and its BusyBox side runs
 `install/printer/dp200-start.sh`, which enters our Debian root (SD card or
 NAND UBI volume) as a chroot and starts everything there through

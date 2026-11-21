@@ -1,4 +1,4 @@
-# Status (overwrite in place; last updated 2026-11-17)
+# Status (overwrite in place; last updated 2026-11-21)
 
 The project: Klipper on the Sindoh DP200, on the printer's own SoC. Two
 setups exist, and they are different on purpose.
@@ -18,6 +18,27 @@ screen app, macros, UPC firmware). It never carries a kernel. Kernel work
 reaches the work printer at the end-goal install
 ([end_goal_install_plan.md](end_goal_install_plan.md)), when that printer
 becomes the full kernel-swap test machine.
+
+## Since 2026-11-18 (short)
+
+- **Release:** the stick install is public as **v0.1.0, a beta
+  pre-release** (payload `0ee46f50`, fork 9b174ab). A v0.1.1 test build
+  with the SD/USB storage option is on the work printer's stick, not
+  installed and not public; the owner tests it on the work printer.
+- **Repositories:** split on 2026-11-20 (this one, sindoh-kernel,
+  sindoh); see the top README.
+- **A third machine, the owner's 3DWOX 1X** (stock firmware, serial
+  console on the dev PC's COM3 for now, an SD card `1x-dev` in its slot):
+  the port has reached stage 5 of [1x_port_plan.md](1x_port_plan.md).
+  Klipper, started from the SD card after stopping Sindoh's program,
+  reads its thermistors, switches its fans, lights and beeper, and moves
+  and homes X, Y and Z. A reboot always returns it to stock. No heater
+  and no extruder has been driven by Klipper there.
+- **Fork pin:** `klipper/FORK` is at 0938457c (1X support). The DP200
+  firmware built from it compiles but has not been run on a DP200; both
+  DP200s still run the builds named below.
+- The dev printer's serial cable is on the 1X; the dev printer is on the
+  network only.
 
 ## Dev printer back on our system since 2026-11-17 night
 
@@ -107,7 +128,7 @@ and build in their own area and report files and md5s.
 | Motor / UPC driver | build box `~/SINDOH-DEV/motor`, branch `upc-bank3-pads` (75743ea, local; its two commits are in the sindoh-kernel repo as c72b89e and 94813ae) |
 | Wi-Fi (8782 driver, firmware study) | build box; `TESTPLAN.md` and `upstream/` there; facts in `sindoh-kernel docs/wifi_88w8782.md` |
 | Klipper code (UPC MCU port, stepping, host modules) | the fork `catawalks/klipper`, branch `sindoh-dp200`; the pinned commit is `klipper/FORK`; rules in `klipper/README.md`; `docs/faster_stepping_plan.md` |
-| Touch screen app | `install/display/` in this repo; `docs/touchscreen_options.md` |
+| Touch screen app | `install/display/` in this repo; `docs/touchscreen.md` |
 
 Publishing: commit here and push `main` to `catawalks/sindoh-klipper`.
 Kernel work is published from the `sindoh-kernel` checkout, model research
