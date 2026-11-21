@@ -13,7 +13,7 @@ step "3. packages"
 dpkg --configure -a
 apt-get update -q || exit 1
 apt-get install -y -q -o Dpkg::Progress-Fancy=0 --no-install-recommends \
-    python3 python3-venv python3-dev python3-pip gcc make libc6-dev \
+    python3 python3-venv python3-dev python3-pip gcc g++ make libc6-dev \
     libffi-dev libncurses-dev git curl unzip nginx ca-certificates \
     libjpeg62-turbo-dev zlib1g-dev liblmdb-dev libsodium-dev \
     procps iproute2 less python3-pil fonts-dejavu-core || exit 1
