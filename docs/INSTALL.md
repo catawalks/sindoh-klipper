@@ -126,6 +126,28 @@ broadcast its name, use **HIDDEN**. If the printer can't reach Klipper, the
 - **Your settings** live in `printer.cfg` (Mainsail → Machine). Don't edit
   `dp200_printer.cfg` or `dp200_macros.cfg`: they are replaced on updates.
 
+## More room for G-code (from v0.1.1; not in v0.1.0)
+
+In v0.1.0, G-code is stored on the printer's internal flash only, which is
+small: delete old files in Mainsail when uploads start to fail.
+
+From v0.1.1 a microSD card in the mainboard's slot, or a USB stick, can
+hold the G-code instead:
+1. On a PC, create a folder named `dp200_storage` at the top level of the
+   card or stick (FAT32).
+2. Put it in the printer **while it is off**, then switch on. Mainsail's
+   file list is now the `dp200_storage/gcodes` folder, and shows its free
+   space.
+
+Good to know:
+- It is picked up only at power-on, and it must **stay in while the
+  printer is on**: pulling it during a print stops the print.
+- Without the card or stick, the printer goes back to its internal
+  storage (files uploaded to one are not visible on the other).
+- A card is tried before a stick. A stick takes the front USB port, which
+  the accelerometer for input shaping also uses.
+- Remove Klipper with the remover of the same or a newer release.
+
 ## Updating
 
 Put a newer release's `_update_rodin` folder on a stick and plug it in. The

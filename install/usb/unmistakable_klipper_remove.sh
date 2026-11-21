@@ -122,10 +122,17 @@ confirm "Touch to restore" "$P2" "Pull stick to cancel"
 
 for r in /klipper /mnt/sd; do
     [ -x $r/dp200/dp200-start.sh ] && $r/dp200/dp200-start.sh stop
-    for m in home/klipper/printer_data/logs var/log tmp run/wpa_supplicant run dev/shm dev/pts dev sys proc; do
+    for m in home/klipper/printer_data/gcodes home/klipper/printer_data/logs var/log tmp run/wpa_supplicant run dev/shm dev/pts dev sys proc; do
         grep -q " $r/$m " /proc/mounts && umount $r/$m
     done
 done
+# Nothing may be mounted inside /klipper when it is deleted: a storage card's
+# G-code folder is mounted there (dp200-storage.sh) and would be emptied.
+klipper_mounts() { grep -q " /klipper/" /proc/mounts; }
+if klipper_mounts; then
+    show "Storage card busy" "Power off, take the card" "or stick out, try again"
+    exit 1
+fi
 # The app goes to RAM first (/tmp is tmpfs; the stack is stopped, so there
 # is room): /klipper has to go before it fits on the NAND, and from here
 # on nothing depends on the stick any more
@@ -180,7 +187,7 @@ fi
 rm -f /DEBUG_MACHINE /etc/dp200-boot.sh /etc/dp200-nand
 sync
 
-if [ -d /klipper ] && ! grep -q " /klipper " /proc/mounts; then
+if [ -d /klipper ] && ! grep -q " /klipper " /proc/mounts && ! klipper_mounts; then
     show "Removing Klipper" "from the NAND" "DO NOT POWER OFF"
     rm -rf /klipper
     sync

@@ -6,6 +6,12 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-20
+- **Storage tier for the stick install, first build** (TODO 40, for
+  v0.1.1): G-code on a card or stick that has a `dp200_storage` folder.
+  PC-tested with stand-in commands; not on a printer, not released.
+  Installer and remover now refuse to delete `/klipper` with a mount
+  inside it. v0.1.0's release notes list internal-only storage as a known
+  issue.
 - **Repositories split** (owner): this repository is now
   catawalks/sindoh-klipper (installer, configs, screen app, tools, docs).
   The kernel work (`kernel/m1`, `docs/kernel`, the kernel history, the SD

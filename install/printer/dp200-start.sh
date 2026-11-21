@@ -41,6 +41,10 @@ mount_root() {
 case "$1" in
 stop)
     in_root /etc/dp200/rc.dp200 stop
+    # a storage card's G-code folder: must be unmounted before anyone
+    # deletes this root (the installer and the remover call stop first)
+    . $(dirname "$0")/dp200-storage.sh
+    dp200_storage_release || echo "dp200-start: G-code storage still mounted" > /dev/console
     rm -rf $LOCK
     exit 0
     ;;
@@ -62,6 +66,13 @@ mount_root
 mkdir -p $ROOT/var/log
 exec >> $LOG 2>&1
 echo "==== dp200-start $(date) root=$ROOT"
+
+# Optional G-code storage on a card or stick (stick install only: there
+# the root is /klipper on the internal flash, marked by on_nand)
+if [ -f $ROOT/etc/dp200/on_nand ]; then
+    . $(dirname "$0")/dp200-storage.sh
+    dp200_storage_setup
+fi
 
 # The stock app is not running (/DEBUG_MACHINE), but make sure of it,
 # and free port 80 for nginx (lighttpd is started by /test/run.sh).

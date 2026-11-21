@@ -228,6 +228,21 @@ stages 1-5 done on the dev printer):
     fork commit; now catawalks/sindoh-klipper `klipper/config/`). Optional:
     move the kernel/NAND/U-Boot test scripts from `tools/` to
     sindoh-kernel ([tools/README.md](tools/README.md) lists them).
+40. **v0.1.1: G-code storage on a card or stick, stick install** (owner
+    11-20; PROJECTS 11). Built 11-20, tested on the PC with stand-in
+    mount commands only: `install/printer/dp200-storage.sh` (opt-in by a
+    `dp200_storage` folder; mounted over the G-code folder at boot;
+    released by `dp200-start.sh stop`), and the installer and remover
+    refuse to delete `/klipper` while anything is mounted inside it.
+    **Not public until it has run on the work printer.** To check there
+    (stock 3.2): the stock mount points (`/mnt/sd`, `/mnt/sda1`) and that
+    BusyBox `mount` takes `uid=,gid=,umask=`; upload, print and delete
+    from a FAT32 stick; boot without it (falls back to internal); the
+    remover with the stick in (G-code on the stick must survive); the SD
+    slot. Still to build: space management on the internal flash (refuse
+    what doesn't fit, show free space), logs on the storage, a screen
+    message when storage is in use. Needs a payload rebuild on the dev
+    printer (offline 11-20).
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).
     Each firmware line (RODIN_, RODUP_, the 6270 models) is treated as its

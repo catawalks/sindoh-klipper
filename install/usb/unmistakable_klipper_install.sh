@@ -73,10 +73,13 @@ fi
 # set once a NAND install starts changing the stock root: a failure then
 # removes the partial /klipper and puts SVN_GUI back, so the stock firmware
 # boots as before
+# Nothing may be mounted inside /klipper when it is deleted: a storage card's
+# G-code folder is mounted there (dp200-storage.sh) and would be emptied.
+klipper_mounts() { grep -q " /klipper/" /proc/mounts; }
 UNDO=0
 undo() {
     show "Undoing the install" "(stock firmware back)" "DO NOT POWER OFF"
-    rm -rf /klipper
+    klipper_mounts || rm -rf /klipper
     if [ ! -d $GUI ] && [ -f "$BACKUP/SVN_GUI.tar" ]; then
         tar -xf "$BACKUP/SVN_GUI.tar" -C /app
     fi
@@ -294,10 +297,11 @@ if [ $DRY_RUN = 0 ]; then
     stick_still_in
     for r in /klipper /mnt/sd; do
         [ -x $r/dp200/dp200-start.sh ] && $r/dp200/dp200-start.sh stop
-        for m in home/klipper/printer_data/logs var/log tmp run/wpa_supplicant run dev/shm dev/pts dev sys proc; do
+        for m in home/klipper/printer_data/gcodes home/klipper/printer_data/logs var/log tmp run/wpa_supplicant run dev/shm dev/pts dev sys proc; do
             grep -q " $r/$m " /proc/mounts && umount $r/$m
         done
     done
+    klipper_mounts && fail "Storage card busy" "power off, take it out"
 fi
 
 # keep the user's printer config across an upgrade (RAM: /tmp is tmpfs)
