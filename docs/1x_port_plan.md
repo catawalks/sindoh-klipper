@@ -357,6 +357,23 @@ explanation and points at something mechanical in the rear feed path
 (the owner switched the printer off to open the rear gear train).
 Whether our long retract left something behind there is open.
 
+**Cause found the same evening: not ours.** With the rear gear train
+open (photos on the dev PC, `Mainboard_Photos/RODIN_1X/rear_gear_train_20261121`)
+the owner saw the second feed stage's gear standing still. Both feed
+motors ran under Klipper when stepped one at a time, with clean driver
+status: engine 4 is the **initial feed motor**, engine 3 the **rear
+(second-stage) feed motor**; what earlier notes call "the extruder" is
+this rear motor. The recordings then showed the stock load's staged
+checks: in the good cartridge load "Pass411" came 0.8 s after the start,
+when the cartridge-side filament sensor (GPIO 80) changed, and the rear
+motor started in the second the filament reached GPIO 120. In the
+jammed loads GPIO 80 never changed, check 411 never passed, the rear
+motor was never started, and the first motor went on pushing into a
+stationary gear (second attempt: "Load 411Error"). The owner had fed
+the loose filament past that switch (it also reports a cartridge). So
+on the 1X the cartridge-bay switch doubles as the filament-in sensor
+for the load sequence. The press explanation above was wrong.
+
 The filament was then pulled back under Klipper, cold, with both
 motors in the stock retract direction (direction checked first):
 1057 mm in total before it was out. GPIO 120 changed after about
