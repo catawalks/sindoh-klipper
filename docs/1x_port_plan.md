@@ -257,9 +257,20 @@ Rules from the two motion mistakes of this stage:
 - If a move does not do what was commanded, stop and switch the motors
   off before investigating; do not send more moves to find out.
 
-Still to do in stage 5: verify 0938457c with the drivers disabled,
-homing with the real sensors, the extruder and cartridge motors
-(engines 3 and 4, pins known), then the heaters. Open: how the extruder and
+**Fix verified and X, Y homed, 2026-11-21** (fork 0938457c, FORK pin
+moved to it). With the fixed firmware each engine's configuration reads
+0x10 before and after a firmware restart, the direction pins follow the
+control register, and a restart leaves all three drivers disabled.
+Then, from the middle of travel and with the sensors released, X was
+homed to the left and Y to the back in 20 mm sections with
+`STOP_ON_ENDSTOP` (`tools/x1_home_sections.sh`): both stopped cleanly
+on their sensors (owner watching). Note: a `manual_stepper` move
+enables its driver by itself, so there is no "dry" stepping through
+Klipper; the pin check before a move is reading, the move is real.
+
+Still to do in stage 5: Z homing (bed empty, it homes upward), the
+extruder and cartridge motors (engines 3 and 4, pins known), then the
+heaters. Open: how the extruder and
 cartridge motors are stepped.
 
 Plan as first written: Fans, lamp,

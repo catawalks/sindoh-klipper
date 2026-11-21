@@ -6,6 +6,9 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: stuck-direction fix verified; X and Y homed on their sensors**
+  under Klipper (fork 0938457c, FORK pin moved). `tools/x1_home_sections.sh`
+  homes a manual stepper in 20 mm sections with a sensor check between.
 - **1X: homing attempt stopped after the head hit the left wall.** A
   firmware restart left the engines' "disable" bit set, which on the 1X
   pins the direction line high. Fork 0938457c (not yet on the printer,
