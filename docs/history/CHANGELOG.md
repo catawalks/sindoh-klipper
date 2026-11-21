@@ -6,6 +6,10 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: first extrusion under Klipper** (TPU, 240 °C, owner watching).
+  Fork b58960c9 (FORK pin moved): the stock control values for the
+  extruder and cartridge engines, found by recording stock feeds.
+  458.8 steps/mm; `x1_stage5f.cfg` moves both feed motors together.
 - **1X: heaters confirmed under Klipper** (PWM 5 nozzle, PWM 28 bed;
   nozzle to 240 °C), `x1_stage5c.cfg`. **Extruder not working yet**
   (`x1_stage5d.cfg`, `x1_stage5e.cfg`): its driver steps, nothing

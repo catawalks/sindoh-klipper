@@ -259,12 +259,12 @@ stages 1-5 done on the dev printer):
     move went one way; head hit the left wall 11-21); fixed and
     verified in 0938457c, and X and Y then homed on their sensors.
     Motion rules: docs/1x_port_plan.md. Z homed too, and both heaters driven by Klipper (PWM 5
-    nozzle, 28 bed, confirmed 11-21). **Extruder: blocked on paper
-    work.** The motor's driver steps but nothing feeds: stock runs a
-    press and clutch sequence with the extruder and cartridge motors
-    (`StepperPressPositionToOn/Off`, `StepperPressClutchOn/Off`) that
-    must be decoded first; then record a stock extrusion. After that a
-    real `[stepper_*]`/`[extruder]` config. **Next (owner present): homing with the sensors
+    nozzle, 28 bed, confirmed 11-21). Klipper extruded TPU at 240 °C the same day (fork
+    b58960c9: stock control values for the extruder and cartridge
+    engines; 458.8 steps/mm). **Next (owner present): the extruder
+    alone in open-filament mode with another filament; the
+    nozzle-contact probe; then turn `x1_printer_draft.cfg` into a real
+    config** (stage 6). **Next (owner present): homing with the sensors
     (GPIO 99/82/83), then extruder and cartridge motors, then
     heaters.** Open: the stepper engine clock against the timer
     (step batching is off on the 1X until measured). The DP200 firmware builds from 8ceef800 are

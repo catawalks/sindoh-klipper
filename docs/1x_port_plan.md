@@ -304,8 +304,35 @@ download from a PC file server that had stopped. The microcode kept
 regulating and `x1_stop.sh` took over from there. Downloads on the
 printer now use `wget -T`.
 
-Still to do in stage 5: the extruder's press and clutch (paper first),
-the cartridge motor, the nozzle-contact probe. Open: how the extruder and
+**5d solved the same day: Klipper extruded** (fork b58960c9, FORK pin
+moved; `x1_stage5f.cfg`). The press was not the cause. A recording of
+two stock 10 mm feeds and one retract showed:
+- the stock firmware uses **another control value on the extruder's
+  engine** (0x33024 feed, 0x33034 retract) and on the cartridge
+  engine (0x30224 feed, 0x30334 retract) than on X, Y, Z (0x33224).
+  With the axis value the extruder's driver counted steps but the motor
+  did not turn (so the 22,700 blind steps moved nothing; the owner
+  confirmed stock still fed and extruded afterwards);
+- **458.8 steps per mm** on the extruder (4588 steps per 10 mm, by the
+  engine's own counter), about 220.35 on the cartridge feeder;
+- both motors run together on every stock feed and retract, and feed
+  is the direction bit clear;
+- no clutch, solenoid or press output changes around a normal feed.
+
+With those values and both motors moved together at the stock ratio
+(`MANUAL_STEPPER ... SYNC=0`), 1 mm and 5 mm turned the gear train and
+15 mm more at 240 °C extruded TPU (owner watching). Owner's note: the
+cartridge motor may only be needed with a Sindoh cartridge; to be
+tested with the extruder alone in open-filament mode.
+
+The press and clutch, decoded from the FM microcode for later: the
+press clutch is GPIO 148 (command argument bit 0) and GPIO 191 (bit 1);
+the four solenoids are PWM blocks 18, 8, 24 and 26 (argument bits 0 to
+3; run 0x0B, stop 0x0A).
+
+Still to do in stage 5: the extruder alone in open-filament mode, the
+nozzle-contact probe, then a real printer config and a first print
+(stage 6). Open: how the extruder and
 cartridge motors are stepped.
 
 Plan as first written: Fans, lamp,
