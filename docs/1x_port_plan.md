@@ -268,9 +268,15 @@ on their sensors (owner watching). Note: a `manual_stepper` move
 enables its driver by itself, so there is no "dry" stepping through
 Klipper; the pin check before a move is reading, the move is real.
 
-Still to do in stage 5: Z homing (bed empty, it homes upward), the
-extruder and cartridge motors (engines 3 and 4, pins known), then the
-heaters. Open: how the extruder and
+**Z homed the same day** (bed empty, owner watching, direction checked
+again after the config reload: positive is down): upward at 2 mm/s in
+2 mm sections, stopped on the sensor (GPIO 83, high at home) after
+about 19 mm. The head was parked at the left, off the bed, so the gap
+to the nozzle at Z home was not seen.
+
+Still to do in stage 5: the extruder and cartridge motors (engines 3
+and 4, pins known), then the heaters (which of PWM blocks 5 and 28 is
+the nozzle and which the bed is still open). Open: how the extruder and
 cartridge motors are stepped.
 
 Plan as first written: Fans, lamp,

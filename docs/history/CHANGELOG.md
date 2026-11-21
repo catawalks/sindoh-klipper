@@ -6,6 +6,8 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: Z homed on its sensor** (GPIO 83, high at home) in 2 mm
+  sections, bed empty, owner watching.
 - **1X: stuck-direction fix verified; X and Y homed on their sensors**
   under Klipper (fork 0938457c, FORK pin moved). `tools/x1_home_sections.sh`
   homes a manual stepper in 20 mm sections with a sensor check between.
