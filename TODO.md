@@ -246,6 +246,12 @@ stages 1-5 done on the dev printer):
     the USB stick's `_update_rodin_KlipperInstall` with the new remover
     since 11-20; v0.1.0 (`0ee46f50`) is kept next to it in
     `_update_rodin_KlipperInstall_v0.1.0`. Not installed anywhere yet.
+41. **1X port** (owner 11-20: start): plan and stages in
+    [docs/1x_port_plan.md](docs/1x_port_plan.md). Now: stage 0 (PC only):
+    `upc_6270.ko` ioctls against `upctool`, emulate the 1X `fm`/`io`
+    microcode for the pin and channel map, thermistor tables, the TMC2224
+    setup. Needs the owner's OK before stage 1 (a Debian root in
+    `/userdata/klipper`: the first write to the 1X's eMMC).
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).
     Each firmware line (RODIN_, RODUP_, the 6270 models) is treated as its

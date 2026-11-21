@@ -6,6 +6,11 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-20
+- **1X port started** (owner): plan in docs/1x_port_plan.md, seven
+  stages from paper work to the installer; the 1X has the DP200's design
+  (UPC cores, same PWM/ADC/sensor addresses) with TMC2224 drivers, six
+  stepper blocks and an eMMC. Serial console and U-Boot prompt reached
+  the same day (sindoh docs/1x.md). Nothing of ours has run on it.
 - **Storage tier for the stick install, first build** (TODO 40, for
   v0.1.1): G-code on a card or stick that has a `dp200_storage` folder.
   PC-tested with stand-in commands; not on a printer, not released.
