@@ -330,9 +330,36 @@ press clutch is GPIO 148 (command argument bit 0) and GPIO 191 (bit 1);
 the four solenoids are PWM blocks 18, 8, 24 and 26 (argument bits 0 to
 3; run 0x0B, stop 0x0A).
 
-Still to do in stage 5: the extruder alone in open-filament mode, the
-nozzle-contact probe, then a real printer config and a first print
-(stage 6). Open: how the extruder and
+**A stock PLA load jammed afterwards (2026-11-21, open-filament mode,
+recorded).** What the recording and console show:
+- stock's press-positioning move took about twice its usual travel
+  first ("PressToOnMovedStep, E:10495, C:5038"; usual about 5075/2436),
+  so the press started from an unusual place;
+- the cartridge feed motor then pushed alone for about 25 s; the
+  filament reached the extruder's entry sensor (GPIO 120) after 7 s and
+  from then on the filament encoder ran at about 60 % of its speed;
+- when the extruder motor joined, the load stopped with "Load 405Error
+  or 406", and stock then looped with both motors running and the
+  encoder barely moving;
+- both engines used the normal control values and directions: not a
+  repeat of the stuck-direction fault.
+**Probably ours, not proven:** the press is positioned by the same two
+motors our feed test had just run (21 mm forward under Klipper), which
+fits the abnormal press travel; a filament tip catching at the extruder
+entry would look the same. To settle it: a stock load after a clean
+stock boot with no Klipper feed-motor moves in between.
+
+The filament was then pulled back under Klipper, cold, with both
+motors in the stock retract direction (direction checked first):
+1057 mm in total before it was out. GPIO 120 changed after about
+330 mm (the tip leaving the extruder), so **GPIO 120 low means filament
+at the extruder entry**. The filament path from the cartridge bay to
+the extruder is long, about a meter.
+
+Still to do in stage 5: find out what our feed-motor moves do to the
+press (before any more of them), the extruder alone in open-filament
+mode, the nozzle-contact probe, then a real printer config and a first
+print (stage 6). Open: how the extruder and
 cartridge motors are stepped.
 
 Plan as first written: Fans, lamp,

@@ -261,7 +261,11 @@ stages 1-5 done on the dev printer):
     Motion rules: docs/1x_port_plan.md. Z homed too, and both heaters driven by Klipper (PWM 5
     nozzle, 28 bed, confirmed 11-21). Klipper extruded TPU at 240 °C the same day (fork
     b58960c9: stock control values for the extruder and cartridge
-    engines; 458.8 steps/mm). **Next (owner present): the extruder
+    engines; 458.8 steps/mm). A stock PLA load jammed afterwards, probably because
+    our feed test left the press mechanism out of place (not proven:
+    docs/1x_port_plan.md); the filament was retracted under Klipper.
+    **Next (owner present): a stock load after a clean stock boot to
+    settle that; then the extruder
     alone in open-filament mode with another filament; the
     nozzle-contact probe; then turn `x1_printer_draft.cfg` into a real
     config** (stage 6). **Next (owner present): homing with the sensors

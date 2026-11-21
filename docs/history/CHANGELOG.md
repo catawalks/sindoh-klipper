@@ -6,6 +6,10 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: a stock PLA load jammed after our feed test** (recorded;
+  probably our doing through the press mechanism, not proven). The
+  filament was retracted under Klipper, 1057 mm, cold. GPIO 120 low =
+  filament at the extruder entry.
 - **1X: first extrusion under Klipper** (TPU, 240 °C, owner watching).
   Fork b58960c9 (FORK pin moved): the stock control values for the
   extruder and cartridge engines, found by recording stock feeds.
