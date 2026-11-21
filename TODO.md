@@ -259,8 +259,8 @@ stages 1-5 done on the dev printer):
     move went one way; head hit the left wall 11-21); fixed and
     verified in 0938457c, and X and Y then homed on their sensors.
     Motion rules: docs/1x_port_plan.md. Z homed too (11-21). **Next (owner present): extruder
-    and cartridge motors, then heaters** (nozzle/bed PWM block
-    assignment still open), then a real `[stepper_*]` config. **Next (owner present): homing with the sensors
+    and cartridge motors, then heaters** (on paper: PWM 5 nozzle, 28 bed; to be
+    confirmed with low limits), then a real `[stepper_*]` config. **Next (owner present): homing with the sensors
     (GPIO 99/82/83), then extruder and cartridge motors, then
     heaters.** Open: the stepper engine clock against the timer
     (step batching is off on the 1X until measured). The DP200 firmware builds from 8ceef800 are

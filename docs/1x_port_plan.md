@@ -293,10 +293,12 @@ the target, hook into the boot, stock backup and remover.
 
 ## Open questions
 
-- Which of PWM blocks 5 and 28 is the nozzle and which the bed, and how
-  the ADC values map onto the two thermistor tables (the bed channel
-  fits the bed table by plain index; the nozzle channel is not matched
-  yet). The owner suspects two heater cartridges in the hot end.
+- Heaters, settled on paper 2026-11-21 (sindoh
+  docs/1x_stock_routines.md): PWM block 5 is the nozzle, 28 the bed, 25
+  the 2X's other nozzle (unconnected on the 1X, where stock leaves it
+  switched on). Thermistors: ADC select 1 nozzle, 2 and 3 bed, the
+  DP200's tables and index bases. Not yet driven by Klipper. Whether
+  the 1X's hot end has one heater cartridge or two is still open.
 - What the motor drivers do when the cores are held (they stayed as they
   were; not looked at closely).
 - Bed leveling hardware on the 1X (`gp_En_LevelSensor`, the active
