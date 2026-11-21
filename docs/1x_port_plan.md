@@ -215,8 +215,15 @@ Klipper with the owner watching:
 | PWM block 19 | beeper (period 250 = 4 kHz, duty 0.36 as stock) |
 | PWM blocks 14, 22; GPIO 225 | nothing on the 1X (the 2X's second head, our reading) |
 
-Still to do in stage 5: the TMC2224 UART (read before writing), one
-motor at a time, homing, then the heaters. Open: how the extruder and
+**5b, first half, done 2026-11-21: the motor drivers read over their
+UART** from Linux (`tools/x1_tmc.py`; ttyS2 with GPIO 149/147/146 as
+select and 152 as gate). Five TMC222x at motor numbers 0 (X), 2 (Y),
+3 (Z), 4 (extruder), 6 (cartridge), 16 microsteps, set up as the engine
+leaves them, and they keep that while powered. So Klipper needs no TMC
+access for a first motor test: step, direction, enable and the current
+reference PWM are enough.
+
+Still to do in stage 5: one motor at a time, homing, then the heaters. Open: how the extruder and
 cartridge motors are stepped.
 
 Plan as first written: Fans, lamp,

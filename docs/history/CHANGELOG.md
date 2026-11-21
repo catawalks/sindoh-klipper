@@ -6,6 +6,10 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: motor drivers read over their UART** (`tools/x1_tmc.py`,
+  read-only, from the printer's Linux): five TMC222x at motor numbers
+  0, 2, 3, 4, 6 (X, Y, Z, extruder, cartridge), 16 microsteps, stock
+  settings intact after the engine is stopped.
 - **1X port, stage 5a** (owner at the printer): Klipper switched the
   case lights, the beeper and every fan on the 1X, one at a time. Fork
   8ceef800 (FORK pin moved): the 1X's PWM block map, writable `gpioN`
