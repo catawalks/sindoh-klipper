@@ -3,7 +3,7 @@
 
     python -I tools/kernel_re/extract_image.py nand_images/mtd0.bin out/Image
 
-mtd0 layout (docs/sd_boot_plan.md): boot table, signed U-Boot, then the
+mtd0 layout (sindoh-kernel docs/sd_boot_plan.md): boot table, signed U-Boot, then the
 uImage at 0x40000. The zImage carries a gzip stream (CONFIG_KERNEL_GZIP);
 the first gzip stream that inflates to > 1 MB is the kernel. Also writes
 out/Image.initramfs.cpio if the embedded initramfs is found."""

@@ -8,7 +8,7 @@ usage:
 
 U-Boot must already be sitting at its "# " prompt. This tool never reboots the
 board and never tries to catch the autoboot countdown; do that by hand (any key
-stops it, see docs/no_gpl_plan.md 2.3).
+stops it, see sindoh-kernel docs/no_gpl_plan.md 2.3).
 
 What goes over the wire, and nothing else:
     mw.l ADDR VAL [COUNT]   (RAM write, chained with ';', max ~480 chars a line)

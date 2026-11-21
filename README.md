@@ -1,9 +1,44 @@
-# Klipper on the Sindoh DP200
+# Klipper for Sindoh 3DWOX printers
 
-Klipper runs on the printer's own SoC (Marvell 88PA6170): klippy, Moonraker
-and Mainsail on the Linux cores, and the Klipper MCU firmware on the two
-UPC real-time cores that used to run Sindoh's motion and heater microcode.
-A touch screen app replaces Sindoh's panel UI.
+[Klipper](https://www.klipper3d.org/), Moonraker and Mainsail running on
+the printer's own mainboard. No extra hardware, no opening the printer:
+it installs from a USB stick with Sindoh's own update mechanism, and a
+second stick file puts the Sindoh firmware back.
+
+**Status: v0.1.0, a beta.** It prints well on the maintainer's printers,
+but it is young. Read the install guide fully before you start.
+
+| | |
+|---|---|
+| **Supported printers** | Sindoh 3DWOX **DP200**, **DP201**, and Stanley Model 1 / other brands converted to DP200Q, on Sindoh firmware `RODIN_200730_2` |
+| **Not yet** | 3DWOX 1, 2X, 1X, 7X (the installer refuses them by name). Research on them: [catawalks/sindoh](https://github.com/catawalks/sindoh) |
+| **Download** | [Releases](https://github.com/catawalks/sindoh-klipper/releases) |
+| **Install guide** | [docs/INSTALL.md](docs/INSTALL.md) |
+| **Slicer profiles** | [install/slicer/](install/slicer/) (PrusaSlicer, OrcaSlicer, Cura) |
+
+## What you get
+
+- Mainsail in your browser, over Wi-Fi or Ethernet.
+- A touch screen app on the printer: home, preheat, load/unload, lamp,
+  Wi-Fi setup, and an emergency STOP on every page.
+- Bed mesh with the built-in probe, pause/resume, the webcam, and the
+  beeper (`M300`).
+- Your calibration lives in one file, `printer.cfg`, which updates never
+  overwrite.
+
+## Two things to know before printing
+
+- **Z homes upward.** The bed rises to the nozzle, so anything left on the
+  bed is crushed. Every print start asks "Is the bed empty?".
+- **Klipper replaces Sindoh's heater protection** with its own (temperature
+  limits, `verify_heater`, and outputs that switch off if the host stops).
+  Watch the first print.
+
+## How it works
+
+Klipper's host software runs on the printer's Linux. The two real-time
+"UPC" cores of the Marvell 88PA6170 chip, which ran Sindoh's motion and
+heater code, run the Klipper MCU firmware instead.
 
 ```
  Linux ── Debian root ─────────────────────────────────────────────────────┐
@@ -16,71 +51,55 @@ A touch screen app replaces Sindoh's panel UI.
    UPC IO core (/dev/upc0): heaters, fans, thermistors      ─────┘
 ```
 
-There are two ways it is installed today:
-- **USB stick install (usable now):** our runtime on the stock root, under
-  Sindoh's stock 3.2 kernel. No hardware changes; removable.
-  [docs/INSTALL.md](docs/INSTALL.md).
-- **End goal (in development, dev printer only):** our own mainline 6.18
-  kernel in NAND with our root, still revertible to stock.
-  [docs/end_goal_install_plan.md](docs/end_goal_install_plan.md).
+The USB stick install runs on Sindoh's stock Linux 3.2 kernel. A later
+"end goal" install puts our own mainline kernel in the printer as well
+([docs/end_goal_install_plan.md](docs/end_goal_install_plan.md)); that is
+still in development.
 
-## Start here
+## The project's repositories
+
+| Repository | What it holds |
+|---|---|
+| **sindoh-klipper** (this one) | The installer, printer configs, the touch screen app, tools and docs |
+| [catawalks/klipper](https://github.com/catawalks/klipper/tree/sindoh-dp200), branch `sindoh-dp200` | The Klipper code itself: the UPC MCU port and host modules. [klipper/FORK](klipper/FORK) pins the commit a release is built from |
+| [catawalks/sindoh-kernel](https://github.com/catawalks/sindoh-kernel) | The mainline Linux kernel port for the 88PA6170 (not needed for the USB stick install) |
+| [catawalks/sindoh](https://github.com/catawalks/sindoh) | Hardware research: other models, teardown notes, the Model 1 converter |
+| [catawalks/sindoh-model-survey](https://github.com/catawalks/sindoh-model-survey) | A read-only USB stick that reports a printer's hardware, to help support more models |
+| [catawalks/sindoh-boot-logo](https://github.com/catawalks/sindoh-boot-logo) | Custom boot logo maker |
+
+## For developers
 
 | Read | For |
 |---|---|
-| [docs/STATUS.md](docs/STATUS.md) | What runs on each printer today; who owns what |
-| [TODO.md](TODO.md) | Open items |
-| [PROJECTS.md](PROJECTS.md) | Larger projects and decisions |
-| [docs/README.md](docs/README.md) | The documentation map, and the rules for where things go |
+| [docs/README.md](docs/README.md) | The documentation map |
+| [docs/STATUS.md](docs/STATUS.md) | What runs on each test printer today |
+| [TODO.md](TODO.md), [PROJECTS.md](PROJECTS.md) | Open items; larger projects and decisions |
 | [docs/history/CHANGELOG.md](docs/history/CHANGELOG.md) | What was done, by date |
-
-## Layout
 
 | Path | What |
 |---|---|
-| `common/` | Hardware register map and IPC layout, shared by every component |
-| `host/upctool.c` | Linux tool: `load`, `stop`, `safe`, `probe`, `bridge`, `info`, `dump` |
-| `upc_fw/probe/` | Hardware probe firmware (passive) |
-| `klipper/README.md`, `klipper/FORK` | Where Klipper's code lives: the fork `catawalks/klipper`, branch `sindoh-dp200` (MCU port, host modules, build configs), and the commit the printers build |
-| `klipper/config/printer.cfg` | The user's file: includes the two below and holds per-printer calibration. Never overwritten by an update |
-| `klipper/config/dp200_printer.cfg` | Hardware definition, PRINT_START/END, PAUSE/RESUME, PRIME_LINE; replaced on updates |
-| `klipper/config/dp200_macros.cfg` | Stock-derived macros (load/unload, clean, bin, probe, bed mesh, homing guards); replaced on updates |
-| `install/` | Root builder, USB installer, boot hook, service script, screen app (`install/display/`), slicer profiles |
-| `kernel/` | Mainline kernel patches, variants and initramfs for the end-goal install |
-| `camera/`, `tools/`, `prebuilt/` | Camera helpers; development and test tools; verified test builds |
-| `docs/` | Documentation: see [docs/README.md](docs/README.md) |
+| `install/usb/` | The USB installer and remover, and the payload builder |
+| `install/display/` | The touch screen app |
+| `install/printer/`, `install/rootfs/` | Boot hook and service scripts |
+| `install/slicer/` | Slicer profiles |
+| `klipper/config/` | `printer.cfg` (yours), `dp200_printer.cfg` and `dp200_macros.cfg` (replaced on updates) |
+| `klipper/FORK` | The Klipper fork commit the printers build |
+| `common/`, `host/upctool.c` | The UPC register map, and the Linux tool that loads and bridges the UPC firmware |
+| `upc_fw/probe/` | A passive hardware probe firmware |
+| `tools/` | Development and test scripts for the dev printer ([tools/README.md](tools/README.md)) |
+| `docs/` | Documentation |
 
-## Safety
+## Credits
 
-* The stock firmware's heater protection is gone. Klipper's protections
-  replace it: `max_temp`/`min_temp` checks on the MCU, `verify_heater`, and
-  the MCU turns a heater off on its own if klippy stops updating it.
-* `upctool stop` (also run by `rc.dp200 stop`) holds both UPC cores in
-  reset and forces every PWM output low and every stepper driver off.
-* A firmware exception on a UPC core turns its outputs off and shows
-  `state FAULT` in `upctool info`.
-* **Z homes upward.** Anything left on the bed is crushed against the
-  nozzle, so every Z homing asks whether the bed is empty (BED_CLEAR).
-* The touch screen's STOP (hold 1 s) is an emergency stop on every page.
-
-The first bring-up notes (October 2026) are in
-[docs/history/README_bringup_2026-10.md](docs/history/README_bringup_2026-10.md).
+Klipper, Moonraker and Mainsail and their authors. Fredrik Gustafsson for
+the first 3DWOX 1 tests and notes. Sebastian Schmidt for his 2021 3DWOX 1
+research, where this started.
 
 ## License
 
-Free and open source. The port's own work (scripts, the touch-screen app,
-configs, `upctool`, the UPC firmware probe, tools and docs) is licensed
-under the **GNU General Public License, version 3 or (at your option) any
-later version**: see [LICENSE](LICENSE). That is the license of Klipper
-itself, and of Moonraker and Mainsail.
-
-Exceptions:
-- `kernel/`: patches and drivers for Linux, so **GPL version 2** (Linux's
-  license), as in the files' own headers.
-- The Klipper fork ([catawalks/klipper](https://github.com/catawalks/klipper),
-  branch `sindoh-dp200`) keeps Klipper's GPLv3.
-- Contributed files keep their author's credit (for example
-  [docs/3dwox1.md](docs/3dwox1.md)).
+Free and open source under the **GNU General Public License, version 3 or
+(at your option) any later version**: see [LICENSE](LICENSE). That is the
+license of Klipper, Moonraker and Mainsail too.
 
 Nothing from Sindoh or Marvell (firmware, images, apps, Wi-Fi firmware)
 is part of this repository or its releases.

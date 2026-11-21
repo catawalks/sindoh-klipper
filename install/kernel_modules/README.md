@@ -16,7 +16,7 @@ module is the proper driver if that isn't enough.
 | sha256 | `885c002695591c8db3b0a64e4f3ba5ee778c574cbdcd1d963b272756bcbfff89` |
 | vermagic | `3.2.0-g67a8e16 SMP preempt mod_unload ARMv7 p2v8`, identical to the stock modules |
 | Source | vanilla `linux-3.2.tar.xz` from cdn.kernel.org, sha256 `dd96ed02...e7ba7` checked against kernel.org's sha256sums.asc |
-| Config | the printer's own `docs/kernel/vendor_3.2.0-g67a8e16.config` + `CONFIG_USB_ACM=m`, `LOCALVERSION="-g67a8e16"` |
+| Config | the printer's own `install/kernel_modules/vendor_3.2.0-g67a8e16.config` + `CONFIG_USB_ACM=m`, `LOCALVERSION="-g67a8e16"` |
 | Compiler | Debian armel GCC 14.2.0, native on the printer (`build_cdc_acm.sh`) |
 
 ### How it was built

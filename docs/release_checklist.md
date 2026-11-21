@@ -15,7 +15,7 @@ cut only when every line is checked on the **same payload** (md5).
 
 ## 1. Decisions (owner, 2026-11-20)
 
-- [x] **Version and tag:** `v0.1.0`, as a tag on catawalks/sindoh.
+- [x] **Version and tag:** `v0.1.0`, as a tag on catawalks/sindoh-klipper.
 - [x] **Firmware lines supported:** the DP200 family only (RODIN_: DP200,
       DP201, DP200Q conversions) on RODIN_200730_2, the only hardware we
       have tested. The installer refuses every other line by name
@@ -26,7 +26,7 @@ cut only when every line is checked on the **same payload** (md5).
 - [x] **License:** GPL-3.0-or-later for the port's own work, like Klipper,
       Moonraker and Mainsail (`LICENSE`, README "License"); `kernel/` stays
       GPL-2.0 like Linux. Still to do: the OK of outside contributors for
-      their files under it (Fredrik Gustafsson, docs/3dwox1.md).
+      their files under it (Fredrik Gustafsson, sindoh docs/3dwox1.md).
 
 ## 2. Build
 
@@ -133,9 +133,9 @@ On the release payload, on a printer that does not have it yet:
 
 ## 6. Publish
 
-- [ ] Tag the port repo and catawalks/sindoh; the fork commit is already
+- [ ] Tag catawalks/sindoh-klipper; the fork commit is already
       public.
-- [ ] GitHub release on catawalks/sindoh with: the install stick folder
+- [ ] GitHub release on catawalks/sindoh-klipper with: the install stick folder
       (`_update_rodin_KlipperInstall/`), the remove folder
       (`_update_rodin_KlipperRemove/`), `SHA256SUMS`, and the release notes
       (version, fork and port commits, supported firmware, known issues).

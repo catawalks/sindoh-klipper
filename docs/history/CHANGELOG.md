@@ -6,6 +6,13 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-20
+- **Repositories split** (owner): this repository is now
+  catawalks/sindoh-klipper (installer, configs, screen app, tools, docs).
+  The kernel work (`kernel/m1`, `docs/kernel`, the kernel history, the SD
+  boot, JTAG and no-GPL plans) moved to catawalks/sindoh-kernel; the model
+  research (`other_models.md`, `1x.md`, `3dwox1.md`, `prime_sd.md`) stays
+  in catawalks/sindoh. v0.1.0 was re-released here; the short-lived
+  release on catawalks/sindoh was deleted. New README, `tools/README.md`.
 - **v0.1.0 released as a beta pre-release** (owner): payload `0ee46f50`
   (build `3940525`, fork 9b174ab) on catawalks/sindoh Releases, with the
   install and remove folders and SHA256SUMS. Not yet installed on a

@@ -19,7 +19,7 @@ The one home for these facts. Other documents link here.
 1. U-Boot (unchanged, stock environment) reads 0x7C0000 bytes from
    mtd0 + 0x40000 and boots it with the stock bootargs.
 2. Our kernel ignores those bootargs (`CONFIG_CMDLINE_FORCE`); its own
-   command line is in [kernel/nand_boot_cmdline.md](kernel/nand_boot_cmdline.md).
+   command line is in [kernel/nand_boot_cmdline.md](https://github.com/catawalks/sindoh-kernel/blob/main/docs/nand_boot_cmdline.md).
 3. Our initramfs (`dp200-init`) mounts the root: `ubi0:filesystem` on mtd6.
    A card carrying the marker `/.dp200-root` is used as the root instead;
    that is for development and recovery only.
@@ -44,5 +44,5 @@ Reboot from our root with `busybox reboot` (there is no `/sbin/reboot`).
   the serial console, as with Sindoh's own updates.
 
 Back to stock: [nand_restore.md](nand_restore.md) and
-[kernel/revert_to_stock_plan.md](kernel/revert_to_stock_plan.md).
+[kernel/revert_to_stock_plan.md](https://github.com/catawalks/sindoh-kernel/blob/main/docs/revert_to_stock_plan.md).
 What is in NAND on each printer today: [STATUS.md](STATUS.md).

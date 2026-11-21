@@ -1,8 +1,8 @@
 # Offline reverse engineering of the vendor kernel
 
 These scripts read the vendor kernel image only from a NAND dump on the PC.
-Nothing touches the printer. The results are in `docs/kernel/` and are used
-in `docs/no_gpl_plan.md`.
+Nothing touches the printer. The results are in `sindoh-kernel docs/` and are used
+in `sindoh-kernel docs/no_gpl_plan.md`.
 
 ```
 python -I tools/kernel_re/extract_image.py ../nand_images/mtd0.bin OUT/Image

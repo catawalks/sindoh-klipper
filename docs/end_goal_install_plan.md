@@ -132,7 +132,7 @@ after the errata kernel's 82-minute soak, TODO 17).**
   failures. Klipper ready, Moonraker and Mainsail (200) answer, the
   screen app runs. Wi-Fi did not come up (command 0xa9 timeout, then
   "Card is removed"): the boot-time Wi-Fi failure, TODO 17 /
-  docs/history/kernel/wifi_boot_failure.md, not a NAND-root problem.
+  sindoh-kernel docs/history/wifi_boot_failure.md, not a NAND-root problem.
 - Decided the same day: `/.dp200-root` is for development and recovery
   only; an end-user card is storage, mtd6 always the root (PROJECTS 10).
 
@@ -176,7 +176,7 @@ moves to armhf (faster); until then two roots would have to be maintained.
 
 ## Mainline items that ride along
 
-Tracked in no_gpl_plan.md; needed by stage 5 at the latest: NAND
+Tracked in sindoh-kernel docs/no_gpl_plan.md; needed by stage 5 at the latest: NAND
 read-write in the device tree for mtd0/mtd6 (the write window/guard,
 patch 0010 v2), wear readout, power-loss behaviour of the UBIFS root,
 the storage-tier card detection, faster stepping default (TODO 13).

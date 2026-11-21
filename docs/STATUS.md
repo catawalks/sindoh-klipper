@@ -102,16 +102,16 @@ and build in their own area and report files and md5s.
 
 | Area | Where the work lives |
 |---|---|
-| Coordination, printer access, macros and config, install, docs | this repo (`klipper_port`), dev PC |
-| Kernel and boot (SMP, NAND, build variants) | build box `~/SINDOH-DEV`, served on 10.10.0.68:8098; summary in `docs/kernel/smp_freeze_summary.md` |
-| Motor / UPC driver | build box `~/SINDOH-DEV/motor`, branch `upc-bank3-pads` (75743ea, local; its two commits are in this repo's kernel/m1 as c72b89e and 94813ae) |
-| Wi-Fi (8782 driver, firmware study) | build box; `TESTPLAN.md` and `upstream/` there; facts in `docs/kernel/wifi_88w8782.md` |
+| Coordination, printer access, macros and config, install, docs | this repo (`sindoh-klipper`), dev PC |
+| Kernel and boot (SMP, NAND, build variants) | build box `~/SINDOH-DEV`, served on 10.10.0.68:8098; summary in `sindoh-kernel docs/smp_freeze_summary.md` |
+| Motor / UPC driver | build box `~/SINDOH-DEV/motor`, branch `upc-bank3-pads` (75743ea, local; its two commits are in the sindoh-kernel repo as c72b89e and 94813ae) |
+| Wi-Fi (8782 driver, firmware study) | build box; `TESTPLAN.md` and `upstream/` there; facts in `sindoh-kernel docs/wifi_88w8782.md` |
 | Klipper code (UPC MCU port, stepping, host modules) | the fork `catawalks/klipper`, branch `sindoh-dp200`; the pinned commit is `klipper/FORK`; rules in `klipper/README.md`; `docs/faster_stepping_plan.md` |
 | Touch screen app | `install/display/` in this repo; `docs/touchscreen_options.md` |
 
-Publishing: commit in `klipper_port`, then merge into the `sindoh_publish`
-checkout (subtree `klipper_port/`, after merging `origin/main`) and push to
-`catawalks/sindoh`. Never push from `klipper_port` directly.
+Publishing: commit here and push `main` to `catawalks/sindoh-klipper`.
+Kernel work is published from the `sindoh-kernel` checkout, model research
+from the `sindoh` checkout.
 
 ## Standing rules (short; the reasons are in the docs they point to)
 

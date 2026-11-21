@@ -41,9 +41,9 @@ armel; no swap, no devtmpfs, no USB CDC-ACM).
 **Status:**
 - **Mainline 6.18.59 with our device tree and drivers runs on the dev
   printer from NAND**: two CPUs, NAND root, Wi-Fi, motion (2026-11-12).
-  No vendor source was needed: [docs/no_gpl_plan.md](docs/no_gpl_plan.md).
+  No vendor source was needed: [docs/no_gpl_plan.md](https://github.com/catawalks/sindoh-kernel/blob/main/docs/no_gpl_plan.md).
   The two-CPU freeze and its fix:
-  [docs/kernel/smp_freeze_summary.md](docs/kernel/smp_freeze_summary.md).
+  [sindoh-kernel docs/smp_freeze_summary.md](https://github.com/catawalks/sindoh-kernel/blob/main/docs/smp_freeze_summary.md).
 - **Modules for the stock 3.2 kernel** can be built without Marvell's SDK
   (`install/kernel_modules/`): `cdc-acm.ko` loads and a USB accelerometer
   appears as /dev/ttyACM0 (2026-10-30). The same recipe works for other
@@ -61,7 +61,7 @@ the end-goal install (#3).
 **Goal (owner, 2026-11-03):** boot from the SD card by the DIP switch,
 without the NAND: a recovery path for a fully corrupted NAND.
 
-**Status** ([docs/sd_boot_plan.md](docs/sd_boot_plan.md)): U-Boot from
+**Status** ([docs/sd_boot_plan.md](https://github.com/catawalks/sindoh-kernel/blob/main/docs/sd_boot_plan.md)): U-Boot from
 NAND reads the card once two SD pin selects are set (RAM only) and boots
 our kernel from raw card sectors (`tools/sd_raw_boot.sh`); that is how new
 kernels are RAM-booted. The DIP-switch boot (the boot ROM loading U-Boot
@@ -94,7 +94,7 @@ stock.
   never written.
 - **Revert = plug in a Sindoh update stick** (2026-11-03): our system
   restores stock from mtd5, then Sindoh's update runs
-  ([docs/kernel/revert_to_stock_plan.md](docs/kernel/revert_to_stock_plan.md)).
+  ([sindoh-kernel docs/revert_to_stock_plan.md](https://github.com/catawalks/sindoh-kernel/blob/main/docs/revert_to_stock_plan.md)).
 - No per-printer backup is required: karas.db rebuilds from mtd4.
 - Accepted risk: a power cut during the mtd0 write needs the serial
   console, as with Sindoh's own updates.
@@ -136,7 +136,7 @@ values are copied from the stock app).
 
 **Goal:** the same port on the 3DWOX 1X, 2X (dual extruder) and 30X.
 
-**Status:** [docs/other_models.md](docs/other_models.md). The OEM firmware
+**Status:** [docs/other_models.md](https://github.com/catawalks/sindoh/blob/main/docs/other_models.md). The OEM firmware
 is decrypted for all models except the 30X (key unknown).
 
 **Next:** 1X testing; the second extruder of the 2X; the 30X key.
@@ -161,7 +161,7 @@ reading there means nothing.
 ## 9. JTAG
 
 The CN3 header is prepared; no TAP answered (likely fused off).
-[docs/jtag_prep.md](docs/jtag_prep.md). Parked.
+[docs/jtag_prep.md](https://github.com/catawalks/sindoh-kernel/blob/main/docs/jtag_prep.md). Parked.
 
 ## 10. Before a release
 
@@ -215,7 +215,7 @@ considered (NFS, a separate host) are in the archive, section 11.
 The owner's idea (2026-11-07): take apart the 88W8782's firmware and maybe
 write a clean-room replacement. It is a "fun path", not a fix for
 anything: the boot and reload failures were in the host driver and are
-solved ([docs/kernel/wifi_88w8782.md](docs/kernel/wifi_88w8782.md)).
+solved ([sindoh-kernel docs/wifi_88w8782.md](https://github.com/catawalks/sindoh-kernel/blob/main/docs/wifi_88w8782.md)).
 
 **Status:** a side session on the build box has started on the decompile.
 - It covers only the 8782; other DP200 batches may have another module.

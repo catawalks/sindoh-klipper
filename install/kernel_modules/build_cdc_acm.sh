@@ -1,7 +1,7 @@
 #!/bin/sh
 # Build cdc-acm.ko (USB CDC-ACM serial) for the DP200's vendor kernel
 # 3.2.0-g67a8e16 without Marvell's SDK: vanilla Linux 3.2 + the printer's own
-# config (docs/kernel/vendor_3.2.0-g67a8e16.config). The vendor kernel has no
+# config (vendor_3.2.0-g67a8e16.config, next to this script). The vendor kernel has no
 # CONFIG_MODVERSIONS, so only the vermagic string has to match:
 #   3.2.0-g67a8e16 SMP preempt mod_unload ARMv7 p2v8
 # Also builds mbcache.ko, which the printer ships as a stock module, so the
@@ -36,7 +36,7 @@ cp include/linux/compiler-gcc4.h include/linux/compiler-gcc14.h
 
 # Vanilla 3.2 has no ARCH_MV61X0 (Marvell's machine). Any ARMv7 SMP machine
 # gives the same generic code and structures; Versatile Express CA9 is one.
-cp $PORT/docs/kernel/vendor_3.2.0-g67a8e16.config .config
+cp $PORT/install/kernel_modules/vendor_3.2.0-g67a8e16.config .config
 sed -i -e '/CONFIG_ARCH_MV61X0/d' \
        -e 's/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION="-g67a8e16"/' \
        -e 's/^CONFIG_LOCALVERSION_AUTO=y/# CONFIG_LOCALVERSION_AUTO is not set/' \
@@ -46,7 +46,7 @@ printf 'CONFIG_ARCH_VEXPRESS=y\nCONFIG_ARCH_VEXPRESS_CA9X4=y\n' >> .config
 yes "" | make ARCH=arm oldconfig > ../oldconfig.log 2>&1 || true
 
 # Options of the vendor config that vanilla 3.2 doesn't know or changed
-grep '^CONFIG_' $PORT/docs/kernel/vendor_3.2.0-g67a8e16.config | sort > ../cfg_vendor.txt
+grep '^CONFIG_' $PORT/install/kernel_modules/vendor_3.2.0-g67a8e16.config | sort > ../cfg_vendor.txt
 grep '^CONFIG_' .config | sort > ../cfg_build.txt
 comm -23 ../cfg_vendor.txt ../cfg_build.txt > ../cfg_lost.txt || true
 

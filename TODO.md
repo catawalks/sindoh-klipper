@@ -225,9 +225,9 @@ stages 1-5 done on the dev printer):
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).
     Each firmware line (RODIN_, RODUP_, the 6270 models) is treated as its
-    own target, possibly with its own mainboard ([docs/other_models.md](docs/other_models.md)).
+    own target, possibly with its own mainboard ([docs/other_models.md](https://github.com/catawalks/sindoh/blob/main/docs/other_models.md)).
     Model facts so far are from Fredrik Gustafsson's 3DWOX 1
-    ([docs/3dwox1.md](docs/3dwox1.md), "Later findings"), not our printers.
+    ([docs/3dwox1.md](https://github.com/catawalks/sindoh/blob/main/docs/3dwox1.md), "Later findings"), not our printers.
     - Done 11-20, untested on a printer: the installer writes
       `dp200_machine.cfg` with the motor currents from the printer's own
       karas.db (CONF_ENGINE_PWM NO=4). First run: the next work-printer
@@ -236,7 +236,7 @@ stages 1-5 done on the dev printer):
     - Model from the firmware tag: accept `RODUP_` (3DWOX 1) as well as
       `RODIN_` in the installer's firmware check, `dp200-start.sh` and the
       screen header; 3DWOX 1 sticks need `_update_rodin_up` and AES
-      packing (other_models.md), and it has 34.5 MB free on its root.
+      packing (sindoh docs/other_models.md), and it has 34.5 MB free on its root.
     - Partitions (checked 11-20 from the update files): the 3DWOX 1's
       Sindoh update script is byte for byte the DP200's, with the same
       kernel load (0x40000, 0x7C0000); its kernel is a 2018 rebuild of the
@@ -245,8 +245,8 @@ stages 1-5 done on the dev printer):
       are most likely gluebi copies of the two attached UBI volumes, which
       both kernels build in. The stick install writes files on the mounted
       root, so it needs no raw partition knowledge. **Confirmed on a real
-      unit** by Sebastian Schmidt's 2021 3DWOX 1 dumps (top of
-      catawalks/sindoh; docs/3dwox1.md): the DP200's mtdparts exactly, and
+      unit** by Sebastian Schmidt's 2021 3DWOX 1 dumps (`3dwox1_2021/` in
+      catawalks/sindoh; sindoh docs/3dwox1.md): the DP200's mtdparts exactly, and
       mtdblock7/8 = the gluebi copies of the UBI volumes. **Asked of
       Fredrik (11-20, owner sends):** `df /`, the size of the Sindoh app
       and WebKit (will Klipper fit?), `ubinfo -a`, the U-Boot block md5,
@@ -261,7 +261,7 @@ stages 1-5 done on the dev printer):
       `EOFFSET_UNLOAD`), PID gains, leveling positions.
     - `MESH_ADAPTIVE` (opt-in macro, 11-20) and `PRINT_START MESH=0`: not
       yet run on a printer.
-    - 1X (owner's, surveyed 11-20, [docs/1x.md](docs/1x.md)): the first
+    - 1X (owner's, surveyed 11-20, [docs/1x.md](https://github.com/catawalks/sindoh/blob/main/docs/1x.md)): the first
       6270 data. Next for a port: the UPC memory map on the 6270, what the
       stock engine talks to on `ttyS2`, how Marvell's stepper/dcmotor
       drivers relate to the UPC, and heater/thermistor wiring. A serial

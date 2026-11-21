@@ -83,7 +83,7 @@ Nothing below is done; NAND and the U-Boot env stay untouched.
    Good for development only.
 2. **Kexec from stock** (no U-Boot change): the stock side starts, then
    kexecs mainline from the SD card. **The stock kernel has no kexec**
-   (`# CONFIG_KEXEC is not set` in docs/kernel/vendor_3.2.0-g67a8e16.config),
+   (`# CONFIG_KEXEC is not set` in install/kernel_modules/vendor_3.2.0-g67a8e16.config),
    so this needs an out-of-tree kexec module built for the vendor kernel
    (install/kernel_modules/ can already build vermagic-matched modules). Some
    Android devices have done this, but on ARM it has to stop the second CPU

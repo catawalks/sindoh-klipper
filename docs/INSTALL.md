@@ -1,7 +1,7 @@
 # Installing Klipper on a Sindoh 3DWOX DP200
 
 > **Status: v0.1.0, a beta pre-release** (2026-11-20). Download it from the
-> [Releases page](https://github.com/catawalks/sindoh/releases). Earlier
+> [Releases page](https://github.com/catawalks/sindoh-klipper/releases). Earlier
 > builds of this installer have run on the owner's two printers (DP200 and
 > a DP200Q-converted Stanley Model 1) on Sindoh firmware RODIN_200730_2;
 > this exact build has not been installed on a printer yet (see the release
@@ -171,4 +171,4 @@ DRY_RUN=1 sh install/usb/unmistakable_klipper_install.sh /mnt/sd/payload
 Details: [usb_installer.md](usb_installer.md),
 [internal_firmware_plan.md](internal_firmware_plan.md),
 [touchscreen_options.md](touchscreen_options.md),
-[sd_boot_plan.md](sd_boot_plan.md), [docs/history/kernel_research.md](history/kernel_research.md).
+[sd_boot_plan.md](https://github.com/catawalks/sindoh-kernel/blob/main/docs/sd_boot_plan.md), [docs/history/kernel_research.md](https://github.com/catawalks/sindoh-kernel/blob/main/docs/history/kernel_research.md).

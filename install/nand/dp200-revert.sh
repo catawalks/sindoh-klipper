@@ -1,5 +1,5 @@
 #!/bin/sh
-# Back to stock from our kernel (docs/kernel/revert_to_stock_plan.md):
+# Back to stock from our kernel (sindoh-kernel docs/revert_to_stock_plan.md):
 # Sindoh's recovery sequence with the DP200 (rodin) file names, from the
 # factory recovery set in mtd5. Runs as root on the mainline kernel with the
 # guarded NAND write path (patch 0010); busybox sh + mtd-utils.
