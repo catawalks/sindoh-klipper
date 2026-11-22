@@ -7,6 +7,11 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- 1X: the rewritten load ran end to end (owner at the printer): feed,
+  purge, retract and the stock wipe, head back at the bin's center
+  (247.8), fan off, purge count 1 of 15. About 3.5 minutes, nearly all
+  of it heating from cold at the 60 % power cap with the part fan on.
+
 - 1X: the rewritten unload ran (50 mm slow, 842 mm to the extruder
   sensor, 509 mm to the bay switch; fan on and off; no runout pause).
   Bin reminder on the 1X back to 15 purges (owner; may go higher).
