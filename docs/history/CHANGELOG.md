@@ -7,6 +7,15 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **Correction (owner): Z zero must not come from the leveling touches.**
+  The notches are cut-outs in the sheet; the nozzle touches the metal
+  plate below the print surface there. `position_endstop` 3.340 (Z 0 at
+  the touch, entry below) was on the printer for a few minutes with
+  nothing moved under it, and is back at the uncalibrated 3.1. Z zero
+  needs a paper test on the sheet. `BED_LEVEL` no longer suggests an
+  endstop value, and the scrub height is now given from the Z sensor's
+  trip point (stock: 3.83 mm above it), not from Z 0.
+
 - **1X: first nozzle touches under Klipper** (owner at the printer, bed
   empty, 150 C, wipe, no scrub). `BED_LEVEL SCRUB=0`: back -0.240,
   front left -0.123, front right -0.177 mm; the three touches at a
