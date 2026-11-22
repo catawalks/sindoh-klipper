@@ -273,13 +273,14 @@ stages 1-5 done on the dev printer):
       setup`, motor current in the config; port plan, stage 7 item 4),
       not tried. Needs a boot where Sindoh's engine never starts.
     - First print, then the screen app's 1X leveling page.
-    - X numbers against stock's: tied on 11-22 (edge 242.4 if stock's
-      home is 262.7). Still odd: stock wipes 257.3 ... 231.3 while the
-      cleaning flap lets go at 250 and 225.5, and stock loads at 256.4,
-      under the left flap. Either stock really works there, or its home
-      is not at 262.7. To settle: watch a stock nozzle cleaning (does
-      the nozzle clear the flap on the right?) and a stock load (where
-      does the filament come out?).
+    - X numbers against stock's: 262.7 is stock's X maximum (the left
+      wall), the sensor's edge about 20 mm before it. The database's
+      positions (load 256.4 then 243.4, wipe 257.3 ... 231.3) are in
+      another frame, about 6.5 mm higher than ours by the owner's flap
+      readings. To confirm: watch a stock load (does the head sit over
+      the bin for the purge and end on the cleaning flap?) or record the
+      X step pin through one. Needed before the leveling points (also
+      database numbers) are used.
     - A root-side helper so Mainsail's reboot and shutdown work on the
       1X (also a second way in when the serial console is blocked).
     - Stage 7: install onto `/userdata` (plan in the port plan; every

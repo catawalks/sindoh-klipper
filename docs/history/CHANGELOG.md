@@ -7,6 +7,14 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- Correction to the two 1X entries below (owner): 262.7 is the stock
+  program's X MAXIMUM, not a recorded home position, and the head cannot
+  be "1 mm further left" than the wall: 19.3 and 20.3 mm are the same
+  distance within the method's error. The load and cleaning positions
+  come from the stock database, not from a recording of the carriage
+  (yesterday's pin recording covered the feed motors only), and they
+  are in a frame about 6.5 mm above ours.
+
 - **1X numbers tied to stock's (reboot to stock, owner at the
   printer):** stock homed all axes, Klipper took over without moving
   them, then each axis was stepped away until its sensor released: X
