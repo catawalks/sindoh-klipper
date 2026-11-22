@@ -246,67 +246,35 @@ stages 1-5 done on the dev printer):
     the USB stick's `_update_rodin_KlipperInstall` with the new remover
     since 11-20; v0.1.0 (`0ee46f50`) is kept next to it in
     `_update_rodin_KlipperInstall_v0.1.0`. Not installed anywhere yet.
-41. **1X port** (owner 11-20: start): plan and stages in
-    [docs/1x_port_plan.md](docs/1x_port_plan.md). Done 11-21: stage 1 (a
-    Debian root with Klipper on the SD card), stage 2 (read-only look at
-    the live shared memory), stage 3 (our look-only probe ran on both
-    UPC cores), stage 4 (Klipper connected to both cores, reading
-    thermistors and the X/Y home sensors; fork 3dcad7d8), most of
-    stage 0. stage 5a (lights, beeper, all five fans switched by Klipper; fork
-    8ceef800). Stage 5b first half done (drivers read over the UART: 16
-    microsteps, X/Y/Z/E/C at motor numbers 0/2/3/4/6). Stage 5b second half done: X, Y, Z moved by Klipper (fork
-    e3e1b356). e3e1b356 had a 1X bug (after a firmware restart every
-    move went one way; head hit the left wall 11-21); fixed and
-    verified in 0938457c, and X and Y then homed on their sensors.
-    Motion rules: docs/1x_port_plan.md. Z homed too, and both heaters driven by Klipper (PWM 5
-    nozzle, 28 bed, confirmed 11-21). Klipper extruded TPU at 240 °C the same day (fork
-    b58960c9: stock control values for the extruder and cartridge
-    engines; 458.8 steps/mm). Two stock open-filament loads jammed afterwards; cause
-    found, not ours: the filament was fed past the cartridge-bay switch
-    (GPIO 80), which the stock load needs before it starts the rear feed
-    motor (docs/1x_port_plan.md). Engine 4 = initial feed motor, engine 3 = the extruder
-    (both at the rear). GPIO 80 = bay switch (filament through the
-    opening port or a cartridge), GPIO 120 = filament at the extruder.
-    A good stock PLA load and unload were then recorded with pins and
-    step counts (sindoh docs/1x_stock_routines.md). Owner 11-21: both
-    motors are always needed, cartridge or open filament (the filament
-    cannot reach the extruder without the initial feed motor, whose
-    gear turns in both modes); no extruder-alone test.
-    **Next (owner present): Klipper load and unload routines copied
-    from the stock recording (initial feed alone to GPIO 120, then both
-    at the same filament speed; unload the reverse, GPIO 80 as the end
-    and as runout sensor); the
-    nozzle-contact probe; then turn `x1_printer_draft.cfg` into a real
-    config** (stage 6). **Next (owner present): homing with the sensors
-    (GPIO 99/82/83), then extruder and cartridge motors, then
-    heaters.** Open: the stepper engine clock against the timer
-    (step batching is off on the 1X until measured). Runout (owner
-    11-21): use GPIO 80 as the filament runout sensor; it releases while
-    the filament end is still ahead of the gears, so a normal unload can
-    pull the rest out. The DP200 has no such switch; Sindoh published a
-    printable adapter for it: the owner prints one, then test it and add
-    it to the DP200 config. The DP200 firmware builds from 8ceef800 are
-    not yet run on a DP200 (pin arguments widened to 32 bit). The stock 1X keeps
-    nozzle 80 °C and bed 50 °C at idle and the microcode goes on heating
-    when the engine dies: every stop sequence must switch the heater
-    outputs off itself. Paper work left: which PWM block is which heater
-    or fan (5 and 28 are the two live heaters), the microstep pins of
-    the TMC2224s, how the extruder and
-    cartridge motors are stepped (X, Y, Z are engines 0 to 2 with step,
-    dir and home pins known: sindoh docs/1x_stock_routines.md), the
-    sign of the stock X coordinate. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
-    `1x-dev`, ext4, mounted by hand at `/tmp/sd`), not on its eMMC.
-    Draft LOAD_FILAMENT / UNLOAD_FILAMENT and the bay runout sensor are in
-    `x1_printer_draft.cfg` (11-21, not run, not parsed by Klipper yet); they
-    use a new fork module, `feed_until` (00e6b950), which stops the feed
-    on a sensor as homing does. Owner 11-21: no feeding in pieces.
-    `UNLOAD_FILAMENT` ran on the printer 11-21 (stage 5g config);
-    `LOAD_FILAMENT` not yet.
-    Owner 11-21: watch the filament encoder during load and unload and
-    stop with "filament not moving, possible jam in the print head" when
-    it stands still. From the stock recording: GPIO 65 pulses only while
-    filament runs at the extruder, GPIO 67 also while the feed motor
-    runs alone (two pick-ups, to be confirmed).
+41. **1X port** (owner 11-20: start): plan, stages and everything found
+    so far in [docs/1x_port_plan.md](docs/1x_port_plan.md); what is done
+    is in the changelog. State: start of stage 6 (config
+    `x1_stage6.cfg` loads; web page and touch screen run). Open:
+    - **Owner present:** unload, then load, to try the two load changes
+      of 11-21 (feed ahead while heating; park over the dump station:
+      check the nozzle is clear of the cleaning flap). The jam check has
+      not seen a real jam; its window values are estimates.
+    - **Owner present:** first homing under `x1_stage6.cfg` (bed empty),
+      then the touch screen by hand (calibration is the DP200's).
+    - **Owner present:** nozzle heater: the 60 % power cap barely holds
+      220 C and the screen's PLA preset is 230 C; raise the cap, then
+      `PID_CALIBRATE` both heaters.
+    - **Owner present:** leveling with the nozzle-contact probe and
+      `[screws_tilt_adjust]` (plan in the port plan; a bed mesh is not
+      possible, the nozzle only makes contact at the three notches).
+    - Runout: GPIO 80 is the runout sensor (config has it); not tried in
+      a print. The DP200 has no such switch: the owner prints Sindoh's
+      adapter, then test it and add it to the DP200 config.
+    - First print, then the screen app's 1X leveling page.
+    - Stage 7: install onto `/userdata` (plan in the port plan; every
+      eMMC write needs the owner's OK), a cold start without the stock
+      engine (driver set-up, reference PWM).
+    - Build for the 2X: second carriage, second nozzle (owner: a 2X is
+      on its way).
+    - Paper work: the stepper engine clock against the timer (step
+      batching is off on the 1X), the microstep pins of the drivers.
+    - The DP200 firmware builds from the 1X-capable fork have not run on
+      a DP200.
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
     beeper): USB audio card 0 + amplifier enable GPIO 180, stock plays
     MP3s with mplayer ([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md),

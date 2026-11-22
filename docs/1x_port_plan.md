@@ -393,7 +393,8 @@ time at low current, bed empty; homing; then heaters with low limits.
 
 **6. A printer.** `printer.cfg` for the 1X, bed leveling (the 1X has
 active leveling tables in `karas.db`), filament handling, the touch
-screen app (the panel is a different size), then a first print.
+screen app (done 11-21: the panel is the DP200's at 24 bits per pixel),
+then a first print.
 
 **7. Installer.** Fold the 1X into the one installer for every model
 (TODO 38): `_update_rodin_1x`, AES packing, `/userdata` or the root as
@@ -433,6 +434,102 @@ A stop that does not need the serial console now exists:
 to the PC's address). Any connection to port 7126 sends Klipper an
 emergency stop; from the PC it took 0.18 s (tested with the printer
 idle).
+
+**5g, 2026-11-21 late evening: the load works.** `LOAD_FILAMENT` at
+220 C with the jam check on ran to the end (owner watching): feed motor
+alone to GPIO 120, both motors 857 mm, purge, retract. The pick-ups
+counted 1436 (bay) and 860 (head) changes. Two owner changes followed
+(config c395930, fork 4f383aaa, `FEED_UNTIL COLD=1`): the load feeds to
+150 mm short of the nozzle while it heats and only then waits for the
+temperature, and the head parks over the dump station at the stock load
+position (X 256.4; at the home sensor, 262.7, the nozzle sits under the
+cleaning flap) and moves to 243.4 after the purge. Both load on the
+printer; neither has run.
+
+**Stage 6 started, night of 2026-11-21 (no motion, no heat).**
+
+- **Config `x1_stage6.cfg`**: the draft as a real config: cartesian
+  axes with homing, `[heater_bed]`, the filament routines, fans, lamp,
+  `[virtual_sdcard]` and `[display_status]`. Z homing asks `BED_CLEAR`
+  first, as on the DP200. Heaters keep the tested low limits (60 %
+  power, watermark). It loads; the home sensors read right through it
+  (X and Y triggered at home, Z open). No axis has moved under it.
+- **Web page**: `install/x1/x1_web.sh start` runs Moonraker (7125) and
+  Mainsail on port 8081 from the card's Debian root; Sindoh's web server
+  keeps port 80 and its camera server (8080) feeds the page.
+- **Touch screen**: the panel is the DP200's (800x480, mounted the same
+  way, same touch controller), but 24 bits per pixel. Our screen app
+  (`install/display/dp200_screen.py`) now reads the board name and runs
+  on both. `x1_web.sh` freezes Sindoh's `appBrowser` with SIGSTOP instead
+  of killing it: nothing restarts it (`UIManager` did not react,
+  `/app/recovery_watchdog.sh` only watches for a read-only root), and
+  `x1_web.sh stop` lets it run again. Seen on the panel's memory; touch
+  not tried (calibration values are the DP200's).
+- **One app for every model** (owner 11-21): the app greys out buttons
+  that cannot work on the printer it runs on: the pages built for the
+  DP200's hardware, and any button whose G-code uses a command Klipper
+  does not list (`/printer/gcode/help`). The differences otherwise live
+  in each model's Klipper config under the same macro names
+  (`LOAD_FILAMENT`, `LAMP_TOGGLE`, `BED_CLEAR`, later a leveling macro).
+
+**Leveling under Klipper (plan, nothing tried).** The nozzle is the
+probe and only touches metal at the three notches in the bed sheet
+(owner 11-21), so a bed mesh is not possible; stock does a three-point
+check and tells the user how far to turn the two front wheels
+(sindoh `docs/1x_stock_routines.md`). Klipper has this as
+`[screws_tilt_adjust]`:
+
+- `[probe]` on GPIO 81 (the contact input), `z_offset: 0`, with
+  `activate_gcode` switching on GPIO 153 (sensor enable) and GPIO 69
+  (nozzle voltage) and `deactivate_gcode` switching them off. Three
+  samples per point, as stock.
+- `[screws_tilt_adjust]` with the back center point as the fixed base
+  and the two front corners as the screws. `SCREWS_TILT_CALCULATE`
+  reports each wheel as a direction and a part of a turn; the screen
+  page shows it in clicks (stock: one click is 45 degrees).
+- A macro `BED_LEVEL` (the same name on every model): heat the nozzle
+  to 150 C, wipe it on the edge strip, home, `SCREWS_TILT_CALCULATE`.
+  On the DP200 the same name runs the pin probe and a mesh.
+- Open before a first try (owner present): the level that means
+  "contact" on GPIO 81, the three points in our coordinates (the stock
+  X values are in the routine's own numbers), the wheel's thread (mm
+  per turn), the wipe path, and whether Z should then home on a notch
+  instead of the top sensor alone.
+- Stock's optional "active leveling" (ten stored correction factors,
+  all zero on this printer) is left out.
+
+**Storage and the install target (read only, 2026-11-21).**
+
+| | Size | Free | Used by stock |
+|---|---|---|---|
+| eMMC, whole chip | 6.3 GB | | |
+| `/` (mmcblk0p2) | 770 MB | 404 MB | the system |
+| `/systemdata` (mmcblk0p3) | 283 MB | 262 MB | empty |
+| `/userdata` (mmcblk0p6) | 4.2 GB | 3.9 GB | empty |
+| RAM | 1 GB | 775 MB | |
+
+`/userdata` is mounted from `/etc/fstab` and holds nothing but
+`lost+found`; no stock program or script mentions it. Stock keeps its
+"stored print" list in RAM (`/tmp/storedprint.db`) and takes print jobs
+over the network on TCP port 9100 (owner did not know of a way to send
+jobs remotely; this is how Sindoh's slicer does it), plus its web page
+on port 80 and the camera on 8080. So, unlike the DP200, nothing has to
+be removed: our whole root is about 920 MB.
+
+Install plan (stage 7, each write to the eMMC needs the owner's OK):
+
+1. Copy the card's root to a folder on `/userdata` (it is ext4, so the
+   root can be used in place as a chroot, as the card is now).
+2. Start it from a hook in the stock boot (TODO 38 decides which: the
+   1X runs `/etc/profile` and `/test/run.sh` at boot like the DP200),
+   guarded by a "boot stock" flag file and by the power button, so the
+   stock firmware stays one choice away.
+3. Nothing else on the eMMC changes: system, recovery and boot
+   partitions, the U-Boot environment and `karas.db` stay as they are.
+   Removing is deleting the folder and the hook.
+4. Before that: a cold start without the stock engine (driver set-up
+   over the UART and the reference PWM, today left over from stock), and
+   the stock engine never started at boot (it heats to 80/50 C at idle).
 
 ## Open questions
 

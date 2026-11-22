@@ -6,6 +6,15 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X night work (owner asleep, no motion, no heat):** stage 6 config
+  `x1_stage6.cfg` loads (axes with homing, bed heater, print job
+  objects; Z homing asks `BED_CLEAR`); Moonraker and Mainsail run on the
+  1X (`install/x1/x1_web.sh`, page on port 8081); our touch screen app
+  runs on the 1X panel (24-bit output, model read from the board name,
+  DP200-only buttons greyed out; Sindoh's screen program is frozen, not
+  killed). Plans written in docs/1x_port_plan.md: leveling with
+  `[screws_tilt_adjust]`, install onto `/userdata` (3.9 GB free, unused
+  by stock).
 - **1X load: feed ahead while heating, and park over the dump station**
   (owner 11-21; fork 4f383aaa `FEED_UNTIL COLD=1`, FORK pin moved). The
   load now starts the heater, feeds to 150 mm short of the nozzle, waits

@@ -29,14 +29,18 @@ becomes the full kernel-swap test machine.
   sindoh); see the top README.
 - **A third machine, the owner's 3DWOX 1X** (stock firmware, serial
   console on the dev PC's COM3 for now, an SD card `1x-dev` in its slot):
-  the port has reached stage 5 of [1x_port_plan.md](1x_port_plan.md).
-  Klipper, started from the SD card after stopping Sindoh's program,
-  reads its thermistors, switches its fans, lights and beeper, and moves
-  and homes X, Y and Z. A reboot always returns it to stock. No heater
-  and no extruder has been driven by Klipper there.
-- **Fork pin:** `klipper/FORK` is at 0938457c (1X support). The DP200
-  firmware built from it compiles but has not been run on a DP200; both
-  DP200s still run the builds named below.
+  the port is at the start of stage 6 of
+  [1x_port_plan.md](1x_port_plan.md). Klipper, started from the SD card
+  after stopping Sindoh's program, heats the nozzle and bed, moves and
+  homes X, Y and Z (as manual steppers so far), and loads and unloads
+  filament on the sensors with a jam check. Since 2026-11-21 it also has
+  a real printer config that loads (`x1_stage6.cfg`; no axis moved under
+  it yet), Moonraker and Mainsail (port 8081) and our touch screen app
+  on its panel. A reboot always returns it to stock.
+- **Fork pin:** `klipper/FORK` names the commit; since b58960c9 only
+  Python files changed (the firmware builds are from b58960c9). The
+  DP200 firmware built from the 1X-capable fork compiles but has not
+  been run on a DP200; both DP200s still run the builds named below.
 - The dev printer's serial cable is on the 1X; the dev printer is on the
   network only.
 
