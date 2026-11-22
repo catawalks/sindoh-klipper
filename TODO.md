@@ -267,9 +267,15 @@ stages 1-5 done on the dev printer):
     motor (docs/1x_port_plan.md). Engine 4 = initial feed motor, engine 3 = the extruder
     (both at the rear). GPIO 80 = bay switch (filament through the
     opening port or a cartridge), GPIO 120 = filament at the extruder.
-    **Next (owner present): a Klipper load routine that uses GPIO 120
-    as its stop; the extruder
-    alone in open-filament mode with another filament; the
+    A good stock PLA load and unload were then recorded with pins and
+    step counts (sindoh docs/1x_stock_routines.md). Owner 11-21: both
+    motors are always needed, cartridge or open filament (the filament
+    cannot reach the extruder without the initial feed motor, whose
+    gear turns in both modes); no extruder-alone test.
+    **Next (owner present): Klipper load and unload routines copied
+    from the stock recording (initial feed alone to GPIO 120, then both
+    at the same filament speed; unload the reverse, GPIO 80 as the end
+    and as runout sensor); the
     nozzle-contact probe; then turn `x1_printer_draft.cfg` into a real
     config** (stage 6). **Next (owner present): homing with the sensors
     (GPIO 99/82/83), then extruder and cartridge motors, then
