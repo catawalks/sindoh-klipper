@@ -7,6 +7,20 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X numbers tied to stock's (reboot to stock, owner at the
+  printer):** stock homed all axes, Klipper took over without moving
+  them, then each axis was stepped away until its sensor released: X
+  20.3 mm, Y 5.5 mm. So the X edge is 242.4 with stock's home at 262.7
+  (ours had 243.4: the earlier "about 6 mm off" was wrong, it is 1 mm),
+  and the Y edge is 5.5 from where stock parks the bed. Config and the
+  dump station numbers moved by that 1 mm (park 246.5, wipe 250 ... 225).
+- **Stock camera (owner's suspicion, confirmed):** Sindoh's camera
+  server only captures while the stock web page is open (details in the
+  sindoh repo's 1x.md).
+- Lesson: no key on the 1X console during the boot loader's countdown;
+  a probe stopped it at its prompt (`boot` continued, nothing saved).
+  `1x_files/serial/listen1x.py` only listens.
+
 - **1X dump station measured by the owner with the JOG page** (our X
   numbers): bin center 247.5; the cleaning flap (right) at 238.5,
   released at 251 moving left and at 226.5 moving right; the tall left

@@ -273,23 +273,13 @@ stages 1-5 done on the dev printer):
       setup`, motor current in the config; port plan, stage 7 item 4),
       not tried. Needs a boot where Sindoh's engine never starts.
     - First print, then the screen app's 1X leveling page.
-    - One time, on the next stock boot: **how our X numbers sit against
-      stock's.** Ours put the sensor's edge at 243.4 and the left end at
-      262.7 (an assumption: the measured 19.3 mm happens to equal stock's
-      262.7 - 243.4). The owner's dump station readings fit stock's
-      numbers about 6 mm lower instead (stock wipes 257.3 ... 231.3; the
-      flap lets go at 251 and 226.5), i.e. stock's 262.7 would be its
-      rest position 6 mm short of the end. To pin it: let stock home and
-      park, start Klipper without moving X, then step away from the end
-      until the sensor releases (`1x_files/serial/edge.py`): that
-      distance is 262.7 minus stock's number for the edge. Needed before
-      any stock X number is used unmeasured (the leveling points).
-    - One time, on the next stock boot, BEFORE starting Klipper (owner
-      11-22): does Sindoh's camera server only capture once the stock
-      web page is opened? Watch the camera's USB interrupts
-      (`ehci_hcd:usb1` in /proc/interrupts) and the server's CPU, then
-      open the stock page on port 80 and look again. Note the result in
-      the sindoh repo's docs/1x.md.
+    - X numbers against stock's: tied on 11-22 (edge 242.4 if stock's
+      home is 262.7). Still odd: stock wipes 257.3 ... 231.3 while the
+      cleaning flap lets go at 250 and 225.5, and stock loads at 256.4,
+      under the left flap. Either stock really works there, or its home
+      is not at 262.7. To settle: watch a stock nozzle cleaning (does
+      the nozzle clear the flap on the right?) and a stock load (where
+      does the filament come out?).
     - A root-side helper so Mainsail's reboot and shutdown work on the
       1X (also a second way in when the serial console is blocked).
     - Stage 7: install onto `/userdata` (plan in the port plan; every
