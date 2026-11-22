@@ -31,6 +31,21 @@ FB_W, FB_H = 800, 480                 # fb0 geometry (stock: two pages, 800x960 
 FB = '/dev/fb0'
 EV = next((p for p in ('/dev/event0', '/dev/input/event0') if os.path.exists(p)), '/dev/event0')
 API = 'http://127.0.0.1:7125'
+
+def _read(path, default=''):
+    try:
+        with open(path) as f:
+            return f.read().strip()
+    except OSError:
+        return default
+
+# Which printer this is. The 3DWOX 1X (and 2X) say so in the stock kernel's
+# /sys/kernel/board_name ("1X_r1"); its panel is the DP200's (800x480,
+# mounted the same way, same touch controller) but 24 bits per pixel.
+BOARD = _read('/sys/kernel/board_name')
+IS_1X = BOARD.startswith(('1X', '2X'))
+MODEL = '1X' if IS_1X else 'DP200'
+FB_BYTES = int(_read('/sys/class/graphics/fb0/bits_per_pixel', '16') or 16) // 8
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 MONO = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
 
@@ -161,6 +176,8 @@ _LUT = ([v & 0xf8 for v in range(256)], [v >> 5 for v in range(256)],
         [(v << 3) & 0xe0 for v in range(256)], [v >> 3 for v in range(256)])
 
 def rgb565(im):
+    if FB_BYTES == 3:                           # 1X: RGB888, red first
+        return im.tobytes()
     r, g, b = im.split()
     hi = ImageChops.add(r.point(_LUT[0]), g.point(_LUT[1]))
     lo = ImageChops.add(g.point(_LUT[2]), b.point(_LUT[3]))
@@ -174,7 +191,7 @@ def fb_pages(path):
             vh = int(f.read().split(',')[1])
     except (OSError, ValueError, IndexError):
         try:                                    # a plain file (tests): its size
-            vh = os.path.getsize(path) // (FB_W * 2)
+            vh = os.path.getsize(path) // (FB_W * FB_BYTES)
         except OSError:
             vh = FB_H
     return tuple(range(0, max(vh // FB_H, 1) * FB_H, FB_H))
@@ -253,8 +270,8 @@ class Panel:
         x0, w = FB_W - v1, v1 - v0
         for page in self.pages:                      # every page the fb has
             for row in range(u1 - u0):
-                self.f.seek(((page + u0 + row) * FB_W + x0) * 2)
-                self.f.write(raw[row * w * 2:(row + 1) * w * 2])
+                self.f.seek(((page + u0 + row) * FB_W + x0) * FB_BYTES)
+                self.f.write(raw[row * w * FB_BYTES:(row + 1) * w * FB_BYTES])
 
 # ---------------------------------------------------------------------------
 # Touch input
@@ -321,6 +338,8 @@ class PowerKey:
     def __init__(self):
         import mmap
         self.m = None
+        if IS_1X:                               # another SoC: that address is not its button
+            return
         try:
             fd = os.open('/dev/mem', os.O_RDONLY | os.O_SYNC)
             self.m = mmap.mmap(fd, 4096, mmap.MAP_SHARED, mmap.PROT_READ, offset=KEY_REG & ~0xfff)
@@ -1638,7 +1657,7 @@ class UI:
                 self.header(d, st)
             else:
                 d.rectangle((0, 0, PW, 64), fill=C_BAR)
-                d.text((20, 14), 'Sindoh DP200', font=font(30), fill=C_TXT)
+                d.text((20, 14), 'Sindoh ' + MODEL, font=font(30), fill=C_TXT)
             getattr(self, 'page_' + self.screen)(d, st)
             if self.confirm:
                 self.overlay_confirm(d)
@@ -1702,7 +1721,7 @@ class UI:
 
     def header(self, d, st):
         d.rectangle((0, 0, PW, 64), fill=C_BAR)
-        d.text((20, 14), 'Sindoh DP200', font=font(30), fill=C_TXT)
+        d.text((20, 14), 'Sindoh ' + MODEL, font=font(30), fill=C_TXT)
         state = st['webhooks']['state']
         col = (80, 200, 120) if state == 'ready' else (230, 80, 70)
         txt = state.upper()
