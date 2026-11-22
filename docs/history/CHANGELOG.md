@@ -7,6 +7,16 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X: first nozzle touches under Klipper** (owner at the printer, bed
+  empty, 150 C, wipe, no scrub). `BED_LEVEL SCRUB=0`: back -0.240,
+  front left -0.123, front right -0.177 mm; the three touches at a
+  point agree to 0.003 mm. Stock's own second round an hour earlier had
+  the front left 0.07 and the front right 0.03 mm above the back; ours
+  0.12 and 0.06. `position_endstop` 3.340 puts Z 0 at the back touch
+  (was the stock 3.1). The report now gives wheel clicks: one click
+  (45 degrees) is 0.19 mm at the notch and clockwise seen from above
+  raises the corner (owner, and the stock recording).
+
 - **1X bed leveling built from the stock recording** (config and
   macros; no touch has run yet). `[probe]` on the nozzle contact input
   (`!gpio81`, enable `gpio153` switched by the probe's activate and
