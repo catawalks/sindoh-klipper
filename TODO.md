@@ -274,7 +274,12 @@ stages 1-5 done on the dev printer):
     config** (stage 6). **Next (owner present): homing with the sensors
     (GPIO 99/82/83), then extruder and cartridge motors, then
     heaters.** Open: the stepper engine clock against the timer
-    (step batching is off on the 1X until measured). The DP200 firmware builds from 8ceef800 are
+    (step batching is off on the 1X until measured). Runout (owner
+    11-21): use GPIO 80 as the filament runout sensor; it releases while
+    the filament end is still ahead of the gears, so a normal unload can
+    pull the rest out. The DP200 has no such switch; Sindoh published a
+    printable adapter for it: the owner prints one, then test it and add
+    it to the DP200 config. The DP200 firmware builds from 8ceef800 are
     not yet run on a DP200 (pin arguments widened to 32 bit). The stock 1X keeps
     nozzle 80 °C and bed 50 °C at idle and the microcode goes on heating
     when the engine dies: every stop sequence must switch the heater
