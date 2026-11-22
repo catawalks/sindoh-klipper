@@ -421,7 +421,12 @@ only the feed motor ran. Cause: `feed_until` had not put the
 extruder's own stepper back on its queue after the unload (it has no
 queue name to restore by). Fixed in fork 980bec78 and checked by step
 counts with no filament loaded. The jam check above would have caught
-this within a second. Still to do: rerun `LOAD_FILAMENT`; a stop that
+this within a second. The jam check is written (fork 08eabc46): `[feed_encoder head]` on GPIO 65
+and `[feed_encoder bay]` on GPIO 67, watched by `FEED_UNTIL ENCODER=`
+in every stretch of both routines, each inside the window where the
+filament is known to be on that pick-up (the `head_after`, `head_until`
+and `bay_until` values in the config, all CHECK). It loads on the
+printer; no move has run with it. Still to do: rerun `LOAD_FILAMENT`; a stop that
 does not wait for the serial console (the owner's "stop" took too long
 to act on).
 

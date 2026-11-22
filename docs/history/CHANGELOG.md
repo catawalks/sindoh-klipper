@@ -6,6 +6,12 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: jam check in load and unload** (owner's idea; fork 08eabc46, FORK
+  pin moved): `[feed_encoder]` reads the two filament pick-ups (GPIO 65
+  near the head side of the extruder, 67 after the bay), and
+  `FEED_UNTIL ENCODER=` stops with "Filament not moving" when one
+  stands still for 30 mm. The stretch to the nozzle now runs through
+  `FEED_UNTIL` too. Loads on the printer; not run with a move yet.
 - **1X: the first Klipper load jammed; cause found and fixed** (fork
   980bec78, FORK pin moved). After the unload had borrowed the extruder's
   own stepper, `feed_until` did not put it back on its queue, so in the
