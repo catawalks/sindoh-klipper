@@ -266,6 +266,12 @@ stages 1-5 done on the dev printer):
       a print. The DP200 has no such switch: the owner prints Sindoh's
       adapter, then test it and add it to the DP200 config.
     - First print, then the screen app's 1X leveling page.
+    - One time, on the next stock boot, BEFORE starting Klipper (owner
+      11-22): does Sindoh's camera server only capture once the stock
+      web page is opened? Watch the camera's USB interrupts
+      (`ehci_hcd:usb1` in /proc/interrupts) and the server's CPU, then
+      open the stock page on port 80 and look again. Note the result in
+      the sindoh repo's docs/1x.md.
     - A root-side helper so Mainsail's reboot and shutdown work on the
       1X (also a second way in when the serial console is blocked).
     - Stage 7: install onto `/userdata` (plan in the port plan; every
