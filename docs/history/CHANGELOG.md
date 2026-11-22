@@ -7,6 +7,17 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X stock homing from mid-travel and the stock bed leveling, recorded
+  move by move** (sindoh repo: docs/1x_stock_routines.md and
+  `1x_recordings/`). Y seeks at about 100 mm/s like X, and runs on
+  3.6 mm after its sensor; under Klipper's dead stop 100 was too harsh
+  for the bed (owner), so the 1X config homes Y at 75 (run once, owner
+  watching; X stays at 100). Leveling: a wipe, an 85 s scrub of the
+  nozzle on the bed, then three touches at each of (111.5, 200.2),
+  (228.5, 0.2) and (-7.5, 0.2), the bed rising at 1.2 mm/s until GPIO
+  81 goes low, about 3.3 to 3.5 mm above where Z homing stops. Not yet
+  built into our config.
+
 - **Homing speeds (owner).** DP200: X and Y seek at 100 mm/s instead of
   stock's 208 (Klipper stops dead at the switch where stock ramps down);
   Z back-off 2 mm instead of 5 (CHECK on a DP200). 3DWOX 1: keeps its
