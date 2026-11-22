@@ -273,19 +273,10 @@ stages 1-5 done on the dev printer):
     - Leveling: done 11-22 (`BED_LEVEL`, its screen page, run by touch).
       Left from stock by choice: no re-homing between points, no
       automatic second round.
-    - First print: needs `PRINT_START` / `PRINT_END` for the 1X, and
-      the 1X's stock acceleration (X about 223 mm/s2 in travel moves;
-      print values not read yet) instead of the placeholder 1000.
-    - X numbers against stock's: 262.7 is stock's X maximum (the left
-      wall), the sensor's edge about 20 mm before it. The database's
-      positions (load 256.4 then 243.4, wipe 257.3 ... 231.3) are in
-      another frame, about 6.5 mm higher than ours by the owner's flap
-      readings; the owner confirms a stock load ends with the nozzle on
-      the cleaning flap, as that frame says. Apply the same 6.5 mm to
-      the leveling points (also database numbers) and check them on the
-      machine before use.
-    - A root-side helper so Mainsail's reboot and shutdown work on the
-      1X (also a second way in when the serial console is blocked).
+    - **Owner present:** speed test (`speedtest.py`: X and Y back and
+      forth at 197 mm/s, then checked against the home sensors), then a
+      first print with `PRINT_START` / `PRINT_END` (written 11-22, not
+      run). Bed `max_temp` 100 is a guess: no stock limit found.
     - Stage 7: install onto `/userdata` (plan in the port plan; every
       eMMC write needs the owner's OK), a cold start without the stock
       engine (driver set-up, reference PWM).

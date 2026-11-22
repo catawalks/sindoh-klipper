@@ -7,6 +7,25 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X: stock's speed and temperature limits, and the print routines.**
+  From the ramp tables compiled into the stock program: X/Y up to
+  197.7 mm/s in 8 mm (0.13 s, about 1460 mm/s2 on average), Z up to
+  12.0 mm/s (about 110 mm/s2), extruder 20 to 86.7 mm/s (about
+  1100 mm/s2); database jerk XY 20, Z 0.1, E 5 mm/s. Config:
+  `max_velocity` 197, `max_accel` 1500, Z 12 and 100, extruder-only 86
+  and 1100. NOT TESTED above 100 mm/s under Klipper (a sensor-checked
+  speed test is written, `1x_files/serial/speedtest.py`, not run).
+  Temperatures: the stock tables go to 250 C at the nozzle (260 in jog
+  mode; the microcode cuts out at 270): nozzle `max_temp` 265 stays. No
+  bed limit exists in the database or program text (stock preheats to
+  50 C, print temperatures come from the slicer, the sensor table ends
+  at 125 C): bed `max_temp` 100, marked CHECK.
+  New: `PRINT_START` (bed question, heat, home, purge and wipe at the
+  bin, no mesh), `PRINT_END`, `PAUSE`, `RESUME`, `CANCEL_PRINT`, the
+  idle timeout that keeps a paused print, `[exclude_object]`,
+  `[gcode_arcs]`: the DP200's, with the 1X's dump station. They load
+  and pass the lint; NOT RUN.
+
 - 1X bed level page run by touch (owner): the whole routine from MOVE,
   BED LEVEL, to the result page. Result of that run: front left 0.06 mm
   below the back, front right 0.02 mm above ("level"). The screen app
