@@ -7,6 +7,16 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X heaters at stock's full power, PID tuned** (owner at the
+  printer). The database allows 1000 of 1000 for nozzle and bed, so
+  `max_power` is 1.0 for both (was 0.6, which barely held 220 C);
+  nozzle `max_temp` 265 (stock loads ABS at 250 and cuts out at 270).
+  `PID_CALIBRATE`: nozzle at 210 C Kp 17.415 Ki 1.470 Kd 51.593, bed at
+  60 C Kp 57.420 Ki 4.557 Kd 180.874, saved on the printer and written
+  into `x1/printer.cfg` as the first unit's values. Check: cold to
+  230 C in about 75 s, then 230 +2/-0.3 C at half power with the part
+  fan at 50 %. The bed's `max_temp` is still the cautious 75.
+
 - **1X: first Z homing under the real config** (owner at the printer,
   bed empty): a 10 mm move down first (sensor stayed open), `BED_CLEAR`,
   `G28 Z` at 7.4 mm/s with the 3 mm back-off and 2 mm/s second approach,

@@ -256,9 +256,8 @@ stages 1-5 done on the dev printer):
       not seen a real jam; its window values are estimates.
     - **Owner present:** first homing under the real config (bed empty),
       then the touch screen by hand (calibration is the DP200's).
-    - **Owner present:** nozzle heater: the 60 % power cap barely holds
-      220 C and the screen's PLA preset is 230 C; raise the cap, then
-      `PID_CALIBRATE` both heaters.
+    - Bed `max_temp` is 75 (bring-up value): find stock's limit before
+      printing anything that wants a hotter bed.
     - **Owner present:** leveling with the nozzle-contact probe and
       `[screws_tilt_adjust]` (plan in the port plan; a bed mesh is not
       possible, the nozzle only makes contact at the three notches).
