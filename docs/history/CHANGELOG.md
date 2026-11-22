@@ -7,6 +7,15 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **3DWOX 1 config folder** (owner): `klipper/config/3dwox1/printer.cfg`,
+  Fredrik Gustafsson's per-model file from his klipper-sindoh repository
+  (commit a04b2bfa), unchanged under a provenance header. It includes
+  the DP200's two files and overrides motor current (0.995 from that
+  unit's database), acceleration, Z speeds, his offsets and nozzle PID.
+  Compared the same day: his macro file is our 11-12 version unchanged;
+  his copy of the hardware file differs in a few settings (listed in
+  the header), not taken over. Not tried by us: we have no 3DWOX 1.
+
 - **The macro side of the screen is written down** (docs/touchscreen.md,
   "What a model's macros provide"): the commands a model must define and
   the `M117` step rule, for the next models. The screen now passes the

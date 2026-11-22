@@ -301,6 +301,16 @@ stages 1-5 done on the dev printer):
     installer needs it. Done 11-22: the version tag `sindoh-upc-1` (the
     cores report `sindoh-upc-...` from the next firmware build on) and
     the build menu text.
+45. **3DWOX 1 in our tree** (owner 11-22): `klipper/config/3dwox1/`
+    holds Fredrik Gustafsson's per-model file. Open: go through the
+    changes in his copy of `dp200_printer.cfg` one by one (max_accel
+    3000, second Z homing approach at 0.5 mm/s with a 2 mm back-off,
+    the step pulse note) and take what is right for the DP200 too; his
+    print start without the bed-empty question stays out. Tell him the
+    file is here and that our macros have moved on since his copy
+    (step lines, JOG, screen timeout). His repository has no license
+    file; the config derives from ours, but ask him to add one. The
+    installer does not know the 3DWOX 1 yet.
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
     beeper): USB audio card 0 + amplifier enable GPIO 180, stock plays
     MP3s with mplayer ([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md),
