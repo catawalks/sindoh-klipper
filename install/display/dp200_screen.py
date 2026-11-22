@@ -1773,6 +1773,34 @@ class UI:
         self.footer(d)
         return im
 
+    def lamp_tick(self):
+        """The case lamp goes off when the screen goes black and comes back
+        on when it wakes (owner 2026-11-22, all models). Only a lamp that
+        was on is switched, and it returns to the brightness it had; the
+        screen only goes black while idle, so a print keeps its light."""
+        dim = bool(self.dimmed())
+        if dim == getattr(self, 'lamp_dim', False):
+            return
+        self.lamp_dim = dim
+        now = ((self.st or {}).get('output_pin lamp') or {}).get('value') or 0
+        if dim:
+            self.lamp_saved = now
+            if now <= 0:
+                return
+            script = 'SET_PIN PIN=lamp VALUE=0'
+        else:
+            was, self.lamp_saved = getattr(self, 'lamp_saved', 0), 0
+            if was <= 0 or now > 0 or self.st is None:
+                return
+            script = 'SET_PIN PIN=lamp VALUE=%.2f' % was
+
+        def work():
+            try:
+                post('/printer/gcode/script', {'script': script})
+            except Exception as e:
+                log('lamp with the screen: %s' % e)
+        threading.Thread(target=work, daemon=True).start()
+
     def dimmed(self):
         idle = self.st and self.st['print_stats']['state'] not in ('printing', 'paused') \
             and not self.busy and self.st['extruder']['target'] == 0 \
@@ -3064,6 +3092,7 @@ def main():
         ui.bl_tick()
         ui.console_tick()
         ui.cmds_tick()
+        ui.lamp_tick()
         # Redraw only when something can have changed: new status, touch,
         # STOP being held, the clock minute, a message or busy state, dimming,
         # WiFi state (scan results, connect progress).

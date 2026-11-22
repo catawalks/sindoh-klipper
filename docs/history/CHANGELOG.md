@@ -7,6 +7,12 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **Screen app, all models: the case lamp follows the screen timeout**
+  (owner). When the screen goes black (idle, no touch for the TIMEOUT
+  setting, or SCREEN OFF) a lamp that is on is switched off; it comes
+  back at the same brightness when the screen wakes. Running on the 1X;
+  not yet watched through a timeout.
+
 - **1X config in the DP200's layout:** `klipper/config/x1/printer.cfg`
   (the owner's file: includes, Z endstop height, heater control),
   `x1_printer.cfg` (hardware) and `x1_macros.cfg` (macros) replace

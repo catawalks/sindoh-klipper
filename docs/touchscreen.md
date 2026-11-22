@@ -49,7 +49,7 @@ the choice was made (KlipperScreen and the other options) is in
 | Dryer | Use the heated bed as a filament dryer: START, STOP DRYING. |
 | System | KLIPPER (restart), NETWORK, DISPLAY, INFO, UPDATE, POWER. |
 | Network | Addresses of both ports, Wi-Fi scan and saved networks (PREFER, FORGET), an on-screen keyboard for the password, DHCP or STATIC with a number pad. |
-| Display | TIMEOUT (1 min to never) and CONSOLE (the kernel log, full screen). |
+| Display | TIMEOUT (1 min to never) and CONSOLE (the kernel log, full screen). When the screen goes black the case lamp goes off with it, and comes back at its old brightness when the screen wakes (only while idle: a print keeps its light). |
 | Info | Build and versions, the stock firmware version, storage. |
 | Update | Mainsail through Moonraker's updater: CHECK NOW, UPDATE. |
 | Power | SHUT DOWN, REBOOT, KLIPPER, SCREEN OFF. On our kernel, with a Sindoh update stick plugged in, TO STOCK reverts the printer to Sindoh's firmware after two confirmations. |
