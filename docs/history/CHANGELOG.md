@@ -6,6 +6,12 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X load: feed ahead while heating, and park over the dump station**
+  (owner 11-21; fork 4f383aaa `FEED_UNTIL COLD=1`, FORK pin moved). The
+  load now starts the heater, feeds to 150 mm short of the nozzle, waits
+  for temperature, then feeds the rest and purges. X goes to the stock
+  load position (256.4; home is 262.7, under the cleaning flap) before
+  and to 243.4 after. Loads on the printer; not run yet.
 - **1X: first full Klipper `LOAD_FILAMENT`** (PLA, 220 °C, config 5g, with
   the jam check on): feed alone to the entry sensor, both motors 857 mm,
   purge and retract, no errors. Pick-ups counted 1436 (bay) and 860
