@@ -7,6 +7,16 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X dump station measured by the owner with the JOG page** (our X
+  numbers): bin center 247.5; the cleaning flap (right) at 238.5,
+  released at 251 moving left and at 226.5 moving right; the tall left
+  flap at 254.5 is not a cleaning flap: the nozzle never passes it and
+  it lies bent over the nozzle tip when the head rests at the left end.
+  Stock's load position 256.4 is under that flap. Macros now park at
+  247.5 for load, unload and purge and wipe between 251 and 226 (not
+  run). MOVE page order (owner): HOME, JOG / LOWER BED, MOTORS OFF /
+  CLEAN, EMPTY BIN / BED LEVEL, CALIBRATE. The JOG page works by touch.
+
 - **Screen app: MOVE -> JOG page (owner), all models.** Step sizes 0.1,
   1, 10, 50 mm and minus/plus buttons for X, Y and Z, with the live
   position. The moving is a config macro, `JOG AXIS= D=` (both macro

@@ -2274,23 +2274,23 @@ class UI:
         no = 'not while paused'
         items = [
             ('HOME', ('screen', 'homing'), C_BTN, 30, 'all / X / Y / Z'),
+            ('JOG', ('screen', 'jog'), C_BTN, 30, 'X / Y / Z'),
             ('LOWER BED', lower, C_BTN, 30, None if lower or not paused else
              ('already low' if homed == 'xyz' else no)),
+            ('MOTORS OFF', ('gcode', 'M84', 'Motors off')),
             ('CLEAN', ('confirm', 'Heat, purge and wipe the nozzle?',
                        ('gcode', 'CLEAN_NOZZLE', 'Clean nozzle')), C_BTN, 30, 'nozzle'),
-            ('MOTORS OFF', ('gcode', 'M84', 'Motors off')),
             ('EMPTY BIN', ('confirm', 'Lower the bed %d mm and move the head to the left, to take '
                                       'out the purge bin?' % BIN_DROP, ('gcode', 'EMPTY_BIN', 'Empty bin', 'bin')),
              C_FULL if n >= BIN_THRESHOLD else C_BTN, 28, '%d / %d purges' % (n, BIN_THRESHOLD)),
-            ('CALIBRATE', ('screen', 'calibrate'), C_BTN, 28, 'input shaping'),
             ('BED LEVEL', ('screen', 'bedlevel'), C_BTN, 28, 'probe + screws'),
-            ('JOG', ('screen', 'jog'), C_BTN, 30, 'X / Y / Z'),
+            ('CALIBRATE', ('screen', 'calibrate'), C_BTN, 28, 'input shaping'),
         ]
         if paused:
-            for k in (0, 3, 5, 6, 7):                  # HOME, MOTORS OFF, CALIBRATE, BED LEVEL, JOG
+            for k in (0, 1, 3, 6, 7):                  # HOME, JOG, MOTORS OFF, BED LEVEL, CALIBRATE
                 items[k] = (items[k][0], None, C_BAR, 28, no, C_DIM)
             if not lower:
-                items[1] = items[1][:1] + (None, C_BAR) + items[1][3:] + (C_DIM,)
+                items[2] = items[2][:1] + (None, C_BAR) + items[2][3:] + (C_DIM,)
             if homed != 'xyz':                          # anything else would home first
                 items = [(it[0], None, C_BAR, 28, no, C_DIM) for it in items]
         self.grid(d, items, top=240, rows_h=90)

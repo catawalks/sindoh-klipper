@@ -43,7 +43,7 @@ the choice was made (KlipperScreen and the other options) is in
 | Bin | After the purge bin is emptied: DONE resets the count. |
 | Macros | Buttons for the owner's own macros; EDIT picks which macros get a button. Each asks before it runs. |
 | Preheat | Material presets and COOL DOWN. |
-| Move | Jog, HOME, LOWER BED, CLEAN (nozzle), MOTORS OFF, EMPTY BIN, CALIBRATE, BED LEVEL. |
+| Move | HOME, JOG (X, Y, Z by 0.1 / 1 / 10 / 50 mm; the config macro `JOG`), LOWER BED, MOTORS OFF, CLEAN (nozzle), EMPTY BIN, BED LEVEL, CALIBRATE. |
 | Bed level | PROBE the bed and show how far to turn each screw, in eighths of a turn. |
 | Calibrate | Z HEIGHT and PROBE OFFSET (the paper test, with SAVE / DISCARD), PID TUNE (nozzle or bed), INPUT SHAPING (with a USB accelerometer: [input_shaping.md](input_shaping.md)), SAVE Z OFFSET. |
 | Dryer | Use the heated bed as a filament dryer: START, STOP DRYING. |
