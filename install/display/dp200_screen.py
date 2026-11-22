@@ -50,7 +50,7 @@ MODEL = '1X' if IS_1X else 'DP200'
 # one yet. A button is greyed out ("not set up yet") when the G-code it
 # runs, or the page it opens, needs a command this printer's Klipper does
 # not list (UI.unavailable). Checked on the 1X only so far.
-SCREEN_NEEDS = {'jog': ('JOG',), 'bedlevel': ('BED_MESH_CALIBRATE',), 'dryer': ('FILAMENT_DRY',),
+SCREEN_NEEDS = {'jog': ('JOG',), 'bedlevel': ('BED_MESH_CALIBRATE|BED_LEVEL',), 'dryer': ('FILAMENT_DRY',),
                 'shaper': ('SHAPER_CALIBRATE',)}
 CAL_NEEDS = {'zend': ('Z_ENDSTOP_CALIBRATE',), 'probe': ('LV_PROBE_CALIBRATE',)}
 # 1X bring-up: it runs beside Sindoh's own system, which still owns the
@@ -570,6 +570,9 @@ class UI:
         # bed level page: mode start/probing/result, live points {(col, row): z}
         self.bl = {'rev': 0, 'mode': 'start', 'pts': {}, 'mesh': None, 'xs': None, 'ys': None,
                    't0': 0.0, 'checked': 0.0, 'busy': False}
+        # bed level by touches (models without a mesh probe, macro BED_LEVEL):
+        # mode start/running/result; res = the macro _LEVEL's variables
+        self.lv = {'rev': 0, 'mode': 'start', 'res': None, 't0': 0.0}
         # console page: the kernel log, refreshed while shown
         self.con = {'rev': 0, 'checked': 0.0, 'busy': False, 'lines': []}
         # USB sticks seen (sdX names), and which of them hold a Sindoh update
@@ -614,7 +617,9 @@ class UI:
         if self.cmds is None:
             return False
         if action[0] == 'screen':
-            return any(c not in self.cmds for c in SCREEN_NEEDS.get(action[1], ()))
+            # "A|B": either command will do (a model's own version of a page)
+            return any(all(alt not in self.cmds for alt in c.split('|'))
+                       for c in SCREEN_NEEDS.get(action[1], ()))
         if action[0] == 'cal_start':
             return any(c not in self.cmds for c in CAL_NEEDS.get(action[1], ()))
         if action[0] != 'gcode':
@@ -768,6 +773,8 @@ class UI:
             self.dry['hours'] = action[1]
         elif kind == 'bl_probe':
             self.bl_probe(action[1])
+        elif kind == 'lv_run':
+            self.lv_run(action[1])
         elif kind == 'adxl':
             self._bg('Sensor ' + ('on' if action[1] else 'off'), lambda: self.adxl_switch(action[1]))
         elif kind == 'power':
@@ -1032,6 +1039,29 @@ class UI:
         threading.Thread(target=work, daemon=True).start()
 
     # ---- bed level ---------------------------------------------------------
+    def lv_run(self, scrub):
+        """Bed level by touches: run the config's BED_LEVEL, then read its
+        result from the macro _LEVEL (back, fl, fr, click, ok, cw_raises).
+        The macro says what it is doing with M117; the page shows that."""
+        lv = self.lv
+        if self.busy:
+            self.flash('Busy: ' + self.busy)
+            return
+        lv.update(mode='running', res=None, t0=time.time())
+        lv['rev'] += 1
+        script = 'BED_CLEAR\nBED_LEVEL SCRUB=%d' % (1 if scrub else 0)
+
+        def fn():
+            try:
+                post('/printer/gcode/script', {'script': script})
+                q = get('/printer/objects/query?gcode_macro%20_LEVEL')
+                lv.update(mode='result', res=q['status']['gcode_macro _LEVEL'])
+            except Exception as e:
+                lv['mode'] = 'start'
+                self.flash('Bed level failed: %s' % fail_text(e, 300), 12)
+            lv['rev'] += 1
+        self._bg('Bed level', fn)
+
     def bl_probe(self, heat):
         """Probe a 4x4 mesh (profile 'level'); the page fills in point by point."""
         bl = self.bl
@@ -2341,7 +2371,82 @@ class UI:
         d.text((x0 + w + 28 - d.textlength('BACK', font=font(16)), top - 22), 'BACK', font=font(16), fill=C_DIM)
         return y1
 
+    def lv_advice(self, res, key):
+        """(text, colour) for a front corner against the back point."""
+        v = res[key] - res['back']
+        click, ok = res.get('click') or 0.19, res.get('ok', 0.05)
+        n = int(round(abs(v) / click))
+        if abs(v) <= ok or n == 0:
+            return 'OK', C_ON
+        # the bed rises to the nozzle: a higher touch = that corner stands higher
+        cw = (v < 0) == bool(res.get('cw_raises', 1))
+        return '%d click%s %s' % (n, '' if n == 1 else 's',
+                                  'clockwise' if cw else 'counter-clockwise'), C_WARN
+
+    def lv_view(self, d, top, res):
+        """The bed from above, door at the bottom: the three touch points."""
+        x0, x1, y0, y1 = 70, PW - 70, top, top + 230
+        d.rounded_rectangle((x0, y0, x1, y1), radius=10, outline=C_DIM, width=2)
+        pts = (('back', (x0 + x1) // 2, y0 + 26, 'Back'), ('fl', x0 + 34, y1 - 26, 'Left'),
+               ('fr', x1 - 34, y1 - 26, 'Right'))
+        for key, x, y, name in pts:
+            col = C_DIM
+            if res:
+                col = C_ON if key == 'back' else self.lv_advice(res, key)[1]
+            d.ellipse((x - 12, y - 12, x + 12, y + 12), fill=col if res else None, outline=col, width=2)
+            tx = x + 22 if key != 'fr' else x - 22 - d.textlength(name, font=font(18))
+            d.text((tx, y - 30 if key != 'back' else y + 16), name, font=font(18), fill=C_DIM)
+            if res and key != 'back':
+                t = '%+.2f' % (res[key] - res['back'])
+                tx = x + 22 if key == 'fl' else x - 22 - d.textlength(t, font=font(22))
+                d.text((tx, y - 8), t, font=font(22), fill=C_TXT)
+        d.text(((x0 + x1) // 2 - 24, y1 + 6), 'door', font=font(16), fill=C_DIM)
+        return y1 + 30
+
+    def page_level3(self, d, st):
+        """Bed level on a model that touches the bed with its nozzle at
+        three points (macro BED_LEVEL) instead of probing a mesh."""
+        lv = self.lv
+        d.text((20, 156), 'Bed level', font=font(28), fill=C_TXT)
+        q = ('Is the bed EMPTY? It homes, heats the nozzle to 150 C and touches the bed '
+             'at three points (about 3 min).')
+        if lv['mode'] == 'running':
+            msg = (st.get('display_status') or {}).get('message') or 'Starting...'
+            e = st['extruder']
+            for i, l in enumerate(wrap(d, msg, font(26), PW - 40)[:2]):
+                d.text((20, 200 + i * 34), l, font=font(26), fill=C_WARN)
+            d.text((20, 274), 'Nozzle %d / %d °C' % (round(e['temperature']), e['target']),
+                   font=font(20), fill=C_TXT)
+            self.lv_view(d, 320, None)
+            d.text((20, 600), 'STOP (hold) stops it at once.', font=font(20), fill=C_DIM)
+            return
+        if lv['mode'] == 'result' and lv['res']:
+            res = lv['res']
+            level = all(self.lv_advice(res, k)[1] == C_ON for k in ('fl', 'fr'))
+            d.text((20, 198), 'Level' if level else 'Turn the wheels, seen from above:',
+                   font=font(20), fill=C_ON if level else C_DIM)
+            y = self.lv_view(d, 236, res) + 6
+            for key, name in (('fl', 'Left'), ('fr', 'Right')):
+                msg, col = self.lv_advice(res, key)
+                d.rounded_rectangle((20, y, PW - 20, y + 38), radius=10, fill=C_BAR)
+                d.ellipse((32, y + 9, 52, y + 29), fill=col)
+                d.text((64, y + 7), '%s: %s' % (name, msg), font=font(20), fill=C_TXT)
+                y += 44
+            self.button(d, (30, 632, 230, 708), 'MEASURE', ('confirm', q, ('lv_run', False)), C_ON, 28, 'again')
+            self.button(d, (250, 632, 450, 708), 'MEASURE', ('confirm', q, ('lv_run', True)), C_BTN, 28, 'scrub first')
+            return
+        for i, l in enumerate(['Touches the bed with the nozzle at its',
+                               'three notches and says how many clicks',
+                               'to turn the two front wheels.', '',
+                               'Scrub first if the nozzle is not clean.']):
+            d.text((20, 204 + i * 28), l, font=font(20), fill=C_DIM)
+        self.lv_view(d, 360, None)
+        self.button(d, (30, 632, 230, 708), 'MEASURE', ('confirm', q, ('lv_run', True)), C_ON, 28, 'scrub first')
+        self.button(d, (250, 632, 450, 708), 'MEASURE', ('confirm', q, ('lv_run', False)), C_BTN, 28, 'no scrub')
+
     def page_bedlevel(self, d, st):
+        if self.cmds and 'BED_LEVEL' in self.cmds and 'BED_MESH_CALIBRATE' not in self.cmds:
+            return self.page_level3(d, st)
         bl = self.bl
         d.text((20, 156), 'Bed level', font=font(28), fill=C_TXT)
         q = 'Is the bed EMPTY? Homes if needed, then probes 16 points (~3 min).'
@@ -2958,7 +3063,7 @@ def paused_refusal(act, st):
     or None. Custom macros: unknown, so never while paused."""
     if job_state(st) not in ('paused', 'starting'):
         return None
-    if act[0] in ('cal_start', 'bl_probe', 'pid_run'):
+    if act[0] in ('cal_start', 'bl_probe', 'lv_run', 'pid_run'):
         return 'Not while a print is paused'
     if act[0] != 'gcode':
         return None
@@ -3161,7 +3266,9 @@ def main():
         key = (time.strftime('%H:%M'), ui.busy, ui.msg and time.time() < ui.msg[1],
                bool(ui.dimmed()), ui.screen, ui.confirm is not None, view_key(ui), ui.err,
                ui.wf['rev'], ui.net['rev'], ui.shp['rev'], ui.bl['rev'], ui.con['rev'],
-               ui.cmds is None, ui.jog_key())
+               ui.cmds is None, ui.jog_key(), ui.lv['rev'],
+               ui.screen == 'bedlevel' and ui.lv['mode'] == 'running' and ui.st and
+               ((ui.st.get('display_status') or {}).get('message'), round(ui.st['extruder']['temperature'])))
         if events or ui.press or ui.key_down is not None or key != last_key:
             panel.show(ui.render())
             last_key = key

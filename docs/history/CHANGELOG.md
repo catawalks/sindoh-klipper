@@ -7,6 +7,16 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **Screen app: bed level page for the 1X** (MOVE, BED LEVEL; no longer
+  greyed out). Start: MEASURE with or without the scrub, after the
+  bed-empty question. Running: the macro's step line and the nozzle
+  temperature. Result: the bed from above with the two front points'
+  differences, the advice in clicks and direction per wheel, MEASURE
+  again. The app takes the result and the click size from the macro
+  `_LEVEL`, nothing model-specific is coded. Checked as rendered
+  pictures on the printer; not yet run by touch. A page can now be
+  served by either of two commands (`BED_MESH_CALIBRATE|BED_LEVEL`).
+
 - 1X leveling closed the loop: the owner turned the front left wheel
   one click counter-clockwise as advised, and a second `BED_LEVEL
   SCRUB=0` read front left -0.04 and front right +0.07 mm against the

@@ -73,7 +73,7 @@ is greyed out and says "not set up yet". For a new model, write these:
 | `EMPTY_BIN`, `BIN_EMPTIED` | MOVE, EMPTY BIN | Purges are counted in `save_variables` `bin_count`. |
 | `JOG AXIS=<X/Y/Z> D=<mm>` | MOVE, JOG | Refuses an axis that is not homed, stops at the limits. |
 | `G28`, `BED_CLEAR` | MOVE, HOME | Z homing needs `BED_CLEAR` first. |
-| `BED_LEVEL` | (1X: no page yet) | 1X: three nozzle touches, report in wheel clicks. The DP200's BED LEVEL page uses `BED_MESH_CALIBRATE` and its own screw commands. |
+| `BED_LEVEL SCRUB=<0/1>` | MOVE, BED LEVEL, on a model without a mesh probe | Three touches with the nozzle. The page shows the macro's `M117` line while it runs, then reads the result from the macro `_LEVEL`: `back`, `fl`, `fr` (touch heights), `click` (mm per wheel click), `cw_raises`, `ok`. A model that defines `BED_MESH_CALIBRATE` gets the DP200's mesh-and-screws page instead. |
 | `SCREEN_TIMEOUT`, `SCREEN_WAKE` | the idle timeout | `variable_display`, `variable_lamp` say what goes dark. |
 | `LAMP_TOGGLE` | LAMP | |
 

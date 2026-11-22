@@ -270,9 +270,9 @@ stages 1-5 done on the dev printer):
     - Cold start without the stock program: prepared (`x1_tmc.py
       setup`, motor current in the config; port plan, stage 7 item 4),
       not tried. Needs a boot where Sindoh's engine never starts.
-    - Leveling works (`BED_LEVEL`, 11-22). Open: a 1X page for it in
-      the screen app (the DP200's bed level page as the template: three
-      points and wheel clicks instead of a mesh and screw turns).
+    - Leveling works (`BED_LEVEL`) and has its screen page (11-22);
+      the page has not been run by touch yet. The screen clock on the
+      1X shows UTC (no time zone in the card's Debian).
     - First print: needs `PRINT_START` / `PRINT_END` for the 1X, and
       the 1X's stock acceleration (X about 223 mm/s2 in travel moves;
       print values not read yet) instead of the placeholder 1000.
