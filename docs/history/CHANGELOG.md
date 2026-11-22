@@ -6,6 +6,11 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: first full Klipper `LOAD_FILAMENT`** (PLA, 220 °C, config 5g, with
+  the jam check on): feed alone to the entry sensor, both motors 857 mm,
+  purge and retract, no errors. Pick-ups counted 1436 (bay) and 860
+  (head) changes; head started counting right after the entry sensor.
+  Not yet checked: what came out of the nozzle (owner), a real jam.
 - **1X: jam check in load and unload** (owner's idea; fork 08eabc46, FORK
   pin moved): `[feed_encoder]` reads the two filament pick-ups (GPIO 65
   near the head side of the extruder, 67 after the bay), and
