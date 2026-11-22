@@ -7,6 +7,27 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **Idle timeout through config macros (owner; replaces the lamp code
+  in the screen app of earlier today):** the screen program runs
+  `SCREEN_TIMEOUT` when its timeout ends and `SCREEN_WAKE` when it
+  wakes; both are in `dp200_macros.cfg` and `x1_macros.cfg`.
+  `variable_lamp` and `variable_display` choose what goes dark; the
+  program reads `display` to know whether to black the screen. Macros
+  tried on the 1X by hand (lamp off and back); the app's own timeout
+  path not watched yet. SCREEN OFF is off the DISPLAY page again.
+- **1X home sensors measured (owner at the printer):** X releases
+  19.3 mm from the left end, Y 5.8 mm from the back end. So the X
+  sensor's edge is stock's 243.4 (its "after the purge" position) and
+  262.7 is the left end; Y's edge is stock's 5.3. `position_endstop` is
+  now 243.4 / 5.3, and `_SINDOH_HOME_AXIS` moves an axis off its sensor
+  (25 / 11 mm) before homing. The X positions used on 11-21 under
+  `x1_stage5g.cfg` were 19.3 mm further right than named (its "park
+  over the dump station" was not over it).
+- Macro names: `_X1_HOME_AXIS`, `_X1_PARK` and `_X1_AFTER_LOAD` could not
+  be called (Klipper cuts a command name at a digit: "Malformed
+  command"); renamed `_SINDOH_*`. `tools/cfglint.py` checks this; it now
+  passes on all config files (run with the card's Klipper Python).
+
 - 1X homing, first tries with the owner: X and Y failed with "still
   triggered after retract". The home sensors stay on from their edge to
   the end of travel (X: the edge is before the dump station). Now, as

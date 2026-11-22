@@ -1773,41 +1773,50 @@ class UI:
         self.footer(d)
         return im
 
-    def lamp_tick(self):
-        """The case lamp goes off when the screen goes black and comes back
-        on when it wakes (owner 2026-11-22, all models). Only a lamp that
-        was on is switched, and it returns to the brightness it had; the
-        screen only goes black while idle, so a print keeps its light."""
-        dim = bool(self.dimmed())
-        if dim == getattr(self, 'lamp_dim', False):
+    def sleep_tick(self):
+        """The idle timeout (SYSTEM -> DISPLAY -> TIMEOUT) is acted on by two
+        macros of the printer's config, so what it does is the config's
+        business, not this program's (owner 2026-11-22): SCREEN_TIMEOUT
+        runs when the timeout ends, SCREEN_WAKE at the next touch (or when
+        a print or heating starts). SCREEN_TIMEOUT's variable "display"
+        says whether the screen goes black too. Without the macros the
+        screen just goes black, as before."""
+        now = time.time()
+        out = bool(self.timed_out())
+        ready = self.st is not None and self.st['webhooks']['state'] == 'ready'
+        if ready and not out and now - getattr(self, 'sleep_read_at', 0) > 60:
+            self.sleep_read_at = now
+
+            def read():
+                try:
+                    r = get('/printer/objects/query?gcode_macro%20SCREEN_TIMEOUT')
+                    v = r['status']['gcode_macro SCREEN_TIMEOUT'].get('display', 1)
+                    self.sleep_display = bool(int(v))
+                except Exception:
+                    self.sleep_display = True      # no such macro: screen only
+            threading.Thread(target=read, daemon=True).start()
+        if out == getattr(self, 'sleep_out', False) or not ready:
             return
-        self.lamp_dim = dim
-        now = ((self.st or {}).get('output_pin lamp') or {}).get('value') or 0
-        if dim:
-            self.lamp_saved = now
-            if now <= 0:
-                return
-            script = 'SET_PIN PIN=lamp VALUE=0'
-        else:
-            was, self.lamp_saved = getattr(self, 'lamp_saved', 0), 0
-            if was <= 0 or now > 0 or self.st is None:
-                return
-            script = 'SET_PIN PIN=lamp VALUE=%.2f' % was
+        self.sleep_out = out
+        script = 'SCREEN_TIMEOUT' if out else 'SCREEN_WAKE'
 
         def work():
             try:
                 post('/printer/gcode/script', {'script': script})
             except Exception as e:
-                log('lamp with the screen: %s' % e)
+                log('%s: %s' % (script, e))
         threading.Thread(target=work, daemon=True).start()
 
-    def dimmed(self):
-        idle = self.st and self.st['print_stats']['state'] not in ('printing', 'paused') \
-            and not self.busy and self.st['extruder']['target'] == 0 \
-            and self.st['heater_bed']['target'] == 0
+    def timed_out(self):
+        idle = self.st and self.st['print_stats']['state'] not in ('printing', 'paused')             and not self.busy and self.st['extruder']['target'] == 0             and self.st['heater_bed']['target'] == 0
         t = self.settings.get('timeout', DIM_AFTER)
         # the console page stays up until it is tapped
         return idle and t and time.time() - self.last_touch > t and self.screen != 'console'
+
+    def dimmed(self):
+        """Screen black: timed out, unless the config's SCREEN_TIMEOUT macro
+        says the display stays on (variable_display: 0)."""
+        return self.timed_out() and getattr(self, 'sleep_display', True)
 
     def header(self, d, st):
         d.rectangle((0, 0, PW, 64), fill=C_BAR)
@@ -2619,12 +2628,11 @@ class UI:
     def page_display(self, d, st):
         t = self.settings.get('timeout', DIM_AFTER)
         d.text((20, 160), 'Display', font=font(28), fill=C_TXT)
-        d.text((20, 204), 'Turns black when idle (no print, heaters off)', font=font(18), fill=C_DIM)
-        d.text((20, 230), 'and wakes on the first tap.', font=font(18), fill=C_DIM)
+        d.text((20, 204), 'When idle (no print, heaters off): screen and', font=font(18), fill=C_DIM)
+        d.text((20, 230), 'lamp go off; the first tap wakes them.', font=font(18), fill=C_DIM)
         self.grid(d, [
             ('TIMEOUT', ('screen', 'timeout'), C_BTN, 28, fmt_timeout(t)),
             ('CONSOLE', ('screen', 'console'), C_BTN, 28, 'tap to close'),
-            ('SCREEN OFF', ('screen_off',), C_BTN, 26, 'tap to wake'),
         ], top=280)
 
     def page_console(self, d):
@@ -3093,7 +3101,7 @@ def main():
         ui.bl_tick()
         ui.console_tick()
         ui.cmds_tick()
-        ui.lamp_tick()
+        ui.sleep_tick()
         # Redraw only when something can have changed: new status, touch,
         # STOP being held, the clock minute, a message or busy state, dimming,
         # WiFi state (scan results, connect progress).

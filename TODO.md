@@ -349,8 +349,11 @@ stages 1-5 done on the dev printer):
       drivers relate to the UPC, and heater/thermistor wiring. A serial
       console on its `ttyS0` would help.
 
-44. **Screen app design (owner 11-22, for later):** the case lamp going
-    off with the screen timeout could be a setting on the DISPLAY page;
-    and behavior like this could come from macros the app reads or calls
-    (a screen-sleep / screen-wake macro per model) instead of being
-    coded into the app. Decide when the app is next reworked.
+44. **Screen app: buttons act through config macros** (owner 11-22: the
+    app should not carry per-model code per button; the macros do what
+    the button means, and a missing macro shows "not set up yet"). Done
+    this way: the idle timeout (`SCREEN_TIMEOUT` / `SCREEN_WAKE`).
+    Still coded in the app: the filament presets and temperatures, the
+    1X filament page's sensor names, the cool-down command list, and
+    which pages are off on the 1X. Move them when those pages are next
+    touched.
