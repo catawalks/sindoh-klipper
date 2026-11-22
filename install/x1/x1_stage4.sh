@@ -3,6 +3,9 @@
 # LOOK ONLY (klipper/config/x1/x1_stage4.cfg defines no output).
 # Run on the printer's own Linux as root, from the SD card:
 #   sh /tmp/sd/stage/x1_stage4.sh start [CONFIG]|status|stop
+# With X1_PC=<the PC's address> in the environment, "start" also keeps a
+# route to it so the PC can send the emergency stop:
+#   curl -m 3 http://PRINTER:7126/
 # CONFIG is a file next to this script (default x1_stage4.cfg, look only).
 # "start" stops Sindoh's motion program (x1_stop.sh); only a reboot
 # brings the stock firmware back. Nothing is written to the eMMC.
@@ -41,8 +44,8 @@ start)
     CFG=${2:-x1_stage4.cfg}
     [ -f $ST/$CFG ] || { echo "no $ST/$CFG"; exit 1; }
     cp $ST/$CFG $ROOT$K/printer_data/config/printer.cfg
-    cp $ST/x1_query.py $ST/x1_gcode.py $ROOT$K/
-    inroot chown -R klipper:klipper $K/printer_data $K/x1_query.py $K/x1_gcode.py
+    cp $ST/x1_query.py $ST/x1_gcode.py $ST/x1_estopd.py $ROOT$K/
+    inroot chown -R klipper:klipper $K/printer_data $K/x1_query.py $K/x1_gcode.py $K/x1_estopd.py
     $U --force --dtcm 0xf9880000 load $ST/fw/klipper_x1_io.bin $ST/fw/klipper_x1_fm.bin || exit 1
     rm -f $ROOT/tmp/klipper_upc_fm $ROOT/tmp/klipper_upc_io
     inroot /usr/local/bin/upctool --force --dtcm 0xf9880000 bridge \
@@ -51,6 +54,15 @@ start)
     inroot su -s /bin/sh klipper -c "cd $K && exec $K/klippy-env/bin/python $K/klipper/klippy/klippy.py \
         $K/printer_data/config/printer.cfg -l $K/printer_data/logs/klippy.log \
         -a $K/printer_data/comms/klippy.sock" > $ROOT/tmp/klippy.out 2>&1 &
+    # Emergency stop over the network: any connection to port 7126 shuts
+    # Klipper down (motors stop, heaters off). X1_PC is the dev PC; the
+    # printer has two ports on one network, so answers to it are pinned
+    # to the wired one while Klipper runs.
+    if [ -n "$X1_PC" ]; then
+        ETH=$(ip -4 addr show eth0 | awk '/inet /{sub("/.*","",$2); print $2}')
+        [ -n "$ETH" ] && ip route replace $X1_PC/32 dev eth0 src $ETH
+    fi
+    inroot su -s /bin/sh klipper -c "exec $K/klippy-env/bin/python $K/x1_estopd.py         $K/printer_data/comms/klippy.sock 7126" > $ROOT/tmp/estopd.log 2>&1 &
     echo "x1_stage4: started (give Klipper about 20 s, then: $0 status)"
     ;;
 status)
@@ -58,7 +70,8 @@ status)
     inroot su -s /bin/sh klipper -c "$K/klippy-env/bin/python $K/x1_query.py $K/printer_data/comms/klippy.sock"
     ;;
 stop)
-    for p in klippy.py "upctool --force --dtcm 0xf9880000 bridge"; do
+    [ -n "$X1_PC" ] && ip route del $X1_PC/32 2>/dev/null
+    for p in klippy.py x1_estopd.py "upctool --force --dtcm 0xf9880000 bridge"; do
         pid=$(ps | grep "$p" | grep -v grep | awk '{print $1}'); [ -n "$pid" ] && kill $pid
     done
     sleep 1

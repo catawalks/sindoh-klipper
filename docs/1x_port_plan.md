@@ -426,9 +426,13 @@ and `[feed_encoder bay]` on GPIO 67, watched by `FEED_UNTIL ENCODER=`
 in every stretch of both routines, each inside the window where the
 filament is known to be on that pick-up (the `head_after`, `head_until`
 and `bay_until` values in the config, all CHECK). It loads on the
-printer; no move has run with it. Still to do: rerun `LOAD_FILAMENT`; a stop that
-does not wait for the serial console (the owner's "stop" took too long
-to act on).
+printer; no move has run with it. Still to do: rerun `LOAD_FILAMENT`; the first moves with the jam check.
+
+A stop that does not need the serial console now exists:
+`tools/x1_estopd.py`, started by `x1_stage4.sh start` (with `X1_PC` set
+to the PC's address). Any connection to port 7126 sends Klipper an
+emergency stop; from the PC it took 0.18 s (tested with the printer
+idle).
 
 ## Open questions
 
