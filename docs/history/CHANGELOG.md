@@ -7,6 +7,13 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- The DP200's LOAD and UNLOAD announce their steps with `M117` too
+  (homing, moving to the bin, heating, feeding, purging, wiping), so the
+  screen's running page shows the real step there as well. The 3DWOX 1
+  port (the klipper-sindoh repository, see the sindoh repo's 3dwox1.md)
+  includes this same `dp200_macros.cfg`, so it gets them when that copy
+  is updated. Lint passes; not run on a DP200.
+
 - **Load and unload say what they are doing (owner):** the 1X macros
   announce each step with `M117` ("Feeding on while the nozzle heats",
   "Waiting for the nozzle to reach 220 C", "Purging into the bin", ...),
