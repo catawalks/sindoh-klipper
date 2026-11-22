@@ -7,6 +7,11 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- 1X scrub (owner): the sheet covers the places where stock scrubs, so
+  stock really presses the sheet about 1.7 mm past the nozzle tip, on
+  the bed's springs. `NOZZLE_SCRUB` uses `scrub_depth` 1.3 mm past the
+  print surface instead, a little less by the owner's choice.
+
 - **1X Z zero by paper test** (owner, JOG page, bed center, 150 C): the
   paper dragged at Z 1.1 with `position_endstop` 3.1, so the endstop is
   2.100 (paper taken as 0.1 mm). By that the notch touches lie about
