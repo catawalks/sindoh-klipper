@@ -300,6 +300,11 @@ stages 1-5 done on the dev printer):
     `x1_printer_draft.cfg` (11-21, not run, not parsed by Klipper yet); they
     use a new fork module, `feed_until` (13f24017), which stops the feed
     on a sensor as homing does. Owner 11-21: no feeding in pieces.
+    Owner 11-21: watch the filament encoder during load and unload and
+    stop with "filament not moving, possible jam in the print head" when
+    it stands still. From the stock recording: GPIO 65 pulses only while
+    filament runs at the extruder, GPIO 67 also while the feed motor
+    runs alone (two pick-ups, to be confirmed).
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
     beeper): USB audio card 0 + amplifier enable GPIO 180, stock plays
     MP3s with mplayer ([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md),
