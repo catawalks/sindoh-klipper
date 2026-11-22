@@ -45,15 +45,19 @@ def _read(path, default=''):
 BOARD = _read('/sys/kernel/board_name')
 IS_1X = BOARD.startswith(('1X', '2X'))
 MODEL = '1X' if IS_1X else 'DP200'
-# Pages and actions that exist only for the DP200's hardware (its probe
-# pin, purge bin, cartridge latch, accelerometer set-up). On another model
-# their buttons are greyed out, and so is every button whose G-code uses a
-# command this printer's Klipper does not have (UI.unavailable).
-# (network, power: the 1X bring-up runs beside Sindoh's own system, which
-# owns the network set-up and the power button)
-DP200_ONLY_SCREENS = ('bedlevel', 'dryer', 'shaper', 'papertest', 'network', 'power')
-WEB_PORT = ':8081' if IS_1X else ''   # 1X bring-up: Sindoh's web server keeps port 80
-DP200_ONLY_KINDS = ('cal_start', 'adxl', 'upd_open')
+# One app for every model (owner 11-21/22): the functions are the same on
+# each printer, but a model's Klipper config may not have the macro for
+# one yet. A button is greyed out ("not set up yet") when the G-code it
+# runs, or the page it opens, needs a command this printer's Klipper does
+# not list (UI.unavailable). Checked on the 1X only so far.
+SCREEN_NEEDS = {'bedlevel': ('BED_MESH_CALIBRATE',), 'dryer': ('FILAMENT_DRY',),
+                'shaper': ('SHAPER_CALIBRATE',)}
+CAL_NEEDS = {'zend': ('Z_ENDSTOP_CALIBRATE',), 'probe': ('LV_PROBE_CALIBRATE',)}
+# 1X bring-up: it runs beside Sindoh's own system, which still owns the
+# network set-up and the power button; no updater is set up there yet.
+BRINGUP_OFF_SCREENS = ('network', 'power')
+BRINGUP_OFF_KINDS = ('upd_open',)
+WEB_PORT = ''
 EXT_CMD_RE = re.compile(r'^[A-Z_][A-Z0-9_]*$')
 FB_BYTES = int(_read('/sys/class/graphics/fb0/bits_per_pixel', '16') or 16) // 8
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
@@ -604,11 +608,17 @@ class UI:
             return False
         while action[0] == 'confirm':
             action = action[2]
-        if action[0] in DP200_ONLY_KINDS:
+        if action[0] in BRINGUP_OFF_KINDS:
             return True
+        if action[0] == 'screen' and action[1] in BRINGUP_OFF_SCREENS:
+            return True
+        if self.cmds is None:
+            return False
         if action[0] == 'screen':
-            return action[1] in DP200_ONLY_SCREENS
-        if action[0] != 'gcode' or self.cmds is None:
+            return any(c not in self.cmds for c in SCREEN_NEEDS.get(action[1], ()))
+        if action[0] == 'cal_start':
+            return any(c not in self.cmds for c in CAL_NEEDS.get(action[1], ()))
+        if action[0] != 'gcode':
             return False
         for line in action[1].split('\n'):
             word = line.split()[0].upper() if line.split() else ''
@@ -1657,7 +1667,7 @@ class UI:
     def button(self, d, box, label, action, colour=C_BTN, size=30, sub=None, fg=C_TXT):
         x0, y0, x1, y1 = box
         if self.unavailable(action):
-            action, colour, sub, fg = None, C_BAR, 'not on the ' + MODEL, C_DIM
+            action, colour, sub, fg = None, C_BAR, 'not set up yet', C_DIM
         down = action is not None and self.pressed(box)
         if down:
             # pressed: lighter face, label pushed down 2 px
@@ -2008,19 +2018,18 @@ class UI:
                 on = st.get(obj, {}).get('filament_detected')
                 d.text((20, 200 + 28 * i), '%s: %s' % (name, 'filament' if on else 'empty'),
                        font=font(20), fill=C_TXT if on else C_DIM)
-            self.grid(d, [('LOAD', ('fil_mode', 'load'), C_BTN, 32, 'choose filament'),
-                          ('UNLOAD', ('fil_mode', 'unload'), C_BTN, 32, 'choose filament')],
-                      top=270, rows_h=96)
-            return
         cart = st.get('dp200_cartridge') or {}
-        if cart.get('present'):
+        if IS_1X:
+            pass
+        elif cart.get('present'):
             d.text((20, 200), 'Cartridge: %s, %.0f of %d m left (%.0f%%)'
                    % (cart.get('material', '?'), cart.get('remaining_m', 0), cart.get('total_m', 0),
                       cart.get('remaining_percent', 0)), font=font(20), fill=C_TXT)
         else:
             d.text((20, 200), 'Cartridge: none (open filament)', font=font(20), fill=C_DIM)
-        d.text((20, 228), 'Runout encoder: %s' % ('on' if enc.get('enabled') else 'off'),
-               font=font(20), fill=C_DIM)
+        if not IS_1X:
+            d.text((20, 228), 'Runout encoder: %s' % ('on' if enc.get('enabled') else 'off'),
+                   font=font(20), fill=C_DIM)
         items = [('LOAD', ('fil_mode', 'load'), C_BTN, 32, 'choose filament'),
                  ('UNLOAD', ('fil_mode', 'unload'), C_BTN, 32, 'choose filament')]
         items.append(('UNLOCK', ('confirm', 'Release the cartridge latch for 4 s? Unload the filament first.',

@@ -455,8 +455,9 @@ printer; neither has run.
   power, watermark). It loads; the home sensors read right through it
   (X and Y triggered at home, Z open). No axis has moved under it.
 - **Web page**: `install/x1/x1_web.sh start` runs Moonraker (7125) and
-  Mainsail on port 8081 from the card's Debian root; Sindoh's web server
-  keeps port 80 and its camera server (8080) feeds the page.
+  Mainsail from the card's Debian root, on port 80 (owner 11-22: it
+  stops Sindoh's own web server, which nothing restarts; a reboot brings
+  it back). Sindoh's camera server (8080) feeds the page.
 - **Touch screen**: the panel is the DP200's (800x480, mounted the same
   way, same touch controller), but 24 bits per pixel. Our screen app
   (`install/display/dp200_screen.py`) now reads the board name and runs
@@ -465,12 +466,17 @@ printer; neither has run.
   `/app/recovery_watchdog.sh` only watches for a read-only root), and
   `x1_web.sh stop` lets it run again. Seen on the panel's memory; touch
   not tried (calibration values are the DP200's).
-- **One app for every model** (owner 11-21): the app greys out buttons
-  that cannot work on the printer it runs on: the pages built for the
-  DP200's hardware, and any button whose G-code uses a command Klipper
-  does not list (`/printer/gcode/help`). The differences otherwise live
-  in each model's Klipper config under the same macro names
-  (`LOAD_FILAMENT`, `LAMP_TOGGLE`, `BED_CLEAR`, later a leveling macro).
+- **One app for every model** (owner 11-21/22): the functions are the
+  same on every printer; what differs is each model's Klipper config,
+  under the same macro names (`LOAD_FILAMENT`, `CLEAN_NOZZLE`,
+  `FILAMENT_DRY`, `LAMP_TOGGLE`, `BED_CLEAR`, later a leveling macro).
+  The app greys out a button ("not set up yet") only while the command
+  it needs is missing from Klipper's list (`/printer/gcode/help`).
+  Written for the 1X on 11-22, none run yet: `CLEAN_NOZZLE` (stock
+  positions), the dryer, `_SINDOH_ENSURE_HOMED`. Still missing on the
+  1X: `EMPTY_BIN`, the leveling macro, the probe offset routine, input
+  shaping, and the network, power and update pages (Sindoh's system
+  still owns those during the bring-up).
 
 **Leveling under Klipper (plan, nothing tried).** The nozzle is the
 probe and only touches metal at the three notches in the bed sheet

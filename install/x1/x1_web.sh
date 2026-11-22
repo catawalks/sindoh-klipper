@@ -3,8 +3,10 @@
 # Klipper that install/x1/x1_stage4.sh started (same Debian root on the SD
 # card). Run on the printer's own Linux as root:
 #   sh /tmp/sd/stage/x1_web.sh start|status|stop|screen   (screen: restart the touch app)
-# The page is on port 8081 (Sindoh's own web server keeps port 80; its
-# camera server on 8080 is used as it is). Moonraker is on 7125.
+# The page is on port 80 (owner 11-22): Sindoh's own web server
+# (lighttpd, started once at boot by /test/run.sh) is stopped first; only
+# a reboot brings it back. Its camera server on 8080 is used as it is.
+# Moonraker is on 7125.
 # It also puts our touch screen app (install/display/dp200_screen.py,
 # copied to the card's /usr/local/bin) on the panel. Sindoh's screen
 # program is not killed, only frozen (SIGSTOP), so nothing restarts it
@@ -13,7 +15,7 @@
 # Nothing is written to the eMMC; logs go to the card and /tmp.
 ROOT=/tmp/sd
 K=/home/klipper
-PORT=8081
+PORT=80
 CONF=/tmp/x1_nginx.conf            # inside the Debian root
 inroot() { chroot $ROOT /usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/root "$@"; }
 pids() { ps | grep "$1" | grep -v grep | awk '{print $1}'; }
@@ -37,6 +39,8 @@ case "$1" in
 start)
     grep -q " $ROOT/proc " /proc/mounts || { echo "start Klipper first (x1_stage4.sh start)"; exit 1; }
     [ -n "$(pids moonraker.py)" ] && { echo "already running"; exit 0; }
+    for p in $(pids /sbin/lighttpd); do kill $p; done
+    sleep 1
     mkdir -p $ROOT/var/log/nginx $ROOT/var/lib/nginx $ROOT/run
     cp /tmp/sd/stage/x1_moonraker.conf $ROOT$K/printer_data/config/moonraker.conf
     mkdir -p $ROOT$K/printer_data/gcodes
@@ -99,6 +103,7 @@ stop)
     screen_stop
     inroot /usr/sbin/nginx -c $CONF -s quit 2>/dev/null
     for p in $(pids moonraker.py); do kill $p; done
+    sleep 2
     echo "x1_web: stopped"
     ;;
 *)  echo "usage: $0 start|status|stop|screen"; exit 1 ;;

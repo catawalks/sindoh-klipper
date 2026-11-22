@@ -35,7 +35,7 @@ becomes the full kernel-swap test machine.
   homes X, Y and Z (as manual steppers so far), and loads and unloads
   filament on the sensors with a jam check. Since 2026-11-21 it also has
   a real printer config that loads (`x1_stage6.cfg`; no axis moved under
-  it yet), Moonraker and Mainsail (port 8081) and our touch screen app
+  it yet), Moonraker and Mainsail (port 80) and our touch screen app
   on its panel. A reboot always returns it to stock.
 - **Fork pin:** `klipper/FORK` names the commit; since b58960c9 only
   Python files changed (the firmware builds are from b58960c9). The

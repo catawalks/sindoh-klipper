@@ -5,6 +5,12 @@ one. The detail for everything up to 2026-11-12 is in
 [TODO_archive_2026-11-12.md](TODO_archive_2026-11-12.md) and the other
 files in this folder; `git log` has the rest.
 
+## 2026-11-22
+- **1X:** Mainsail on port 80 (`x1_web.sh` stops Sindoh's web server);
+  the screen greys a button only when its macro is missing ("not set up
+  yet", not by model); 1X macros written, none run: `CLEAN_NOZZLE`,
+  the dryer, `_SINDOH_ENSURE_HOMED`, `M300`.
+
 ## 2026-11-21
 - **1X night work (owner asleep, no motion, no heat):** stage 6 config
   `x1_stage6.cfg` loads (axes with homing, bed heater, print job
