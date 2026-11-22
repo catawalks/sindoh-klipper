@@ -7,6 +7,15 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- 3DWOX 1 config re-laid into our file layout (owner): the one file
+  became `3dwox1_printer.cfg` (the model: includes `dp200_printer.cfg`,
+  then acceleration, Z speeds, homing speeds) and `printer.cfg` (the
+  printer: Z endstop height, probe offsets, PID). The four motor
+  current values were dropped: the installer writes them per machine
+  from the stock database (`dp200_machine.cfg`; his unit's +99 gives
+  the same 0.995), and a fixed value in printer.cfg would override that
+  on every other 3DWOX 1. No other value changed.
+
 - **3DWOX 1 config folder** (owner): `klipper/config/3dwox1/printer.cfg`,
   Fredrik Gustafsson's per-model file from his klipper-sindoh repository
   (commit a04b2bfa), unchanged under a provenance header. It includes

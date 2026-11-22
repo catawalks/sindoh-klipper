@@ -302,7 +302,7 @@ stages 1-5 done on the dev printer):
     cores report `sindoh-upc-...` from the next firmware build on) and
     the build menu text.
 45. **3DWOX 1 in our tree** (owner 11-22): `klipper/config/3dwox1/`
-    holds Fredrik Gustafsson's per-model file. Open: go through the
+    holds his values in our layout (`3dwox1_printer.cfg` + `printer.cfg`). Open: go through the
     changes in his copy of `dp200_printer.cfg` one by one (max_accel
     3000, second Z homing approach at 0.5 mm/s with a 2 mm back-off,
     the step pulse note) and take what is right for the DP200 too; his
