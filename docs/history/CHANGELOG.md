@@ -7,6 +7,10 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- 1X: the rewritten unload ran (50 mm slow, 842 mm to the extruder
+  sensor, 509 mm to the bay switch; fan on and off; no runout pause).
+  Bin reminder on the 1X back to 15 purges (owner; may go higher).
+
 - **1X load, unload, wipe and bin routines rewritten from a stock
   recording** (`host/movewatch.c`, new: one line per motor move; the
   sequences are in the sindoh repo's 1x_stock_routines.md). Our X frame
