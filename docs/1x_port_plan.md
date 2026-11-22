@@ -399,6 +399,22 @@ screen app (the panel is a different size), then a first print.
 (TODO 38): `_update_rodin_1x`, AES packing, `/userdata` or the root as
 the target, hook into the boot, stock backup and remover.
 
+**5g, 2026-11-21 evening: load and unload on the sensors.** Config
+`x1_stage5g.cfg`: a real `[extruder]`, the initial feed motor as
+`[extruder_stepper feed]`, both filament sensors, the power supply fan
+as a `[controller_fan]` on the heaters, and `LOAD_FILAMENT` /
+`UNLOAD_FILAMENT` built on the fork's `feed_until` module (fork
+00e6b950), which stops the motors in the firmware when a sensor
+changes, as homing does. The sensor pins are shared with the runout
+switches. First `UNLOAD_FILAMENT` at 220 C, owner watching: both motors
+back 903.6 mm at 29 mm/s until GPIO 120 released, then the feed motor
+alone 474.3 mm at 59 mm/s until the bay switch released, then 240 mm
+more. Two things found on the way: the engine's own step counter counts
+both edges under our firmware (2 per step), and this stage's
+`[printer]` limits must allow the load speeds. Not done yet:
+`LOAD_FILAMENT`, and the jam check with the filament encoder (GPIO 65
+and 67; owner's idea: stop with "filament not moving").
+
 ## Open questions
 
 - Heaters, settled on paper 2026-11-21 (sindoh

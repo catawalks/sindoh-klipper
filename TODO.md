@@ -298,8 +298,10 @@ stages 1-5 done on the dev printer):
     `1x-dev`, ext4, mounted by hand at `/tmp/sd`), not on its eMMC.
     Draft LOAD_FILAMENT / UNLOAD_FILAMENT and the bay runout sensor are in
     `x1_printer_draft.cfg` (11-21, not run, not parsed by Klipper yet); they
-    use a new fork module, `feed_until` (13f24017), which stops the feed
+    use a new fork module, `feed_until` (00e6b950), which stops the feed
     on a sensor as homing does. Owner 11-21: no feeding in pieces.
+    `UNLOAD_FILAMENT` ran on the printer 11-21 (stage 5g config);
+    `LOAD_FILAMENT` not yet.
     Owner 11-21: watch the filament encoder during load and unload and
     stop with "filament not moving, possible jam in the print head" when
     it stands still. From the stock recording: GPIO 65 pulses only while

@@ -6,6 +6,15 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: Klipper unloaded PLA, stopping on the sensors** (stage 5g
+  config, fork 00e6b950, FORK pin moved; Python only, same firmware).
+  New fork module `feed_until`: a homing-style move for the extruder
+  and the initial feed motor. Both pulled back 903.6 mm until GPIO 120
+  released (stock: 914), then the feed motor alone 474.3 mm until the
+  bay switch released, plus 240 mm. The power supply fan is now
+  switched by Klipper with the heaters (owner: it must run whenever a
+  heater is on). A good stock PLA load and unload were recorded first
+  (sindoh docs/1x_stock_routines.md).
 - **1X: a stock PLA load jammed after our feed test** (recorded;
   probably our doing through the press mechanism, not proven). The
   filament was retracted under Klipper, 1057 mm, cold. GPIO 120 low =
