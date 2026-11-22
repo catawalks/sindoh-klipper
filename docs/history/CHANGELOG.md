@@ -7,6 +7,12 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X Z zero by paper test** (owner, JOG page, bed center, 150 C): the
+  paper dragged at Z 1.1 with `position_endstop` 3.1, so the endstop is
+  2.100 (paper taken as 0.1 mm). By that the notch touches lie about
+  1.2 mm below the print surface (the sheet's thickness), and stock's
+  scrub height about 1.7 mm below it. Z minimum -2.0.
+
 - **Correction (owner): Z zero must not come from the leveling touches.**
   The notches are cut-outs in the sheet; the nozzle touches the metal
   plate below the print surface there. `position_endstop` 3.340 (Z 0 at
