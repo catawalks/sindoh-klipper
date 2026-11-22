@@ -24,7 +24,8 @@ def call(method, params=None):
 info = call('info')
 print('klippy state:', info.get('state'), '-', (info.get('state_message') or '').strip().replace('\n', ' | '))
 names = call('objects/list').get('objects', [])
-want = [n for n in names if n.split()[0] in ('mcu', 'temperature_sensor', 'gcode_button', 'output_pin', 'heater_generic', 'heater_fan')]
+want = [n for n in names if n.split()[0] in ('mcu', 'temperature_sensor', 'gcode_button', 'output_pin', 'heater_generic', 'heater_fan', 'extruder', 'heater_bed',
+                                          'filament_switch_sensor', 'feed_until', 'extruder_stepper')]
 st = call('objects/query', {'objects': {n: None for n in want}}).get('status', {})
 for n in sorted(st):
     v = st[n]
@@ -34,7 +35,13 @@ for n in sorted(st):
             n, v.get('mcu_version'), ls.get('freq'), ls.get('mcu_awake'), ls.get('bytes_retransmit')))
     elif n.startswith('temperature_sensor'):
         print('%-28s %.1f C' % (n, v.get('temperature', float('nan'))))
-    elif n.startswith('heater_generic'):
+    elif n.startswith('filament_switch_sensor'):
+        print('%-28s %s' % (n, 'filament' if v.get('filament_detected') else 'empty'))
+    elif n.startswith('feed_until'):
+        print('%-28s last move %.1f mm, stopped by sensor: %s' % (n, v.get('last_distance', 0), v.get('last_stopped')))
+    elif n.startswith('extruder_stepper'):
+        print('%-28s follows %s' % (n, v.get('motion_queue')))
+    elif n.startswith(('heater_generic', 'extruder', 'heater_bed')):
         print('%-28s %.1f C  target %.0f  power %.2f' % (n, v.get('temperature', 0), v.get('target', 0), v.get('power', 0)))
     elif n.startswith('heater_fan'):
         print('%-28s speed %s' % (n, v.get('speed')))
