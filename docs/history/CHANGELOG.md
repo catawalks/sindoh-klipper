@@ -7,6 +7,11 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- 1X leveling closed the loop: the owner turned the front left wheel
+  one click counter-clockwise as advised, and a second `BED_LEVEL
+  SCRUB=0` read front left -0.04 and front right +0.07 mm against the
+  back ("level"). The click moved that corner 0.16 mm (0.19 expected).
+
 - **1X: the whole `BED_LEVEL` ran** (owner at the printer): homing,
   150 C, wipe, the scrub at 1.3 mm past the surface, nine touches, bed
   forward, report. Back -1.293, front left -1.173 (0.12 mm higher: one
