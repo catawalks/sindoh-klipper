@@ -50,7 +50,7 @@ MODEL = '1X' if IS_1X else 'DP200'
 # one yet. A button is greyed out ("not set up yet") when the G-code it
 # runs, or the page it opens, needs a command this printer's Klipper does
 # not list (UI.unavailable). Checked on the 1X only so far.
-SCREEN_NEEDS = {'bedlevel': ('BED_MESH_CALIBRATE',), 'dryer': ('FILAMENT_DRY',),
+SCREEN_NEEDS = {'jog': ('JOG',), 'bedlevel': ('BED_MESH_CALIBRATE',), 'dryer': ('FILAMENT_DRY',),
                 'shaper': ('SHAPER_CALIBRATE',)}
 CAL_NEEDS = {'zend': ('Z_ENDSTOP_CALIBRATE',), 'probe': ('LV_PROBE_CALIBRATE',)}
 # 1X bring-up: it runs beside Sindoh's own system, which still owns the
@@ -725,6 +725,8 @@ class UI:
                 self.settings['fil_custom'] = t
                 save_settings(self.settings)
             self.run(fil_confirm(self.fil['mode'], 'CUSTOM', t))
+        elif kind == 'jog_step':
+            self.jog_step = action[1]
         elif kind == 'set_timeout':
             self.settings['timeout'] = action[1]
             ok = save_settings(self.settings)
@@ -1845,6 +1847,7 @@ class UI:
 
     # page -> page that BACK returns to (None: top level, no BACK)
     PARENT = {'filament': 'home', 'preheat': 'home', 'move': 'home', 'homing': 'move', 'system': 'home',
+              'jog': 'move',
               'calibrate': 'move', 'shaper': 'calibrate', 'bedlevel': 'move', 'dryer': 'filament',
               'fil_mat': 'filament', 'fil_custom': 'fil_mat', 'info': 'system', 'update': 'system',
               'pid': 'calibrate', 'objects': 'print',
@@ -2281,9 +2284,10 @@ class UI:
              C_FULL if n >= BIN_THRESHOLD else C_BTN, 28, '%d / %d purges' % (n, BIN_THRESHOLD)),
             ('CALIBRATE', ('screen', 'calibrate'), C_BTN, 28, 'input shaping'),
             ('BED LEVEL', ('screen', 'bedlevel'), C_BTN, 28, 'probe + screws'),
+            ('JOG', ('screen', 'jog'), C_BTN, 30, 'X / Y / Z'),
         ]
         if paused:
-            for k in (0, 3, 5, 6):                     # HOME, MOTORS OFF, CALIBRATE, BED LEVEL
+            for k in (0, 3, 5, 6, 7):                  # HOME, MOTORS OFF, CALIBRATE, BED LEVEL, JOG
                 items[k] = (items[k][0], None, C_BAR, 28, no, C_DIM)
             if not lower:
                 items[1] = items[1][:1] + (None, C_BAR) + items[1][3:] + (C_DIM,)
@@ -2564,6 +2568,42 @@ class UI:
         items.append(('HOME Z', ('confirm', bed_q % 'Z', ('gcode', 'BED_CLEAR\nG28 Z', 'Home Z')),
                       C_ON if 'z' in homed else C_BTN))
         self.grid(d, items, top=240)
+
+    JOG_STEPS = (0.1, 1, 10, 50)
+
+    def page_jog(self, d, st):
+        """Move one axis by a step. The moving is the config's JOG macro
+        (it refuses an axis that is not homed and stops at the limits), so
+        this page is the same for every model."""
+        th = st['toolhead']
+        homed = th.get('homed_axes', '')
+        pos = (th.get('position') or [0, 0, 0])[:3]
+        step = getattr(self, 'jog_step', 1)
+        d.text((20, 160), 'Jog', font=font(28), fill=C_TXT)
+        for i, a in enumerate('XYZ'):
+            ok = a.lower() in homed
+            d.text((20 + i * 150, 204), '%s %s' % (a, ('%.1f' % pos[i]) if ok else 'not homed'),
+                   font=font(22), fill=C_TXT if ok else C_WARN)
+        w = (PW - 30 * 2 - 12 * 3) // 4
+        for i, v in enumerate(self.JOG_STEPS):
+            x = 30 + i * (w + 12)
+            self.button(d, (x, 250, x + w, 320), '%g' % v, ('jog_step', v),
+                        C_ON if v == step else C_BTN, 26, 'mm')
+        items = []
+        for a in 'XYZ':
+            for sign, word in ((-1, '-'), (1, '+')):
+                act = ('gcode', 'JOG AXIS=%s D=%g' % (a, sign * step), 'Jog %s' % a)                     if a.lower() in homed else None
+                items.append(('%s %s' % (a, word), act, C_BTN if act else C_BAR, 34,
+                              ('%s%g mm' % ('+' if sign > 0 else '-', step)) if act else 'home it first',
+                              C_TXT if act else C_DIM))
+        self.grid(d, items, top=340, rows_h=96)
+
+    def jog_key(self):
+        """What the JOG page shows that the other pages do not (redraw key)."""
+        if self.screen != 'jog' or not self.st:
+            return None
+        return (getattr(self, 'jog_step', 1),
+                tuple(round(v, 1) for v in (self.st['toolhead'].get('position') or [])[:3]))
 
     def page_system(self, d, st):
         d.text((20, 160), 'System', font=font(28), fill=C_TXT)
@@ -3108,7 +3148,7 @@ def main():
         key = (time.strftime('%H:%M'), ui.busy, ui.msg and time.time() < ui.msg[1],
                bool(ui.dimmed()), ui.screen, ui.confirm is not None, view_key(ui), ui.err,
                ui.wf['rev'], ui.net['rev'], ui.shp['rev'], ui.bl['rev'], ui.con['rev'],
-               ui.cmds is None)
+               ui.cmds is None, ui.jog_key())
         if events or ui.press or ui.key_down is not None or key != last_key:
             panel.show(ui.render())
             last_key = key

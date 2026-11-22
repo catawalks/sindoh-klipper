@@ -7,6 +7,14 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **Screen app: MOVE -> JOG page (owner), all models.** Step sizes 0.1,
+  1, 10, 50 mm and minus/plus buttons for X, Y and Z, with the live
+  position. The moving is a config macro, `JOG AXIS= D=` (both macro
+  files): it refuses an axis that is not homed and stops at the axis
+  limits. On the 1X: macro tried over the network (X -1 mm, Y to its
+  200 mm limit, Z refused as not homed); the page checked as a rendered
+  picture, not yet by touch.
+
 - **1X: X and Y home under the real config** (first axes moved under
   it). After one more failure (the macro read the sensor as `x`; this
   Klipper names it `stepper_x`, so the move-off step never ran), both
