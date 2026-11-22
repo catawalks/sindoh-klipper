@@ -45,6 +45,16 @@ def _read(path, default=''):
 BOARD = _read('/sys/kernel/board_name')
 IS_1X = BOARD.startswith(('1X', '2X'))
 MODEL = '1X' if IS_1X else 'DP200'
+# Pages and actions that exist only for the DP200's hardware (its probe
+# pin, purge bin, cartridge latch, accelerometer set-up). On another model
+# their buttons are greyed out, and so is every button whose G-code uses a
+# command this printer's Klipper does not have (UI.unavailable).
+# (network, power: the 1X bring-up runs beside Sindoh's own system, which
+# owns the network set-up and the power button)
+DP200_ONLY_SCREENS = ('bedlevel', 'dryer', 'shaper', 'papertest', 'network', 'power')
+WEB_PORT = ':8081' if IS_1X else ''   # 1X bring-up: Sindoh's web server keeps port 80
+DP200_ONLY_KINDS = ('cal_start', 'adxl', 'upd_open')
+EXT_CMD_RE = re.compile(r'^[A-Z_][A-Z0-9_]*$')
 FB_BYTES = int(_read('/sys/class/graphics/fb0/bits_per_pixel', '16') or 16) // 8
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 MONO = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
@@ -127,7 +137,8 @@ DRY_HOURS = (2, 4, 6, 8, 12)
 # max_temp is 260 and min_extrude_temp 170 (dp200_printer.cfg).
 FIL_PRESETS = (('PLA', 230), ('PETG', 240), ('ABS', 250),
                ('ASA', 250), ('TPU', 230), ('NYLON', 255))
-FIL_STOCK = ('PLA', 'ABS')
+FIL_STOCK = ('PLA', 'ABS') if not IS_1X else ()    # the 1X macros take TEMP= only
+COOL_DOWN = 'TURN_OFF_HEATERS' if IS_1X else 'FILAMENT_DRY_STOP\nTURN_OFF_HEATERS'
 FIL_MIN, FIL_MAX = 180, 260
 FIL_STEPS = (-10, -5, 5, 10)
 # Bed level page: 4x4 probe grid, the two front screws and the fixed back support
@@ -145,7 +156,8 @@ OBJECTS = ('webhooks', 'print_stats', 'virtual_sdcard', 'display_status', 'extru
            'heater_bed', 'output_pin lamp', 'gcode_move', 'toolhead', 'idle_timeout',
            'filament_switch_sensor cartridge_lever', 'filament_motion_sensor filament_encoder',
            'dp200_cartridge', 'gcode_macro _DRY', 'gcode_macro BED_CLEAR', 'manual_probe',
-           'exclude_object', 'save_variables', 'gcode_macro PRINT_START')
+           'exclude_object', 'save_variables', 'gcode_macro PRINT_START',
+           'filament_switch_sensor bay', 'filament_switch_sensor extruder_entry')
 
 C_BG = (20, 20, 26)
 C_BAR = (36, 36, 44)
@@ -566,6 +578,44 @@ class UI:
         self.req = None                # the G-code request it waits on (see busy_tick)
         # custom macro buttons: the file's buttons (or its error), the printer's macros (EDIT)
         self.mac = {'buttons': [], 'error': None, 'all': None, 'page': 0, 'edit_page': 0}
+        # the G-code commands this printer's Klipper knows (None: not read yet)
+        self.cmds = None
+        self.cmds_at = 0.0
+
+    def cmds_tick(self):
+        """Read Klipper's command list once it is ready (again after a
+        restart). Only used on models other than the DP200."""
+        if not IS_1X:
+            return
+        ready = self.st is not None and self.st['webhooks']['state'] == 'ready'
+        if not ready:
+            self.cmds = None
+            return
+        if self.cmds is None and time.time() - self.cmds_at > 5:
+            self.cmds_at = time.time()
+            try:
+                self.cmds = set(k.upper() for k in get('/printer/gcode/help'))
+            except Exception:
+                self.cmds = None
+
+    def unavailable(self, action):
+        """True if this button cannot work on this printer model."""
+        if not IS_1X or action is None:
+            return False
+        while action[0] == 'confirm':
+            action = action[2]
+        if action[0] in DP200_ONLY_KINDS:
+            return True
+        if action[0] == 'screen':
+            return action[1] in DP200_ONLY_SCREENS
+        if action[0] != 'gcode' or self.cmds is None:
+            return False
+        for line in action[1].split('\n'):
+            word = line.split()[0].upper() if line.split() else ''
+            # extended commands only: G1, M104 and the like are not listed
+            if EXT_CMD_RE.match(word) and not re.match(r'^[GMT]\d', word) and word not in self.cmds:
+                return True
+        return False
 
     # ---- actions -------------------------------------------------------
     def run(self, action):
@@ -1606,6 +1656,8 @@ class UI:
 
     def button(self, d, box, label, action, colour=C_BTN, size=30, sub=None, fg=C_TXT):
         x0, y0, x1, y1 = box
+        if self.unavailable(action):
+            action, colour, sub, fg = None, C_BAR, 'not on the ' + MODEL, C_DIM
         down = action is not None and self.pressed(box)
         if down:
             # pressed: lighter face, label pushed down 2 px
@@ -1845,8 +1897,8 @@ class UI:
             ('SYSTEM', ('screen', 'system')),
             ('COOL DOWN', ('confirm', 'The print is paused: cool down anyway? It cannot resume '
                                       'until the nozzle is hot again.',
-                           ('gcode', 'FILAMENT_DRY_STOP\nTURN_OFF_HEATERS', 'Cool down'))
-             if paused else ('gcode', 'FILAMENT_DRY_STOP\nTURN_OFF_HEATERS', 'Cool down')),
+                           ('gcode', COOL_DOWN, 'Cool down'))
+             if paused else ('gcode', COOL_DOWN, 'Cool down')),
         ], top=top, rows_h=74 if paused else 90)
         if paused:
             return
@@ -1949,6 +2001,17 @@ class UI:
         lever = st.get('filament_switch_sensor cartridge_lever', {})
         enc = st.get('filament_motion_sensor filament_encoder', {})
         d.text((20, 160), 'Filament', font=font(28), fill=C_TXT)
+        if IS_1X:
+            # the two switches on the filament path (config x1_stage6.cfg)
+            for i, (name, obj) in enumerate((('Opening port', 'filament_switch_sensor bay'),
+                                             ('At the extruder', 'filament_switch_sensor extruder_entry'))):
+                on = st.get(obj, {}).get('filament_detected')
+                d.text((20, 200 + 28 * i), '%s: %s' % (name, 'filament' if on else 'empty'),
+                       font=font(20), fill=C_TXT if on else C_DIM)
+            self.grid(d, [('LOAD', ('fil_mode', 'load'), C_BTN, 32, 'choose filament'),
+                          ('UNLOAD', ('fil_mode', 'unload'), C_BTN, 32, 'choose filament')],
+                      top=270, rows_h=96)
+            return
         cart = st.get('dp200_cartridge') or {}
         if cart.get('present'):
             d.text((20, 200), 'Cartridge: %s, %.0f of %d m left (%.0f%%)'
@@ -2458,7 +2521,7 @@ class UI:
 
     def page_system(self, d, st):
         d.text((20, 160), 'System', font=font(28), fill=C_TXT)
-        d.text((20, 200), 'Web: http://%s/' % self.ip, font=font(20), fill=C_DIM)
+        d.text((20, 200), 'Web: http://%s%s/' % (self.ip, WEB_PORT), font=font(20), fill=C_DIM)
         d.text((20, 228), 'Klipper: %s' % st['webhooks']['state'], font=font(20), fill=C_DIM)
         self.grid(d, [
             ('FIRMWARE', ('confirm', 'FIRMWARE_RESTART? (stops everything)',
@@ -2899,6 +2962,8 @@ def view_key(ui):
             st['gcode_move']['homing_origin'][2],
             st.get('filament_switch_sensor cartridge_lever', {}).get('filament_detected'),
             st.get('filament_motion_sensor filament_encoder', {}).get('enabled'), ui.ip,
+            st.get('filament_switch_sensor bay', {}).get('filament_detected'),
+            st.get('filament_switch_sensor extruder_entry', {}).get('filament_detected'),
             tuple(sorted((st.get('dp200_cartridge') or {}).items(), key=lambda kv: kv[0]))
             if st.get('dp200_cartridge') else None,
             tuple(sorted((st.get('gcode_macro _DRY') or {}).items())), ui.dry['mat'], ui.dry['hours'],
@@ -2917,6 +2982,7 @@ def main():
     if '--demo' in sys.argv:
         out = sys.argv[sys.argv.index('--demo') + 1]
         ui.st = query()
+        ui.cmds_tick()
         if len(sys.argv) > sys.argv.index('--demo') + 2:
             ui.screen = sys.argv[sys.argv.index('--demo') + 2]
         if net is not None:                            # network pages: read the ports first
@@ -2988,12 +3054,14 @@ def main():
         ui.shaper_tick()
         ui.bl_tick()
         ui.console_tick()
+        ui.cmds_tick()
         # Redraw only when something can have changed: new status, touch,
         # STOP being held, the clock minute, a message or busy state, dimming,
         # WiFi state (scan results, connect progress).
         key = (time.strftime('%H:%M'), ui.busy, ui.msg and time.time() < ui.msg[1],
                bool(ui.dimmed()), ui.screen, ui.confirm is not None, view_key(ui), ui.err,
-               ui.wf['rev'], ui.net['rev'], ui.shp['rev'], ui.bl['rev'], ui.con['rev'])
+               ui.wf['rev'], ui.net['rev'], ui.shp['rev'], ui.bl['rev'], ui.con['rev'],
+               ui.cmds is None)
         if events or ui.press or ui.key_down is not None or key != last_key:
             panel.show(ui.render())
             last_key = key
