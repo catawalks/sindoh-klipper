@@ -275,6 +275,15 @@ stages 1-5 done on the dev printer):
       batching is off on the 1X), the microstep pins of the drivers.
     - The DP200 firmware builds from the 1X-capable fork have not run on
       a DP200.
+43. **Rename the fork branch `sindoh-dp200`** (owner 11-22: the port runs
+    on several models now) to `sindoh-upc`, **after the work printer's
+    v0.1.1 stick test of Monday 11-23** (the stick's scripts fetch by
+    the old name). Touches `klipper/FORK`, `tools/fork_*.sh`,
+    `klippy_*.sh`, `payload_prep.sh`, the READMEs and the release
+    checklist; keep the old branch name on GitHub until no released
+    installer needs it. Done 11-22: the version tag `sindoh-upc-1` (the
+    cores report `sindoh-upc-...` from the next firmware build on) and
+    the build menu text.
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
     beeper): USB audio card 0 + amplifier enable GPIO 180, stock plays
     MP3s with mplayer ([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md),

@@ -6,6 +6,9 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-22
+- **Fork tag `sindoh-upc-1`** (owner: the cores should not be named after
+  the DP200): firmware and Klipper builds report `sindoh-upc-...` from
+  the next build on. Build menu text names all 3DWOX models (f97fa268).
 - **1X:** Mainsail on port 80 (`x1_web.sh` stops Sindoh's web server);
   the screen greys a button only when its macro is missing ("not set up
   yet", not by model); 1X macros written, none run: `CLEAN_NOZZLE`,
