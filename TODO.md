@@ -277,10 +277,10 @@ stages 1-5 done on the dev printer):
       wall), the sensor's edge about 20 mm before it. The database's
       positions (load 256.4 then 243.4, wipe 257.3 ... 231.3) are in
       another frame, about 6.5 mm higher than ours by the owner's flap
-      readings. To confirm: watch a stock load (does the head sit over
-      the bin for the purge and end on the cleaning flap?) or record the
-      X step pin through one. Needed before the leveling points (also
-      database numbers) are used.
+      readings; the owner confirms a stock load ends with the nozzle on
+      the cleaning flap, as that frame says. Apply the same 6.5 mm to
+      the leveling points (also database numbers) and check them on the
+      machine before use.
     - A root-side helper so Mainsail's reboot and shutdown work on the
       1X (also a second way in when the serial console is blocked).
     - Stage 7: install onto `/userdata` (plan in the port plan; every
