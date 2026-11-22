@@ -266,6 +266,8 @@ stages 1-5 done on the dev printer):
       a print. The DP200 has no such switch: the owner prints Sindoh's
       adapter, then test it and add it to the DP200 config.
     - First print, then the screen app's 1X leveling page.
+    - A root-side helper so Mainsail's reboot and shutdown work on the
+      1X (also a second way in when the serial console is blocked).
     - Stage 7: install onto `/userdata` (plan in the port plan; every
       eMMC write needs the owner's OK), a cold start without the stock
       engine (driver set-up, reference PWM).

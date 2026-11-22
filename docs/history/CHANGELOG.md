@@ -6,6 +6,20 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-22
+
+- **1X camera: ustreamer instead of Sindoh's server.** The 1X has the
+  DP200's camera (Sonix 0c45:6341; MJPEG up to 1280x720 at 30 fps).
+  Sindoh's `mjpg_streamer` reads YUYV at 5 fps and re-encodes it, and it
+  delivers no frames once Sindoh's engine is stopped before the camera
+  was started (found after a restart of that server, and again after a
+  power cycle). `x1_web.sh start` now stops it and runs `ustreamer` with
+  the DP200's time32 shim (built on the card; kernel 4.2.8 needs it too):
+  1280x720 MJPEG pass-through, about 0 % CPU with one viewer, 20 fps
+  captured in room light. Moonraker's `target_fps` is 30.
+- 1X notes: Mainsail's reboot does nothing (Moonraker has no root in the
+  card's Debian; `sudo` missing). Any connection to port 7126 is the
+  network stop, a port check included: it shut Klipper down once today
+  (`FIRMWARE_RESTART` brought it back).
 - **Fork tag `sindoh-upc-1`** (owner: the cores should not be named after
   the DP200): firmware and Klipper builds report `sindoh-upc-...` from
   the next build on. Build menu text names all 3DWOX models (f97fa268).

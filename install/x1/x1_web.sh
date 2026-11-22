@@ -5,7 +5,7 @@
 #   sh /tmp/sd/stage/x1_web.sh start|status|stop|screen   (screen: restart the touch app)
 # The page is on port 80 (owner 11-22): Sindoh's own web server
 # (lighttpd, started once at boot by /test/run.sh) is stopped first; only
-# a reboot brings it back. Its camera server on 8080 is used as it is.
+# a reboot brings it back. Its camera server is replaced too (webcam_start).
 # Moonraker is on 7125.
 # It also puts our touch screen app (install/display/dp200_screen.py,
 # copied to the card's /usr/local/bin) on the panel. Sindoh's screen
@@ -28,6 +28,22 @@ screen_start() {
     [ -e $ROOT/dev/input/event0 ] || cp -a /dev/input/event0 $ROOT/dev/input/
     inroot /bin/sh -c "while :; do /usr/bin/python3 /usr/local/bin/dp200_screen.py; sleep 3; done"         >> $ROOT/tmp/x1_screen.log 2>&1 &
     echo $! > /tmp/x1_screen.pid
+}
+# Camera: Sindoh's mjpg_streamer (YUYV, 5 fps, re-encoded on the CPU, and
+# it only delivers frames while Sindoh's engine runs) is stopped and
+# ustreamer passes the camera's own MJPEG through: 1280x720, up to 30 fps,
+# about 0 % CPU. Same camera and same time32 shim as the DP200
+# (install/camera/v4l2_time32_shim.c, built on the card). The flag file
+# keeps Sindoh's /test/restart.sh from starting its server again.
+webcam_start() {
+    [ -x $ROOT/usr/bin/ustreamer ] && [ -f $ROOT/usr/local/lib/v4l2_time32_shim.so ] || { echo "no ustreamer or shim on the card: camera left as it is"; return; }
+    [ -n "$(pidof ustreamer)" ] && return
+    touch /tmp/mjpg_flag.txt
+    for p in $(pidof mjpg_streamer); do kill -2 $p; done
+    sleep 2
+    [ -e $ROOT/dev/video0 ] || cp -a /dev/video0 $ROOT/dev/
+    inroot chgrp video /dev/video0; chmod 660 $ROOT/dev/video0
+    inroot su -s /bin/sh klipper -c "LD_PRELOAD=/usr/local/lib/v4l2_time32_shim.so exec /usr/bin/ustreamer         --device=/dev/video0 --format=MJPEG --encoder=HW --resolution=1280x720 --desired-fps=30         --device-timeout=5 --persistent --host=127.0.0.1 --port=8080" > /dev/null 2>&1 &
 }
 screen_stop() {
     [ -f /tmp/x1_screen.pid ] && kill $(cat /tmp/x1_screen.pid) 2>/dev/null
@@ -89,6 +105,7 @@ EOF
     inroot su -s /bin/sh klipper -c "cd $K && exec $K/moonraker-env/bin/python \
         $K/moonraker/moonraker/moonraker.py -d $K/printer_data" > $ROOT/tmp/moonraker.out 2>&1 &
     inroot /usr/sbin/nginx -c $CONF
+    webcam_start
     screen_start
     echo "x1_web: started. Page on port $PORT, Moonraker on 7125 (give it about 30 s)"
     ;;
@@ -103,6 +120,7 @@ stop)
     screen_stop
     inroot /usr/sbin/nginx -c $CONF -s quit 2>/dev/null
     for p in $(pids moonraker.py); do kill $p; done
+    for p in $(pidof ustreamer); do kill $p; done
     sleep 2
     echo "x1_web: stopped"
     ;;
