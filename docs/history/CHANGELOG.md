@@ -7,6 +7,12 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X: first Z homing under the real config** (owner at the printer,
+  bed empty): a 10 mm move down first (sensor stayed open), `BED_CLEAR`,
+  `G28 Z` at 7.4 mm/s with the 3 mm back-off and 2 mm/s second approach,
+  then `G28` for all three axes. `EMPTY_BIN` ran: bed to Z 90, head to
+  X 132.4.
+
 - **1X stock homing from mid-travel and the stock bed leveling, recorded
   move by move** (sindoh repo: docs/1x_stock_routines.md and
   `1x_recordings/`). Y seeks at about 100 mm/s like X, and runs on
