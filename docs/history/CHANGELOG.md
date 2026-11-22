@@ -7,6 +7,15 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- 1X homing, first tries with the owner: X and Y failed with "still
+  triggered after retract". The home sensors stay on from their edge to
+  the end of travel (X: the edge is before the dump station). Now, as
+  stock does it, an axis that is on its sensor first moves off it
+  (`_X1_HOME_AXIS`, `home_off_x` / `home_off_y`), then homes. Not run
+  yet; the edge positions are not measured. The lamp-with-the-screen
+  change was confirmed on the 1X (owner), and the DISPLAY page got a
+  SCREEN OFF button (on the DP200 it was only on the power-key page).
+
 - **Screen app, all models: the case lamp follows the screen timeout**
   (owner). When the screen goes black (idle, no touch for the TIMEOUT
   setting, or SCREEN OFF) a lamp that is on is switched off; it comes

@@ -2624,6 +2624,7 @@ class UI:
         self.grid(d, [
             ('TIMEOUT', ('screen', 'timeout'), C_BTN, 28, fmt_timeout(t)),
             ('CONSOLE', ('screen', 'console'), C_BTN, 28, 'tap to close'),
+            ('SCREEN OFF', ('screen_off',), C_BTN, 26, 'tap to wake'),
         ], top=280)
 
     def page_console(self, d):

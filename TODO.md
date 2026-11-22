@@ -348,3 +348,9 @@ stages 1-5 done on the dev printer):
       stock engine talks to on `ttyS2`, how Marvell's stepper/dcmotor
       drivers relate to the UPC, and heater/thermistor wiring. A serial
       console on its `ttyS0` would help.
+
+44. **Screen app design (owner 11-22, for later):** the case lamp going
+    off with the screen timeout could be a setting on the DISPLAY page;
+    and behavior like this could come from macros the app reads or calls
+    (a screen-sleep / screen-wake macro per model) instead of being
+    coded into the app. Decide when the app is next reworked.
