@@ -448,7 +448,10 @@ printer; neither has run.
 
 **Stage 6 started, night of 2026-11-21 (no motion, no heat).**
 
-- **Config `x1_stage6.cfg`**: the draft as a real config: cartesian
+- **Config** (first `x1_stage6.cfg`; since 11-22 three files as on the
+  DP200: `printer.cfg`, `x1_printer.cfg`, `x1_macros.cfg` in
+  `klipper/config/x1/`, started with `x1_stage4.sh start printer.cfg`):
+  the draft as a real config: cartesian
   axes with homing, `[heater_bed]`, the filament routines, fans, lamp,
   `[virtual_sdcard]` and `[display_status]`. Z homing asks `BED_CLEAR`
   first, as on the DP200. Heaters keep the tested low limits (60 %
@@ -533,9 +536,25 @@ Install plan (stage 7, each write to the eMMC needs the owner's OK):
 3. Nothing else on the eMMC changes: system, recovery and boot
    partitions, the U-Boot environment and `karas.db` stay as they are.
    Removing is deleting the folder and the hook.
-4. Before that: a cold start without the stock engine (driver set-up
-   over the UART and the reference PWM, today left over from stock), and
-   the stock engine never started at boot (it heats to 80/50 C at idle).
+4. Before that: a cold start without the stock engine, and the stock
+   engine never started at boot (it heats to 80/50 C at idle). Prepared
+   2026-11-22, **not run on a cold printer yet**:
+   - Driver registers: `tools/x1_tmc.py setup --yes` writes what the
+     stock program writes (TPWMTHRS, IHOLD_IRUN, PWMCONF, GCONF, five
+     drivers); `check` compares read-only and passes on the live
+     printer. `x1_stage4.sh start` runs the check.
+   - Motor current: seven `[output_pin motor_current_*]` in
+     `x1_printer.cfg` hold the reference PWM at the stock counts (rule
+     as on the DP200: high = 100 + database offset, period 200); read
+     back from the registers equal to what stock left. Which block is
+     which motor is known for the extruder (32) and the cartridge feed
+     (21) only; Y/Z are 30/31 and X is one of 13, 23, 29.
+   - Still unknown for a real cold start: whether the select GPIOs
+     (146, 147, 149, 152) and the UART pins work without the stock
+     program's start-up, the reference blocks' second register (0x64
+     after stock, never written by us), what else the engine switches
+     on (PSU fan enable GPIO 127 is in the config), and the Z driver's
+     `TPWMTHRS`, which stock rewrites at each Z homing (value not read).
 
 ## Open questions
 

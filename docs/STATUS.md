@@ -34,7 +34,8 @@ becomes the full kernel-swap test machine.
   after stopping Sindoh's program, heats the nozzle and bed, moves and
   homes X, Y and Z (as manual steppers so far), and loads and unloads
   filament on the sensors with a jam check. Since 2026-11-21 it also has
-  a real printer config that loads (`x1_stage6.cfg`; no axis moved under
+  a real printer config that loads (`printer.cfg` + `x1_printer.cfg` +
+  `x1_macros.cfg`, the DP200's layout; no axis moved under
   it yet), Moonraker and Mainsail (port 80) and our touch screen app
   on its panel. A reboot always returns it to stock.
 - **Fork pin:** `klipper/FORK` names the commit; since b58960c9 only

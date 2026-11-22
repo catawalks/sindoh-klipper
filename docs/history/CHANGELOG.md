@@ -7,6 +7,24 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X config in the DP200's layout:** `klipper/config/x1/printer.cfg`
+  (the owner's file: includes, Z endstop height, heater control),
+  `x1_printer.cfg` (hardware) and `x1_macros.cfg` (macros) replace
+  `x1_stage6.cfg` and the draft. `x1_stage4.sh start printer.cfg` copies
+  the two includes at every start and keeps a `printer.cfg` that is
+  already there. Loaded on the printer; nothing moved.
+- **1X motor drivers, prepared for a start without the stock program:**
+  `tools/x1_tmc.py` got `check` (read-only; passes on the live printer)
+  and `setup` (writes the stock register values; not run). The motor
+  current references are now Klipper outputs (`motor_current_*`, seven
+  PWM blocks) set to the stock counts 100, 109, 140, 150 of 200; the
+  database offsets explain them (X2 0, C +9, Y and Z +40, E +50).
+- Thermistor tables: they are compiled into the stock program, not
+  stored in the database (no temperature calibration column in any
+  karas.db we have: dev DP200, 2017 firmware package, Prime card), and
+  the 1X's tables equal the DP200's value for value. So they are per
+  firmware, not per printer, and the installer has nothing to read.
+
 - **1X camera: ustreamer instead of Sindoh's server.** The 1X has the
   DP200's camera (Sonix 0c45:6341; MJPEG up to 1280x720 at 30 fps).
   Sindoh's `mjpg_streamer` reads YUYV at 5 fps and re-encodes it, and it

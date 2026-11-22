@@ -2012,7 +2012,7 @@ class UI:
         enc = st.get('filament_motion_sensor filament_encoder', {})
         d.text((20, 160), 'Filament', font=font(28), fill=C_TXT)
         if IS_1X:
-            # the two switches on the filament path (config x1_stage6.cfg)
+            # the two switches on the filament path (config x1_printer.cfg)
             for i, (name, obj) in enumerate((('Opening port', 'filament_switch_sensor bay'),
                                              ('At the extruder', 'filament_switch_sensor extruder_entry'))):
                 on = st.get(obj, {}).get('filament_detected')

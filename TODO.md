@@ -249,12 +249,12 @@ stages 1-5 done on the dev printer):
 41. **1X port** (owner 11-20: start): plan, stages and everything found
     so far in [docs/1x_port_plan.md](docs/1x_port_plan.md); what is done
     is in the changelog. State: start of stage 6 (config
-    `x1_stage6.cfg` loads; web page and touch screen run). Open:
+    the three-file config loads; web page and touch screen run). Open:
     - **Owner present:** unload, then load, to try the two load changes
       of 11-21 (feed ahead while heating; park over the dump station:
       check the nozzle is clear of the cleaning flap). The jam check has
       not seen a real jam; its window values are estimates.
-    - **Owner present:** first homing under `x1_stage6.cfg` (bed empty),
+    - **Owner present:** first homing under the real config (bed empty),
       then the touch screen by hand (calibration is the DP200's).
     - **Owner present:** nozzle heater: the 60 % power cap barely holds
       220 C and the screen's PLA preset is 230 C; raise the cap, then
@@ -265,6 +265,13 @@ stages 1-5 done on the dev printer):
     - Runout: GPIO 80 is the runout sensor (config has it); not tried in
       a print. The DP200 has no such switch: the owner prints Sindoh's
       adapter, then test it and add it to the DP200 config.
+    - **Owner present:** which current reference block is which motor
+      (lower one block, see which motor weakens): X among PWM 13, 23,
+      29; Y and Z between 30 and 31. Then the installer can write
+      `x1_machine.cfg` from the database as it does for the DP200.
+    - Cold start without the stock program: prepared (`x1_tmc.py
+      setup`, motor current in the config; port plan, stage 7 item 4),
+      not tried. Needs a boot where Sindoh's engine never starts.
     - First print, then the screen app's 1X leveling page.
     - One time, on the next stock boot, BEFORE starting Klipper (owner
       11-22): does Sindoh's camera server only capture once the stock

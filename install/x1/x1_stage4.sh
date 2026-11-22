@@ -7,6 +7,8 @@
 # route to it so the PC can send the emergency stop:
 #   curl -m 3 http://PRINTER:7126/
 # CONFIG is a file next to this script (default x1_stage4.cfg, look only).
+# The real config: "start printer.cfg" (with x1_printer.cfg and
+# x1_macros.cfg next to it; klipper/config/x1/ in the repo).
 # "start" stops Sindoh's motion program (x1_stop.sh); only a reboot
 # brings the stock firmware back. Nothing is written to the eMMC.
 ROOT=/tmp/sd
@@ -43,7 +45,23 @@ start)
     mkdir -p $ROOT$K/printer_data/config $ROOT$K/printer_data/logs $ROOT$K/printer_data/comms
     CFG=${2:-x1_stage4.cfg}
     [ -f $ST/$CFG ] || { echo "no $ST/$CFG"; exit 1; }
-    cp $ST/$CFG $ROOT$K/printer_data/config/printer.cfg
+    C=$ROOT$K/printer_data/config
+    # The real config is three files, as on the DP200: printer.cfg (the
+    # owner's: kept once it is there, SAVE_CONFIG writes into it) and the
+    # two includes, replaced at every start. Any other CONFIG is a test
+    # config and replaces printer.cfg.
+    for f in x1_printer.cfg x1_macros.cfg; do [ -f $ST/$f ] && cp $ST/$f $C/; done
+    if [ "$CFG" = printer.cfg ] && grep -q "include x1_printer.cfg" $C/printer.cfg 2>/dev/null; then
+        echo "x1_stage4: keeping the printer.cfg already there"
+    else
+        [ -f $C/printer.cfg ] && grep -q "include x1_printer.cfg" $C/printer.cfg && cp $C/printer.cfg $C/printer.cfg.kept
+        cp $ST/$CFG $C/printer.cfg
+    fi
+    # Motor drivers: set up by the stock program at boot. Look only; on a
+    # start without it: chroot $ROOT /usr/bin/python3 /stage/x1_tmc.py setup --yes
+    # (the stock system has no Python: the card's, with the UART node)
+    [ -e $ROOT/dev/ttyS2 ] || cp -a /dev/ttyS2 $ROOT/dev/
+    [ -f $ST/x1_tmc.py ] && inroot /usr/bin/python3 /stage/x1_tmc.py check | tail -1
     cp $ST/x1_query.py $ST/x1_gcode.py $ST/x1_estopd.py $ROOT$K/
     inroot chown -R klipper:klipper $K/printer_data $K/x1_query.py $K/x1_gcode.py $K/x1_estopd.py
     $U --force --dtcm 0xf9880000 load $ST/fw/klipper_x1_io.bin $ST/fw/klipper_x1_fm.bin || exit 1
