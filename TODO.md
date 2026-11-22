@@ -310,7 +310,20 @@ stages 1-5 done on the dev printer):
     file is here and that our macros have moved on since his copy
     (step lines, JOG, screen timeout). His repository has no license
     file; the config derives from ours, but ask him to add one. The
-    installer does not know the 3DWOX 1 yet.
+    installer does not know the 3DWOX 1 yet. Both wait for a 3DWOX 1
+    or for someone who has one (owner 11-22). Owner's reading of his
+    slower speeds: the Z stall was probably the motor current (the
+    DP200's values, far too low for his unit, before the installer read
+    them per machine), and the "violent" homing is Klipper stopping dead
+    from stock's homing speed where stock ramps down after the sensor.
+    So the model file's speeds may not be needed with the right current.
+46. **Idea: ramp down after a home sensor trips** (owner 11-22), as
+    stock does (1X: it runs about 4.9 mm past the sensor's edge),
+    instead of Klipper's dead stop. Would be a change to the stop path
+    in `src/stepper.c` (and our hardware-burst path) plus a per-stepper
+    option; the host already copes with a stop position that differs
+    from the trigger position. Only for axes with room behind the
+    sensor (never Z). Not started: decide after the first prints.
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
     beeper): USB audio card 0 + amplifier enable GPIO 180, stock plays
     MP3s with mplayer ([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md),
