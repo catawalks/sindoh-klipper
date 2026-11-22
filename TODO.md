@@ -355,6 +355,14 @@ stages 1-5 done on the dev printer):
     app should not carry per-model code per button; the macros do what
     the button means, and a missing macro shows "not set up yet"). Done
     this way: the idle timeout (`SCREEN_TIMEOUT` / `SCREEN_WAKE`).
+    **Problem found 11-22 (owner):** a macro waits behind whatever
+    Klipper is running, so `SCREEN_WAKE` did not switch the lamp on
+    until a heat-up had finished. Lamp and wake must not go through
+    the G-code queue. Idea: a small module in the fork that switches an
+    output at once on a web request (Moonraker passes Klipper's own
+    endpoints through); the config still says what the timeout covers
+    (`variable_lamp`, `variable_display`), the app reads that and uses
+    the endpoint. To decide with the owner.
     Still coded in the app: the filament presets and temperatures, the
     1X filament page's sensor names, the cool-down command list, and
     which pages are off on the 1X. Move them when those pages are next
