@@ -7,6 +7,19 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X bed leveling built from the stock recording** (config and
+  macros; no touch has run yet). `[probe]` on the nozzle contact input
+  (`!gpio81`, enable `gpio153` switched by the probe's activate and
+  deactivate lines): checked without motion, it reads "triggered" with
+  the sensor off and "open" with it on, so a missing enable refuses to
+  probe. `BED_LEVEL`: 150 C, wipe, `NOZZLE_SCRUB` (a shortened copy of
+  stock's scrub; `SCRUB=0` skips it), three touches at each of the
+  three notches at 1.2 mm/s, a report in millimeters against the back
+  point and the `position_endstop` that would put Z 0 at the touch.
+  Limits widened for it: X down to -8, Y to 200.5, Z down to -1.5.
+  Not stock: no wheel-click advice yet (pitch unknown), no re-homing
+  between points.
+
 - **1X: which current reference drives which motor.** With one output
   at 0 a short hard move (7 mm at 8000 mm/s2 for the head, 6 mm at
   3000 for the bed) leaves that motor on its home sensor; every other
