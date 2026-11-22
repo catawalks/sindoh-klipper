@@ -323,7 +323,7 @@ stages 1-5 done on the dev printer):
     in `src/stepper.c` (and our hardware-burst path) plus a per-stepper
     option; the host already copes with a stop position that differs
     from the trigger position. Only for axes with room behind the
-    sensor (never Z). Not started: decide after the first prints.
+    sensor (never Z). Shelved (owner 11-22): too far from stock Klipper to carry alone; revisit once our board support has been accepted upstream.
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
     beeper): USB audio card 0 + amplifier enable GPIO 180, stock plays
     MP3s with mplayer ([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md),

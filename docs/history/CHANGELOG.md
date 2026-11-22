@@ -7,6 +7,19 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **Homing speeds (owner).** DP200: X and Y seek at 100 mm/s instead of
+  stock's 208 (Klipper stops dead at the switch where stock ramps down);
+  Z back-off 2 mm instead of 5 (CHECK on a DP200). 3DWOX 1: keeps its
+  50 mm/s and gets its slow second Z approach (0.5 mm/s, 2 mm) in the
+  model file. 1X: stock's own speeds, read from the move-by-move
+  recording: X seeks at about 102 mm/s (ramps about 223 mm/s2) and
+  searches the edge at 10.2 mm/s; the bed moves at 7.42 mm/s and stock
+  takes the first Z trip with no second approach. Config: X and Y
+  100 / 10, Z 7.4 with our own second approach at 2 mm/s, `max_z_velocity`
+  7.5. The 1X's long Y moves were not in the recording (Y as X). None
+  of these values has run yet. The ramp-down idea is shelved until our
+  board support is upstream (TODO 46).
+
 - 3DWOX 1 config re-laid into our file layout (owner): the one file
   became `3dwox1_printer.cfg` (the model: includes `dp200_printer.cfg`,
   then acceleration, Z speeds, homing speeds) and `printer.cfg` (the
