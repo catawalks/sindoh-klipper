@@ -296,6 +296,8 @@ stages 1-5 done on the dev printer):
     dir and home pins known: sindoh docs/1x_stock_routines.md), the
     sign of the stock X coordinate. Stage 1 goes on an SD card in the 1X's slot (owner 11-21:
     `1x-dev`, ext4, mounted by hand at `/tmp/sd`), not on its eMMC.
+    Draft LOAD_FILAMENT / UNLOAD_FILAMENT and the bay runout sensor are in
+    `x1_printer_draft.cfg` (11-21, not run, templates not parsed yet).
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
     beeper): USB audio card 0 + amplifier enable GPIO 180, stock plays
     MP3s with mplayer ([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md),
