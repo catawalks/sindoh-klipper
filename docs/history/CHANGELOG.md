@@ -7,6 +7,13 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- `tools/gen_test_prints.py --model x1`: the three test prints for the
+  1X (bed centre 110, 100; no prime line, two skirt loops instead; 5 mm
+  retract for the long tube). The DP200 files are unchanged apart from
+  their names being built from the model. Sindoh's own slicer profiles
+  are on the owner's PC (`D:\DP200\CURA`, `D:\DP200\Simpified3D`), to
+  compare later.
+
 - 1X speed test at stock's top speed (owner's go, bed empty):
   `tools/x1_speed_test.py 197 1500 5`. X five 210 mm trips, Y five
   170 mm trips at 197 mm/s and 1500 mm/s2; afterwards both axes switched

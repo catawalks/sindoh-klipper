@@ -13,6 +13,8 @@
 Both start with PRINT_START (heat, home, bed mesh, purge/wipe) and PRIME_LINE, and end with
 PRINT_END, use relative E (M83) and label the object for [exclude_object].
 Usage: gen_test_prints.py OUTDIR [--bed 60] [--extruder 210]
+       gen_test_prints.py OUTDIR --model x1     (3DWOX 1X: bed centre 110, 100,
+           files x1_*.gcode, no PRIME_LINE: two skirt loops prime instead)
 """
 import argparse
 import math
@@ -20,6 +22,8 @@ import os
 
 FIL_AREA = math.pi * (1.75 / 2) ** 2
 CX, CY = 100.0, 100.0          # bed centre (200 x 200 mm bed)
+PRIME = True                   # the model has a PRIME_LINE macro
+RETRACT = 4.0
 
 
 def e_per_mm(width, height):
@@ -28,11 +32,11 @@ def e_per_mm(width, height):
 
 
 class G:
-    def __init__(self, name, bed, ext, retract=4.0, retract_speed=35):
+    def __init__(self, name, bed, ext, retract=None, retract_speed=35):
         self.lines = []
         self.x = self.y = None
         self.retracted = False
-        self.retract = retract
+        self.retract = RETRACT if retract is None else retract
         self.rs = retract_speed * 60
         self.name = name
         self.bed, self.ext = bed, ext
@@ -101,12 +105,23 @@ class G:
         self.emit('M106 S0')
         # the slicer start G-code's prime line: PRIME_LINE at the front edge
         # (Y 0), ends at Z 2; then travel to the object at Z 5
-        self.emit('PRIME_LINE')
+        if PRIME:
+            self.emit('PRIME_LINE')
         self.emit('G90')
         self.emit('M83')
         self.emit('G0 Z5 F600')
         self.travel(x0, y0)            # over the object before going down
         self.emit('EXCLUDE_OBJECT_START NAME=%s' % self.name)
+        self.skirt_box = (x0, y0, x1, y1)
+
+    def skirt(self, epm, speed, loops=2, gap=3.0, w=0.45):
+        """Without a prime line: loops around the object prime the nozzle."""
+        if PRIME:
+            return
+        x0, y0, x1, y1 = self.skirt_box
+        for i in range(loops):
+            d = gap + i * w
+            self.rect(x0 - d, y0 - d, x1 + d, y1 + d, epm, speed)
 
     def layer(self, z, n):
         self.emit(';LAYER:%d' % n)
@@ -127,6 +142,7 @@ def first_layer(bed, ext):
     h, w = 0.25, 0.45
     epm = e_per_mm(w, h)
     g.layer(h, 0)
+    g.skirt(epm, 20)
     half = 25.0
     for i in range(3):
         o = half - w / 2 - i * w
@@ -150,6 +166,8 @@ def box(bed, ext):
         if n == 2:
             g.emit('M106 S255')                     # part fan from layer 3 (PLA)
         speed = 20 if n == 0 else 30
+        if n == 0:
+            g.skirt(epm, speed)
         half = 10.0
         for i in range(2):
             o = half - w / 2 - i * w
@@ -212,11 +230,18 @@ def main():
     ap.add_argument('outdir')
     ap.add_argument('--bed', type=int, default=60)
     ap.add_argument('--extruder', type=int, default=210)
+    ap.add_argument('--model', default='dp200', choices=('dp200', 'x1'))
     a = ap.parse_args()
+    global CX, CY, PRIME, RETRACT
+    if a.model == 'x1':
+        # 3DWOX 1X: the bed's notches are at X -7.5 and 228.5, Y 0.2 and
+        # 200.2; no prime line macro; a long tube from the extruder to the
+        # nozzle (857 mm), so a longer retract
+        CX, CY, PRIME, RETRACT = 110.0, 100.0, False, 5.0
     os.makedirs(a.outdir, exist_ok=True)
-    for fn, g in (('dp200_first_layer.gcode', first_layer(a.bed, a.extruder)),
-                  ('dp200_box_20mm.gcode', box(a.bed, a.extruder)),
-                  ('dp200_xy_scale_150mm.gcode', xy_scale(a.bed, a.extruder))):
+    for fn, g in (('%s_first_layer.gcode' % a.model, first_layer(a.bed, a.extruder)),
+                  ('%s_box_20mm.gcode' % a.model, box(a.bed, a.extruder)),
+                  ('%s_xy_scale_150mm.gcode' % a.model, xy_scale(a.bed, a.extruder))):
         p = os.path.join(a.outdir, fn)
         g.save(p)
         e = sum(float(l.split('E')[1].split()[0]) for l in g.lines
