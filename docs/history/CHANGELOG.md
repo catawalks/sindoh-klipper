@@ -7,6 +7,11 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- 1X bed level page run by touch (owner): the whole routine from MOVE,
+  BED LEVEL, to the result page. Result of that run: front left 0.06 mm
+  below the back, front right 0.02 mm above ("level"). The screen app
+  was restarted afterwards and shows local time.
+
 - 1X clock: the card's Debian had no time zone, so the screen showed
   UTC. `x1_web.sh` now copies the stock system's zone file (the stock
   firmware links `/etc/localtime` at every boot to the zone chosen on

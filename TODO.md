@@ -270,8 +270,9 @@ stages 1-5 done on the dev printer):
     - Cold start without the stock program: prepared (`x1_tmc.py
       setup`, motor current in the config; port plan, stage 7 item 4),
       not tried. Needs a boot where Sindoh's engine never starts.
-    - Leveling works (`BED_LEVEL`) and has its screen page (11-22);
-      the page has not been run by touch yet.
+    - Leveling: done 11-22 (`BED_LEVEL`, its screen page, run by touch).
+      Left from stock by choice: no re-homing between points, no
+      automatic second round.
     - First print: needs `PRINT_START` / `PRINT_END` for the 1X, and
       the 1X's stock acceleration (X about 223 mm/s2 in travel moves;
       print values not read yet) instead of the placeholder 1000.
