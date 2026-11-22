@@ -7,6 +7,15 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **Load and unload say what they are doing (owner):** the 1X macros
+  announce each step with `M117` ("Feeding on while the nozzle heats",
+  "Waiting for the nozzle to reach 220 C", "Purging into the bin", ...),
+  and the screen's running page shows that line with the nozzle
+  temperature. The DP200's macros do not do this yet: there the page
+  still guesses the step from homing and temperature. Not yet watched
+  on the panel (the routines so far were started over the network,
+  which does not open that page).
+
 - 1X: the rewritten load ran end to end (owner at the printer): feed,
   purge, retract and the stock wipe, head back at the bin's center
   (247.8), fan off, purge count 1 of 15. About 3.5 minutes, nearly all

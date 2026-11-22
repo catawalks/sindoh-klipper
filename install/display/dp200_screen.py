@@ -2120,6 +2120,18 @@ class UI:
                font=font(30), fill=C_TXT)
         el = int(time.time() - r['t0'])
         d.text((20, 202), 'Running %d:%02d' % (el // 60, el % 60), font=font(20), fill=C_DIM)
+        # The macro says what it is doing with M117 (display_status): show
+        # that. Macros that do not (the DP200's, so far) get the guessed list.
+        msg = (st.get('display_status') or {}).get('message')
+        if msg:
+            e = st['extruder']
+            d.text((20, 250), 'Now:', font=font(20), fill=C_DIM)
+            for i, l in enumerate(wrap(d, msg, font(28), PW - 40)[:3]):
+                d.text((20, 282 + i * 38), l, font=font(28), fill=C_WARN)
+            d.text((20, 400), 'Nozzle %d / %d °C' % (round(e['temperature']), e['target']),
+                   font=font(22), fill=C_TXT)
+            d.text((20, 440), 'STOP (hold) stops it at once.', font=font(18), fill=C_DIM)
+            return
         steps = FIL_STEPS_LOAD if mode == 'load' else FIL_STEPS_UNLOAD
         cur = fil_phase(st)
         keys = [k for k, _ in steps]
@@ -3059,7 +3071,8 @@ def view_key(ui):
             tuple(b['gcode'] for b in ui.mac['buttons']), ui.mac['error'], ui.mac['page'],
             ui.mac['edit_page'], None if ui.mac['all'] is None else len(ui.mac['all']),
             ui.fil_fail and ui.fil_fail['msg'], job_state(st),
-            (int(time.time() - ui.fil_job['t0']), fil_phase(st)) if ui.screen == 'fil_run' and ui.fil_job
+            (int(time.time() - ui.fil_job['t0']), fil_phase(st), (st.get('display_status') or {}).get('message'),
+             round(st['extruder']['temperature'])) if ui.screen == 'fil_run' and ui.fil_job
             else None,
             start_phase(st) if job_state(st) == 'starting' else None)
 
