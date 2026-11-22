@@ -7,6 +7,12 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- 1X clock: the card's Debian had no time zone, so the screen showed
+  UTC. `x1_web.sh` now copies the stock system's zone file (the stock
+  firmware links `/etc/localtime` at every boot to the zone chosen on
+  its screen, one of 144 in its database) into the Debian root at
+  start. Takes effect when the screen app next starts.
+
 - **Screen app: bed level page for the 1X** (MOVE, BED LEVEL; no longer
   greyed out). Start: MEASURE with or without the scrub, after the
   bed-empty question. Running: the macro's step line and the nozzle

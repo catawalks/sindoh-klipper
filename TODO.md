@@ -271,8 +271,7 @@ stages 1-5 done on the dev printer):
       setup`, motor current in the config; port plan, stage 7 item 4),
       not tried. Needs a boot where Sindoh's engine never starts.
     - Leveling works (`BED_LEVEL`) and has its screen page (11-22);
-      the page has not been run by touch yet. The screen clock on the
-      1X shows UTC (no time zone in the card's Debian).
+      the page has not been run by touch yet.
     - First print: needs `PRINT_START` / `PRINT_END` for the 1X, and
       the 1X's stock acceleration (X about 223 mm/s2 in travel moves;
       print values not read yet) instead of the placeholder 1000.
@@ -327,6 +326,13 @@ stages 1-5 done on the dev printer):
     option; the host already copes with a stop position that differs
     from the trigger position. Only for axes with room behind the
     sensor (never Z). Shelved (owner 11-22): too far from stock Klipper to carry alone; revisit once our board support has been accepted upstream.
+47. **Time zone** (owner 11-22). The 1X takes the zone set on the stock
+    screen at every start. Open: the DP200 and 3DWOX 1 (does their
+    stock keep the same setting? the installer could carry it over),
+    and what happens once stock is gone for good (stage 7 install):
+    then we need our own setting. Proposal: SYSTEM page, pick a region
+    then a city from the system's zone list (it has the daylight saving
+    rules), default = what stock had.
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
     beeper): USB audio card 0 + amplifier enable GPIO 180, stock plays
     MP3s with mplayer ([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md),

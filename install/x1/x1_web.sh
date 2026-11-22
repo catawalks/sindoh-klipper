@@ -45,6 +45,15 @@ webcam_start() {
     inroot chgrp video /dev/video0; chmod 660 $ROOT/dev/video0
     inroot su -s /bin/sh klipper -c "LD_PRELOAD=/usr/local/lib/v4l2_time32_shim.so exec /usr/bin/ustreamer         --device=/dev/video0 --format=MJPEG --encoder=HW --resolution=1280x720 --desired-fps=30         --device-timeout=5 --persistent --host=127.0.0.1 --port=8080" > /dev/null 2>&1 &
 }
+# Time zone: the one set on the stock screen. Stock links /etc/localtime
+# to its zone file at every boot (from its database); the Debian root gets
+# a copy of that file, so the touch screen's clock and the logs show the
+# same local time as stock did. No zone names involved.
+time_zone() {
+    [ -e /etc/localtime ] || return
+    rm -f $ROOT/etc/localtime
+    cp -L /etc/localtime $ROOT/etc/localtime
+}
 screen_stop() {
     [ -f /tmp/x1_screen.pid ] && kill $(cat /tmp/x1_screen.pid) 2>/dev/null
     rm -f /tmp/x1_screen.pid
@@ -58,6 +67,7 @@ start)
     for p in $(pids /sbin/lighttpd); do kill $p; done
     sleep 1
     mkdir -p $ROOT/var/log/nginx $ROOT/var/lib/nginx $ROOT/run
+    time_zone
     cp /tmp/sd/stage/x1_moonraker.conf $ROOT$K/printer_data/config/moonraker.conf
     mkdir -p $ROOT$K/printer_data/gcodes
     inroot chown -R klipper:klipper $K/printer_data
@@ -115,7 +125,7 @@ status)
     done
     ;;
 screen)
-    screen_stop; screen_start ;;
+    screen_stop; time_zone; screen_start ;;
 stop)
     screen_stop
     inroot /usr/sbin/nginx -c $CONF -s quit 2>/dev/null
