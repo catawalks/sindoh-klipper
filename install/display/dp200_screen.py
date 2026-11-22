@@ -116,8 +116,10 @@ PRESETS = (('PLA', 200, 60), ('ABS', 240, 90))
 LOWER_BED_Z = 120                     # Z grows downwards on this machine (bed moves down)
 # Purge bin: _SINDOH_BIN_COUNT counts purges in save_variables bin_count and
 # asks for emptying from bin_threshold (_DP200, dp200_macros.cfg) on
-BIN_THRESHOLD = 15
+BIN_THRESHOLD = 15                    # the DP200's stock value; set per model below
 BIN_DROP = 70                         # EMPTY_BIN lowers the bed this far (bin_drop)
+if IS_1X:
+    BIN_THRESHOLD = 5                 # owner 11-22 (x1_macros.cfg bin_threshold)
 # Custom macro buttons (MOVE -> MACROS): a JSON file in Klipper's config
 # folder, so it can also be edited in Mainsail. {"buttons": [{"label":
 # "PURGE", "gcode": "MY_PURGE"}, ...]}; every button asks before it runs.
@@ -2280,8 +2282,9 @@ class UI:
             ('MOTORS OFF', ('gcode', 'M84', 'Motors off')),
             ('CLEAN', ('confirm', 'Heat, purge and wipe the nozzle?',
                        ('gcode', 'CLEAN_NOZZLE', 'Clean nozzle')), C_BTN, 30, 'nozzle'),
-            ('EMPTY BIN', ('confirm', 'Lower the bed %d mm and move the head to the left, to take '
-                                      'out the purge bin?' % BIN_DROP, ('gcode', 'EMPTY_BIN', 'Empty bin', 'bin')),
+            ('EMPTY BIN', ('confirm', ('Lower the bed and move the head aside, to take out the purge bin?' if IS_1X else
+                                      'Lower the bed %d mm and move the head to the left, to take '
+                                      'out the purge bin?' % BIN_DROP), ('gcode', 'EMPTY_BIN', 'Empty bin', 'bin')),
              C_FULL if n >= BIN_THRESHOLD else C_BTN, 28, '%d / %d purges' % (n, BIN_THRESHOLD)),
             ('BED LEVEL', ('screen', 'bedlevel'), C_BTN, 28, 'probe + screws'),
             ('CALIBRATE', ('screen', 'calibrate'), C_BTN, 28, 'input shaping'),

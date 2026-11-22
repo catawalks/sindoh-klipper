@@ -7,6 +7,23 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X load, unload, wipe and bin routines rewritten from a stock
+  recording** (`host/movewatch.c`, new: one line per motor move; the
+  sequences are in the sindoh repo's 1x_stock_routines.md). Our X frame
+  equals stock's (home 20.35 mm past the sensor's edge). Copied: purge
+  position 247.8 reached from the left via 252.8, part fan at 50 %,
+  purge 60 mm at 1.98 mm/s, 0.5 s, retract 20 mm, 3 s, then the wipe
+  (left to the wall, two passes 226.8 ... 252.8, back to 247.8); unload
+  with stock's slow first 50 mm; homing moves off the sensor by stock's
+  35 / 10 mm. Owner's choices: the head waits over the bin (stock: at
+  X 192 for the load, 212.7 for the unload, where it has the filament
+  cut at the head), our temperatures, no latch solenoid in the unload
+  (`CARTRIDGE_RELEASE` does it, PWM block 8). New: `EMPTY_BIN` (head to
+  132.4 as stock, bed to Z 90 by the owner; stock 121), the purge count
+  with `bin_threshold` 5 (owner; stock never asks on the 1X; the DP200's
+  15 is Sindoh's own number), labelled as the LEFT head's for the 2X.
+  Loads on the printer and passes the lint; NOT RUN yet.
+
 - **1X unload and load under the real config (owner at the printer),**
   at the measured positions: unload 897 mm to the extruder sensor and
   506 mm to the bay switch; load 454 mm by the feed motor alone, 707 mm
