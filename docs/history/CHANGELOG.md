@@ -7,6 +7,13 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X: X and Y home under the real config** (first axes moved under
+  it). After one more failure (the macro read the sensor as `x`; this
+  Klipper names it `stepper_x`, so the move-off step never ran), both
+  home from outside the sensor stretch and from deep inside it, ending
+  at 243.4 / 5.3. X then parked at 256.4, stock's load position. Z has
+  not been homed under this config.
+
 - **Idle timeout through config macros (owner; replaces the lamp code
   in the screen app of earlier today):** the screen program runs
   `SCREEN_TIMEOUT` when its timeout ends and `SCREEN_WAKE` when it
