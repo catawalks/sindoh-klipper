@@ -136,12 +136,11 @@ NUMPY_LINK = '/usr/local/lib/dp200-numpy/numpy'   # install/input_shaping/setup_
 DRY_PRESETS = (('PLA', 50, 4), ('PETG', 65, 4), ('TPU', 50, 5),
                ('ABS', 80, 4), ('ASA', 80, 4), ('NYLON', 85, 8))
 DRY_HOURS = (2, 4, 6, 8, 12)
-# LOAD / UNLOAD temperatures (nozzle C). PLA and ABS run the macros' stock
-# settings (MATERIAL=); the others and CUSTOM pass TEMP=. The extruder's
-# max_temp is 260 and min_extrude_temp 170 (dp200_printer.cfg).
+# LOAD / UNLOAD temperatures (nozzle C). Every choice is passed to the
+# macros as TEMP=, on every model (docs/touchscreen.md, "What a model's
+# macros provide"). The DP200's max_temp is 260, min_extrude_temp 170.
 FIL_PRESETS = (('PLA', 230), ('PETG', 240), ('ABS', 250),
                ('ASA', 250), ('TPU', 230), ('NYLON', 255))
-FIL_STOCK = ('PLA', 'ABS') if not IS_1X else ()    # the 1X macros take TEMP= only
 COOL_DOWN = 'TURN_OFF_HEATERS' if IS_1X else 'FILAMENT_DRY_STOP\nTURN_OFF_HEATERS'
 FIL_MIN, FIL_MAX = 180, 260
 FIL_STEPS = (-10, -5, 5, 10)
@@ -3028,7 +3027,7 @@ def fil_error_kind(msg):
 def fil_confirm(mode, name, t):
     """The confirm action for LOAD/UNLOAD of filament `name` at t C."""
     macro = 'LOAD_FILAMENT' if mode == 'load' else 'UNLOAD_FILAMENT'
-    arg = 'MATERIAL=%s' % name if name in FIL_STOCK else 'TEMP=%d' % t
+    arg = 'TEMP=%d' % t
     what = name if name != 'CUSTOM' else 'filament'
     return ('confirm', 'Heat the nozzle to %d°C and %s %s?' % (t, mode.upper(), what),
             ('gcode', '%s %s' % (macro, arg), '%s %s' % (mode.capitalize(), what), 'fil'))

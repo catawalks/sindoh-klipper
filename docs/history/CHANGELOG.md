@@ -7,6 +7,14 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **The macro side of the screen is written down** (docs/touchscreen.md,
+  "What a model's macros provide"): the commands a model must define and
+  the `M117` step rule, for the next models. The screen now passes the
+  filament temperature as `TEMP=` on every model (it sent `MATERIAL=` for
+  PLA and ABS on the DP200; the result is the same there, 230 / 250 C
+  with the feed starting 20 C below). The DP200's heating line names
+  its temperature.
+
 - The DP200's LOAD and UNLOAD announce their steps with `M117` too
   (homing, moving to the bin, heating, feeding, purging, wiping), so the
   screen's running page shows the real step there as well. The 3DWOX 1

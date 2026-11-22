@@ -55,6 +55,53 @@ the choice was made (KlipperScreen and the other options) is in
 | Power | SHUT DOWN, REBOOT, KLIPPER, SCREEN OFF. On our kernel, with a Sindoh update stick plugged in, TO STOCK reverts the printer to Sindoh's firmware after two confirmations. |
 | Error | Shown when Klipper is shut down or cannot start, with the message and the buttons that help (restart, network). |
 
+## What a model's macros provide
+
+One screen program serves every model. It has no per-model routines: a
+button sends a command, and the model's macro file
+(`dp200_macros.cfg`, `x1/x1_macros.cfg`) makes that command do the right
+thing on its hardware. A button whose command the config does not define
+is greyed out and says "not set up yet". For a new model, write these:
+
+| Command | The screen sends it for | Notes |
+|---|---|---|
+| `LOAD_FILAMENT TEMP=<C>` | FILAMENT, LOAD | The screen always passes the temperature of the chosen filament as `TEMP=`. A macro may also accept `MATERIAL=` for use from the console. |
+| `UNLOAD_FILAMENT TEMP=<C>` | FILAMENT, UNLOAD | As above. |
+| `CARTRIDGE_RELEASE` | FILAMENT, UNLOCK | Cartridge latch. |
+| `FILAMENT_DRY`, `FILAMENT_DRY_STOP` | FILAMENT, DRYER | |
+| `CLEAN_NOZZLE` | MOVE, CLEAN | Counts a purge. |
+| `EMPTY_BIN`, `BIN_EMPTIED` | MOVE, EMPTY BIN | Purges are counted in `save_variables` `bin_count`. |
+| `JOG AXIS=<X/Y/Z> D=<mm>` | MOVE, JOG | Refuses an axis that is not homed, stops at the limits. |
+| `G28`, `BED_CLEAR` | MOVE, HOME | Z homing needs `BED_CLEAR` first. |
+| `SCREEN_TIMEOUT`, `SCREEN_WAKE` | the idle timeout | `variable_display`, `variable_lamp` say what goes dark. |
+| `LAMP_TOGGLE` | LAMP | |
+
+**Say what you are doing.** A routine that takes more than a few seconds
+(load, unload, cleaning, anything that waits for a heater) announces each
+step with `M117 <text>`. The screen's running page shows that line with
+the nozzle temperature, and Mainsail shows it too, so nobody waits in the
+dark. Rules:
+
+- One short line per step, in plain words, naming a temperature the step
+  waits for: `M117 Heating the nozzle to {temp|int} C`.
+- Put `M400` before an `M117` that follows queued moves (`G1`, `G4`).
+  Klipper reads ahead, so without it the line changes while the previous
+  step is still moving.
+- End the routine with a bare `M117`, which clears the line.
+- Keep the steps in the order they happen; the screen shows only the
+  current one.
+
+The steps used so far, for the same wording on the next model: "Homing X
+and Y", "Moving to the purge bin" (1X: "dump bin"), "Heating the nozzle
+to N C", "Feeding to the extruder", "Feeding on while the nozzle heats",
+"Waiting for the nozzle to reach N C", "Feeding to the nozzle", "Purging
+into the bin", "Wiping the nozzle", "Pulling the filament out of the
+nozzle", "Pulling the filament back".
+
+Before `M117` existed in the macros the page guessed the step from the
+homing state and the temperature; it still does when a macro sends no
+line.
+
 ## The panel and touch controller (measured on the printer)
 
 | | |
