@@ -270,11 +270,12 @@ stages 1-5 done on the dev printer):
     - Cold start without the stock program: prepared (`x1_tmc.py
       setup`, motor current in the config; port plan, stage 7 item 4),
       not tried. Needs a boot where Sindoh's engine never starts.
-    - Leveling: stock's whole routine is recorded (sindoh
-      docs/1x_stock_routines.md, "Bed leveling recorded move by
-      move"): build the scrub, the three-point touch and the wheel
-      advice from it. Needs X down to -7.5 (`position_min` is -3.1).
-    - First print, then the screen app's 1X leveling page.
+    - Leveling works (`BED_LEVEL`, 11-22). Open: a 1X page for it in
+      the screen app (the DP200's bed level page as the template: three
+      points and wheel clicks instead of a mesh and screw turns).
+    - First print: needs `PRINT_START` / `PRINT_END` for the 1X, and
+      the 1X's stock acceleration (X about 223 mm/s2 in travel moves;
+      print values not read yet) instead of the placeholder 1000.
     - X numbers against stock's: 262.7 is stock's X maximum (the left
       wall), the sensor's edge about 20 mm before it. The database's
       positions (load 256.4 then 243.4, wipe 257.3 ... 231.3) are in

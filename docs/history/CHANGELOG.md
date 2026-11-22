@@ -7,6 +7,12 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X: the whole `BED_LEVEL` ran** (owner at the printer): homing,
+  150 C, wipe, the scrub at 1.3 mm past the surface, nine touches, bed
+  forward, report. Back -1.293, front left -1.173 (0.12 mm higher: one
+  click counter-clockwise), front right -1.208 (0.09 mm higher: within
+  half a click). The same picture as without the scrub (0.12 and 0.06).
+
 - 1X scrub (owner): the sheet covers the places where stock scrubs, so
   stock really presses the sheet about 1.7 mm past the nozzle tip, on
   the bed's springs. `NOZZLE_SCRUB` uses `scrub_depth` 1.3 mm past the
