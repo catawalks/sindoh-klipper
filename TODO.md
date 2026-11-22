@@ -273,10 +273,10 @@ stages 1-5 done on the dev printer):
     - Leveling: done 11-22 (`BED_LEVEL`, its screen page, run by touch).
       Left from stock by choice: no re-homing between points, no
       automatic second round.
-    - **Owner present:** speed test (`speedtest.py`: X and Y back and
-      forth at 197 mm/s, then checked against the home sensors), then a
-      first print with `PRINT_START` / `PRINT_END` (written 11-22, not
-      run). Bed `max_temp` 100 is a guess: no stock limit found.
+    - **Owner present:** a first print with `PRINT_START` /
+      `PRINT_END` (written 11-22, not run). Bed `max_temp` 100 is a
+      guess: no stock limit found. Z and the extruder have not run at
+      their stock limits (12 and 86 mm/s).
     - Stage 7: install onto `/userdata` (plan in the port plan; every
       eMMC write needs the owner's OK), a cold start without the stock
       engine (driver set-up, reference PWM).

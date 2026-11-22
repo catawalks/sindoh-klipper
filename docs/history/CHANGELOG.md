@@ -7,6 +7,11 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- 1X speed test at stock's top speed (owner's go, bed empty):
+  `tools/x1_speed_test.py 197 1500 5`. X five 210 mm trips, Y five
+  170 mm trips at 197 mm/s and 1500 mm/s2; afterwards both axes switched
+  their home sensors within 0.5 mm of where homing had put them.
+
 - **1X: stock's speed and temperature limits, and the print routines.**
   From the ramp tables compiled into the stock program: X/Y up to
   197.7 mm/s in 8 mm (0.13 s, about 1460 mm/s2 on average), Z up to
