@@ -412,8 +412,18 @@ alone 474.3 mm at 59 mm/s until the bay switch released, then 240 mm
 more. Two things found on the way: the engine's own step counter counts
 both edges under our firmware (2 per step), and this stage's
 `[printer]` limits must allow the load speeds. Not done yet:
-`LOAD_FILAMENT`, and the jam check with the filament encoder (GPIO 65
-and 67; owner's idea: stop with "filament not moving").
+the jam check with the filament encoder (GPIO 65 and 67; owner's idea:
+stop with "filament not moving").
+
+The first `LOAD_FILAMENT` then jammed: the feed motor stopped on
+GPIO 120 after 457 mm as it should, but for the stretch to the nozzle
+only the feed motor ran. Cause: `feed_until` had not put the
+extruder's own stepper back on its queue after the unload (it has no
+queue name to restore by). Fixed in fork 980bec78 and checked by step
+counts with no filament loaded. The jam check above would have caught
+this within a second. Still to do: rerun `LOAD_FILAMENT`; a stop that
+does not wait for the serial console (the owner's "stop" took too long
+to act on).
 
 ## Open questions
 

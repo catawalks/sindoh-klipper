@@ -6,6 +6,12 @@ one. The detail for everything up to 2026-11-12 is in
 files in this folder; `git log` has the rest.
 
 ## 2026-11-21
+- **1X: the first Klipper load jammed; cause found and fixed** (fork
+  980bec78, FORK pin moved). After the unload had borrowed the extruder's
+  own stepper, `feed_until` did not put it back on its queue, so in the
+  load only the feed motor ran and pushed into a standing gear (owner
+  cut the power). Found by step counts with no filament; the same
+  counts are right after the fix. `LOAD_FILAMENT` not yet rerun.
 - **1X: Klipper unloaded PLA, stopping on the sensors** (stage 5g
   config, fork 00e6b950, FORK pin moved; Python only, same firmware).
   New fork module `feed_until`: a homing-style move for the extruder
