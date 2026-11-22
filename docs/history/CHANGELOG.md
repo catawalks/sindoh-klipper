@@ -7,6 +7,17 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X unload and load under the real config (owner at the printer),**
+  at the measured positions: unload 897 mm to the extruder sensor and
+  506 mm to the bay switch; load 454 mm by the feed motor alone, 707 mm
+  by both while the nozzle was still heating (the "feed ahead" change,
+  first run), the last 150 mm at 220 C, purge at the bin's center,
+  then onto the cleaning flap. 2 min 48 s for the load, no jam error.
+  The unload ended in a runout pause (the bay sensor took it for a
+  print running out): the sensor is now switched off during load and
+  unload. Owner: the bin's center is to be approached from the left, so
+  the cleaning flap has sprung back (`park_via_x`, not run yet).
+
 - Correction to the two 1X entries below (owner): 262.7 is the stock
   program's X MAXIMUM, not a recorded home position, and the head cannot
   be "1 mm further left" than the wall: 19.3 and 20.3 mm are the same
