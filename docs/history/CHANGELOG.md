@@ -7,6 +7,16 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X: which current reference drives which motor.** With one output
+  at 0 a short hard move (7 mm at 8000 mm/s2 for the head, 6 mm at
+  3000 for the bed) leaves that motor on its home sensor; every other
+  output, and no output, lets it come off. X is PWM block 29, Y is 30;
+  Z is 31 by elimination, E 32 and C 21 by value. The config's outputs
+  are named `motor_current_x/y/z/e/c` now (13 and 23 stay as spares).
+  A plain move does not show it: a motor with its reference at 0 still
+  turns without load. The installer can now write a 1X's currents from
+  its database as it does for the DP200 (not done yet).
+
 - **1X heaters at stock's full power, PID tuned** (owner at the
   printer). The database allows 1000 of 1000 for nozzle and bed, so
   `max_power` is 1.0 for both (was 0.6, which barely held 220 C);

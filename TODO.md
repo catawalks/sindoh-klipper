@@ -264,10 +264,9 @@ stages 1-5 done on the dev printer):
     - Runout: GPIO 80 is the runout sensor (config has it); not tried in
       a print. The DP200 has no such switch: the owner prints Sindoh's
       adapter, then test it and add it to the DP200 config.
-    - **Owner present:** which current reference block is which motor
-      (lower one block, see which motor weakens): X among PWM 13, 23,
-      29; Y and Z between 30 and 31. Then the installer can write
-      `x1_machine.cfg` from the database as it does for the DP200.
+    - Installer for the 1X: write `x1_machine.cfg` from the database as
+      for the DP200 (X from MOTOR_PWM_X2OFFSET, Y, Z, E, and C from
+      MOTOR_PWM_COFFSET; outputs `motor_current_x/y/z/e/c`).
     - Cold start without the stock program: prepared (`x1_tmc.py
       setup`, motor current in the config; port plan, stage 7 item 4),
       not tried. Needs a boot where Sindoh's engine never starts.
