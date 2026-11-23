@@ -1,6 +1,6 @@
 #!/bin/sh
 # 3DWOX 1X, stage 4 of the port: our Klipper firmware on both UPC cores,
-# LOOK ONLY (klipper/config/x1/x1_stage4.cfg defines no output).
+# LOOK ONLY (klipper/config/x1/bringup/x1_stage4.cfg defines no output).
 # Run on the printer's own Linux as root, from the SD card:
 #   sh /tmp/sd/stage/x1_stage4.sh start [CONFIG]|status|stop
 # With X1_PC=<the PC's address> in the environment, "start" also keeps a

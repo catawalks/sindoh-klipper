@@ -10,6 +10,7 @@ file has **one home**; nothing is copied by hand between them.
 | Firmware build configs (`config/dp200_fm.config`, `dp200_io.config`) | the fork |
 | Host modules (`klippy/extras/upc_stats.py`, `upc_clockcheck.py`, `dp200_cartridge.py`) | the fork |
 | Printer configuration: `printer.cfg`, `dp200_printer.cfg`, `dp200_macros.cfg`, `dp200_adxl.cfg.off` | here, `klipper/config/` |
+| Other models, same three-file layout: `klipper/config/x1/` (3DWOX 1X; its bring-up test configs in `x1/bringup/`), `klipper/config/3dwox1/` (3DWOX 1, untested) | here |
 | The UPC register map and IPC layout (`upc_hw.h`, `upc_ipc.h`) | here, `common/` (upctool uses them). The fork carries a copy in `src/upc/` to build; `tools/fork_check.sh` compares them |
 | Which fork commit the printers build | here, `klipper/FORK` |
 

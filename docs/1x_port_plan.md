@@ -191,7 +191,7 @@ saving mode first):
 - `install/x1/x1_stop.sh` stops the engine, holds the cores and stops
   the heater PWM blocks; `install/x1/x1_stage4.sh start|status|stop`
   loads the firmware, runs `upctool bridge` and klippy in the SD card's
-  Debian root with `klipper/config/x1/x1_stage4.cfg` (no outputs
+  Debian root with `klipper/config/x1/bringup/x1_stage4.cfg` (no outputs
   defined). `tools/x1_query.py` prints the state from Klipper's API
   socket. `upctool` is passive by itself on these boards.
 - Both MCUs connect (398.04 MHz measured by Klipper). The home sensors
@@ -204,7 +204,7 @@ saving mode first):
 **5. Outputs one at a time (owner present each time).**
 
 **5a done 2026-11-21: lights, beeper and fans** (fork 8ceef800: the 1X's
-PWM block map and writable `gpioN` pins; `klipper/config/x1/x1_stage5a.cfg`;
+PWM block map and writable `gpioN` pins; `klipper/config/x1/bringup/x1_stage5a.cfg`;
 `tools/x1_gcode.py` sends timed G-code). Each output was switched by
 Klipper with the owner watching:
 
@@ -229,7 +229,7 @@ reference PWM are enough.
 
 **5b, second half, done 2026-11-21: X, Y and Z moved by Klipper** (fork
 e3e1b356: the 1X's stepper register offsets, read from the stock FM
-microcode; `klipper/config/x1/x1_stage5b.cfg` with one `manual_stepper`
+microcode; `klipper/config/x1/bringup/x1_stage5b.cfg` with one `manual_stepper`
 per axis; step batching off in `x1_fm.config` until the engine clock is
 measured). 5 mm out and back on each axis with the owner watching;
 directions and pins in sindoh docs/1x_stock_routines.md. The drivers ran
