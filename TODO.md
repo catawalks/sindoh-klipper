@@ -274,6 +274,10 @@ stages 1-5 done on the dev printer):
         the bow). The nozzle touch only works at the notches; a mesh
         needs a conductive sheet or another probe on the head (end
         user / future change).
+      - Owner 11-22: stock prints on this 1X have never come out
+        mirrored, and neither Sindoh's slicer nor the firmware
+        mirrors, so most likely no X change is needed and the
+        front/back reading of Y is what is wrong. The L print decides.
       - **X direction (owner decision, after a print):** the stock
         program passes a print file's X straight through, in the same
         left-growing frame as our config, and nothing in Sindoh's files
@@ -285,8 +289,11 @@ stages 1-5 done on the dev printer):
         use X 110 (middle of the notches). Find the sheet's real
         center before changing `gen_test_prints.py`.
       - Taken from Sindoh's Cura values 11-22 (owner): retract 6 mm,
-        40 mm/s printing, 130 mm/s travel, `max_accel` 2000 (speed
-        test passed at 2000). Not printed yet. All four are starting points
+        40 mm/s printing, 130 mm/s travel. `max_accel` 2500 from
+        Sindoh's own slicer (owner 11-22 night): **owner present, bed
+        empty:** `tools/x1_speed_test.py 197 2500 5` (passed at 2000).
+        Not printed yet. Next steps (owner): tune toward 60 mm/s
+        (Sindoh's "Fast"), more with input shaping. All four are starting points
         to tune higher later (owner). The first layer stays
         0.25 x 0.45.
     - Bed `max_temp` 100 is a guess: no stock limit found. Z and the

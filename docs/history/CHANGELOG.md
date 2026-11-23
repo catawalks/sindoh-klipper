@@ -7,6 +7,9 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- 1X `max_accel: 2500` (owner: the value Sindoh's own slicer profiles
+  use). On the printer; the speed test at 2500 waits for the owner.
+
 - Sindoh's own slicer profiles (3DWOX Desktop, 23 models) and a cube
   sliced for the 1X read: speeds per profile (Fast 60 mm/s, Normal 40),
   machine values, and the cube's engraved Z is not mirrored in the
