@@ -7,6 +7,13 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- Research repository (sindoh cd691c5 and after): `1x.md` no longer
+  says nothing was tested with Klipper; it marks what the port
+  confirmed (UPC cores, motor current rule, driver UART, thermistor
+  tables) and its closing section is "What the Klipper port found".
+  `other_models.md`: the 1X has one board name, `1X_r1`, and the
+  owner's firmware is newer than the Drive's newest.
+
 - **1X: PC Debug 2 listened to** (owner moved the console cable there):
   no byte at 115200 in 52 s, through a lamp switch, a beep and a
   firmware restart, and none at 9600 to 921600. Linux uses only the
