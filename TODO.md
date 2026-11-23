@@ -451,11 +451,19 @@ stages 1-5 done on the dev printer):
       finished. Idea: a small module in the fork that switches an
       output at once on a web request; the config still says what the
       timeout covers. To decide with the owner.
-    - **1X power button:** Sindoh's `/app/powerkeyd` keeps running
-      under Klipper and powers the printer off on the front button.
-      The owner has to hold the button about 3 s (11-23); the
-      program then acts within 20 ms of its input. Decide whether to hold it off during a print (freeze the
-      program while printing).
+    - **1X power button: our own handling** (owner 11-23: as on the
+      DP200, a press for the power menu, a hold to shut down).
+      Measured 11-23 (sindoh `docs/1x.md`): Linux cannot see a tap or
+      a 1 s press; GPIO 116 goes low only once the button has been
+      held about 3 s and stays low until it is let go; the printer
+      does not switch off by itself during a 5 s hold. Sindoh's
+      `/app/powerkeyd` shuts down the moment the line goes low. To
+      build: our own watcher in its place (powerkeyd frozen while
+      Klipper runs): line low = open the screen's POWER page; still
+      low after a further few seconds = shut down through the power
+      helper; never act during a print without a confirmation.
+      Owner to choose the times and whether a hold during a print
+      asks first.
     - **1X updater:** Mainsail lists the card's Klipper checkout as
       invalid (detached, untracked files). Do not use its "recover"
       there; the stage 7 install will have no checkout.

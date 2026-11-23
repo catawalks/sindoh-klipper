@@ -7,6 +7,11 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- 1X power button measured (owner pressing, the line logged): a tap
+  and a 1 s press are invisible to Linux; on a long hold GPIO 116 goes
+  low after about 3 s and stays low until release. Design notes in
+  TODO 44; facts in sindoh `docs/1x.md`.
+
 - **1X: reboot from Moonraker works** (`POST /machine/reboot`, what
   Mainsail's power menu sends; owner present, bed clear). Console
   log: the helper went through web page, Moonraker, Klipper, heater
