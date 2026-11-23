@@ -43,7 +43,7 @@ the choice was made (KlipperScreen and the other options) is in
 | Bin | After the purge bin is emptied: DONE resets the count. |
 | Macros | Buttons for the owner's own macros; EDIT picks which macros get a button. Each asks before it runs. |
 | Preheat | Material presets and COOL DOWN. |
-| Move | HOME, JOG (X, Y, Z by 0.1 / 1 / 10 / 50 mm; the config macro `JOG`), LOWER BED, MOTORS OFF, CLEAN (nozzle), EMPTY BIN, BED LEVEL, CALIBRATE. |
+| Move | HOME, JOG (X, Y, Z by 0.1 / 1 / 10 / 50 mm; the config macro `JOG`), LOWER BED, BED FORWARD, CLEAN (nozzle), EMPTY BIN, BED LEVEL, CALIBRATE (Z HEIGHT and PROBE OFFSET paper tests, PID TUNE, INPUT SHAPING), MOTORS OFF. |
 | Bed level | PROBE the bed and show how far to turn each screw, in eighths of a turn. |
 | Calibrate | Z HEIGHT and PROBE OFFSET (the paper test, with SAVE / DISCARD), PID TUNE (nozzle or bed), INPUT SHAPING (with a USB accelerometer: [input_shaping.md](input_shaping.md)), SAVE Z OFFSET. |
 | Dryer | Use the heated bed as a filament dryer: START, STOP DRYING. |
@@ -72,6 +72,7 @@ is greyed out and says "not set up yet". For a new model, write these:
 | `CLEAN_NOZZLE` | MOVE, CLEAN | Counts a purge. |
 | `EMPTY_BIN`, `BIN_EMPTIED` | MOVE, EMPTY BIN | Purges are counted in `save_variables` `bin_count`. |
 | `JOG AXIS=<X/Y/Z> D=<mm>` | MOVE, JOG | Refuses an axis that is not homed, stops at the limits. |
+| `BED_FORWARD` | MOVE, BED FORWARD | Only Y moves (homes Y first if needed, never Z: a part may be on the bed). Refuses while printing. |
 | `G28`, `BED_CLEAR` | MOVE, HOME | Z homing needs `BED_CLEAR` first. |
 | `BED_LEVEL SCRUB=<0/1>` | MOVE, BED LEVEL, on a model without a mesh probe | Three touches with the nozzle. The page shows the macro's `M117` line while it runs, then reads the result from the macro `_LEVEL`: `back`, `fl`, `fr` (touch heights), `click` (mm per wheel click), `cw_raises`, `ok`. A model that defines `BED_MESH_CALIBRATE` gets the DP200's mesh-and-screws page instead. |
 | `SCREEN_TIMEOUT`, `SCREEN_WAKE` | the idle timeout | `variable_display`, `variable_lamp` say what goes dark. |

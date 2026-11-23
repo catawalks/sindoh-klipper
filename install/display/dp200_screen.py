@@ -2369,7 +2369,7 @@ class UI:
             ('JOG', ('screen', 'jog'), C_BTN, 30, 'X / Y / Z'),
             ('LOWER BED', lower, C_BTN, 30, None if lower or not paused else
              ('already low' if homed == 'xyz' else no)),
-            ('MOTORS OFF', ('gcode', 'M84', 'Motors off')),
+            ('BED FORWARD', ('gcode', 'BED_FORWARD', 'Bed forward'), C_BTN, 26, 'to the front'),
             ('CLEAN', ('confirm', 'Heat, purge and wipe the nozzle?',
                        ('gcode', 'CLEAN_NOZZLE', 'Clean nozzle')), C_BTN, 30, 'nozzle'),
             ('EMPTY BIN', ('confirm', ('Lower the bed and move the head aside, to take out the purge bin?' if IS_1X else
@@ -2377,16 +2377,17 @@ class UI:
                                       'out the purge bin?' % BIN_DROP), ('gcode', 'EMPTY_BIN', 'Empty bin', 'bin')),
              C_FULL if n >= BIN_THRESHOLD else C_BTN, 28, '%d / %d purges' % (n, BIN_THRESHOLD)),
             ('BED LEVEL', ('screen', 'bedlevel'), C_BTN, 28, 'probe + screws'),
-            ('CALIBRATE', ('screen', 'calibrate'), C_BTN, 28, 'input shaping'),
+            ('CALIBRATE', ('screen', 'calibrate'), C_BTN, 28, 'Z, probe, PID, shaper'),
+            ('MOTORS OFF', ('gcode', 'M84', 'Motors off')),
         ]
         if paused:
-            for k in (0, 1, 3, 6, 7):                  # HOME, JOG, MOTORS OFF, BED LEVEL, CALIBRATE
+            for k in (0, 1, 3, 6, 7, 8):   # HOME, JOG, BED FORWARD, BED LEVEL, CALIBRATE, MOTORS OFF
                 items[k] = (items[k][0], None, C_BAR, 28, no, C_DIM)
             if not lower:
                 items[2] = items[2][:1] + (None, C_BAR) + items[2][3:] + (C_DIM,)
             if homed != 'xyz':                          # anything else would home first
                 items = [(it[0], None, C_BAR, 28, no, C_DIM) for it in items]
-        self.grid(d, items, top=240, rows_h=90)
+        self.grid(d, items, top=232, rows_h=78)       # five rows
 
     def bl_view(self, d, top, w, live):
         """Top-down plate (back at the top, door at the bottom) with the 16

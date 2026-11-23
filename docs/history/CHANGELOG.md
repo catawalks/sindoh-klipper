@@ -7,6 +7,20 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- **Work printer: the v0.1.1 test payload installed from the stick**
+  (owner). His notes from using it led to:
+  - **BED FORWARD** on the screen's MOVE page (macro `BED_FORWARD` in
+    both models' macro files: only Y moves, Y is homed first if needed,
+    never Z). The MOVE page now has five rows; MOTORS OFF is last.
+  - **`LV_PROBE_CALIBRATE_SAVE` needs no typed number:** run when the
+    paper drags, it accepts the paper test itself and reads the
+    height; after an `ACCEPT` it takes the nozzle's height (only right
+    after `LV_PROBE_CALIBRATE`, and only a plausible paper-test
+    height). `Z=` still overrides; the screen's PROBE OFFSET wizard,
+    which already did this, is unchanged.
+  Templates compile and each case was run against stand-in printer
+  states on the PC; nothing has run on a printer.
+
 - Research repository (sindoh cd691c5 and after): `1x.md` no longer
   says nothing was tested with Klipper; it marks what the port
   confirmed (UPC cores, motor current rule, driver UART, thermistor

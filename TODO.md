@@ -70,7 +70,8 @@ Either printer:
   cable goes back to the console port (needed to start Klipper).
 - **Remote reboot** (item 48): with the console back, copy the three
   files to the card's stage folder and restart the web side, then try
-  Mainsail's power menu.
+  Mainsail's power menu. Same visit: the screen app and `x1_macros.cfg`
+  of 11-23 (BED FORWARD) go onto the card.
 - **Runout sensor** during a print; a held-back filament for the jam
   check.
 - **Cold start** without Sindoh's program (port plan, stage 7 item 4).
@@ -350,6 +351,23 @@ stages 1-5 done on the dev printer):
     then we need our own setting. Proposal: SYSTEM page, pick a region
     then a city from the system's zone list (it has the daylight saving
     rules), default = what stock had.
+49. **Next stick payload (v0.1.2)** (owner 11-23: the installed
+    v0.1.1 test payload is from 11-20 and lacks the screen and macro
+    work since). It should carry: JOG, the MOVE page order with BED
+    FORWARD, the lamp going off with the screen (`SCREEN_TIMEOUT` /
+    `SCREEN_WAKE`, restart fix), step messages during load and
+    unload, homing at 100 mm/s with a 2 mm Z back-off, the automatic
+    `LV_PROBE_CALIBRATE_SAVE`, and the remote reboot (item 48). Before
+    it can be built:
+    - The DP200 firmware from the current fork (f97fa268) has never
+      run on a DP200: test it on the dev printer first, or build the
+      payload with the firmware of v0.1.0 and only new host files.
+    - `BED_FORWARD` and the new `LV_PROBE_CALIBRATE_SAVE` on a DP200
+      (owner present).
+    - `docs/INSTALL.md` still tells users to type
+      `LV_PROBE_CALIBRATE_SAVE Z=<value>` (right for v0.1.0 and
+      v0.1.1): change it with the release that carries the new macro.
+    - The dev printer did not answer on the network on 11-23.
 48. **Reboot and power off from Mainsail, every model** (owner 11-23:
     people will want to restart their printer remotely). Moonraker runs
     `sudo reboot` / `sudo poweroff` inside the Klipper root, which
