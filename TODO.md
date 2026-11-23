@@ -55,9 +55,9 @@ Either printer:
     nozzle doesn't drag across a failed print. Mind that Z homes upward.
 
 1X (get a fresh "bed empty" first; background in items 41 and 44):
-- **The big L again** (`x1_xy_scale_150mm.gcode`, regenerated for the
-  corrected X frame): the corner must now be at the front LEFT. Also
-  shows how the first layer lies over 150 mm (the bow).
+- **A complete print in the corrected X frame** (the L's outline was
+  right on 11-23; `x1_xy_scale_150mm.gcode` also shows how the first
+  layer lies over 150 mm, the bed's bow).
 - **Z zero:** paper test at the bed center, then a first layer print
   (`x1_first_layer.gcode`).
 - **Speed test at the new acceleration:**
@@ -275,8 +275,9 @@ stages 1-5 done on the dev printer):
       which is the 2X's other carriage) and printed mirror images
       (the big L). Now the stock frame: X 0 at the bed's left edge,
       home sensor at -17.85, wall at -38.2; every X value converted
-      (new = 224.5 - old). Homing, park, wipe and leveling checked on
-      the printer; a print in the new frame is still to come.
+      (new = 224.5 - old). Homing, park, wipe, leveling and the L's
+      outline (right way round) checked on the printer. A complete
+      print in the new frame is still to come.
     - **Z zero and the bed's bow:** the first print's first layer was
       too close at the center (box 9.8 mm for 10). Z zero rests on one
       paper test. No mesh is possible on the stock bed (the nozzle

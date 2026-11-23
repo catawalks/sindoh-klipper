@@ -21,7 +21,9 @@ files in this folder; `git log` has the rest.
   path, test prints centered at X 114, the speed test. On the printer
   with the owner: direction check, homing X and Y, park, wipe, bed
   center, and a full `BED_LEVEL` with scrub (front corners -0.05 and
-  +0.06 mm against the back). Stock facts: sindoh
+  +0.06 mm against the back), then the L again: its outline lay the
+  right way round, corner at the front left (owner; cancelled after
+  2 min, the question was answered). Stock facts: sindoh
   `docs/1x_stock_routines.md`, "The stock X frame".
 - Screen: BED FORWARD without a caption; a caption can no longer leave
   its button (smaller type, then cut); the print start page shows the
