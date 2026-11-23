@@ -49,6 +49,23 @@ console or the network); `.sh` files on the printer.
 | `fast_stepping_*.py` | Step-rate and load measurements for the faster stepping work |
 | `beep_test.sh`, `bed_pose_sweep.sh` | Beeper test; bed camera pose sweep |
 
+## 3DWOX 1X bring-up
+
+The 1X runs our programs from an SD card beside its stock system
+([../docs/1x_port_plan.md](../docs/1x_port_plan.md)); its start scripts
+are in `../install/x1/`. Its stock Linux has no Python: the `.py` files
+run inside the card's Debian root or on the PC.
+
+| File | What |
+|---|---|
+| `x1_query.py`, `x1_gcode.py`, `x1_sens.py` | Klipper's state; send G-code through the API socket; watch the filament switches |
+| `x1_estopd.py` | Emergency stop over the network (any connection to its port stops Klipper) |
+| `x1_tmc.py` | Read the TMC2224 drivers, compare with what stock sets, set them up for a cold start |
+| `x1_current_test.py`, `x1_speed_test.py` | Which reference output feeds which motor; does an axis keep its position at speed (owner at the printer) |
+| `x1_home_sections.sh` | Home a manual stepper in short sections (first motion tests) |
+| `x1_gpiolog.sh`, `x1_fbshot.py`, `x1_ucode_probe.py` | Log GPIO changes; turn a copy of the stock screen into a PNG; run the stock microcode in an emulator |
+| `../host/movewatch.c`, `../host/regwatch.c` | Record a running stock printer move by move, or once a second (read-only) |
+
 ## Studying the stock firmware
 
 | File | What |

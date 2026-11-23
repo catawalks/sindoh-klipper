@@ -1,7 +1,8 @@
-# Status (overwrite in place; last updated 2026-11-21)
+# Status (overwrite in place; last updated 2026-11-22)
 
-The project: Klipper on the Sindoh DP200, on the printer's own SoC. Two
-setups exist, and they are different on purpose.
+The project: Klipper on Sindoh 3DWOX printers, on the printer's own SoC.
+Two DP200 setups exist, and they are different on purpose; a third
+machine, the owner's 1X, is being ported (its own section below).
 
 ## The two printers
 
@@ -27,21 +28,11 @@ becomes the full kernel-swap test machine.
   installed and not public; the owner tests it on the work printer.
 - **Repositories:** split on 2026-11-20 (this one, sindoh-kernel,
   sindoh); see the top README.
-- **A third machine, the owner's 3DWOX 1X** (stock firmware, serial
-  console on the dev PC's COM3 for now, an SD card `1x-dev` in its slot):
-  the port is at the start of stage 6 of
-  [1x_port_plan.md](1x_port_plan.md). Klipper, started from the SD card
-  after stopping Sindoh's program, heats the nozzle and bed, moves and
-  homes X, Y and Z (as manual steppers so far), and loads and unloads
-  filament on the sensors with a jam check. Since 2026-11-21 it also has
-  a real printer config that loads (`printer.cfg` + `x1_printer.cfg` +
-  `x1_macros.cfg`, the DP200's layout; no axis moved under
-  it yet), Moonraker and Mainsail (port 80) and our touch screen app
-  on its panel. A reboot always returns it to stock.
-- **Fork pin:** `klipper/FORK` names the commit; since b58960c9 only
-  Python files changed (the firmware builds are from b58960c9). The
-  DP200 firmware built from the 1X-capable fork compiles but has not
-  been run on a DP200; both DP200s still run the builds named below.
+- **A third machine, the owner's 3DWOX 1X:** see "1X" below.
+- **Fork pin:** `klipper/FORK` names the commit (f97fa268 since
+  11-22). The DP200 firmware built from the 1X-capable fork compiles
+  but has not been run on a DP200; both DP200s still run the builds
+  named below.
 - The dev printer's serial cable is on the 1X; the dev printer is on the
   network only.
 
@@ -120,6 +111,33 @@ power save is on** (the new default with our kernel, TODO 26) and X uses
 - 11-16 is the first time this Klipper (on upstream 29d4ec2d) runs on
   the stock 3.2 kernel; before, only on the dev printer's mainline kernel.
 
+## 1X (the owner's, stock firmware `ROD1X_200916_2`), as of 2026-11-22
+
+- **How it runs:** everything of ours is on the SD card `1x-dev` and in
+  RAM; nothing is written to the eMMC, and a reboot returns to stock.
+  After a stock boot: mount the card, `x1_stage4.sh start printer.cfg`
+  (stops Sindoh's motion program, loads our firmware on both cores),
+  then `x1_web.sh start` (Moonraker, Mainsail on port 80, camera, our
+  screen app, the power helper). Reach: serial console on the dev PC's
+  COM3, Ethernet 10.10.0.169.
+- **Port stage:** 6 of [1x_port_plan.md](1x_port_plan.md), nearly done.
+  Works under Klipper: homing on all axes, both heaters (PID tuned),
+  load, unload, nozzle wipe and bin routine copied from stock, bed
+  leveling by nozzle touch with its screen page, print start and end,
+  a first print (20 mm box, 11-22), 720p camera, the touch screen
+  including NETWORK (view), UPDATE and INFO.
+- **Config:** `klipper/config/x1/` (`printer.cfg`, `x1_printer.cfg`,
+  `x1_macros.cfg`), the DP200's layout. Limits: 197 mm/s, `max_accel`
+  2500 (speed-tested at 2000), Z zero by paper test (`position_endstop`
+  2.100).
+- **Not yet:** a print with the 11-22 speed settings, the mirror check
+  (big L), reboot and shut down from the screen (dry-run only), a cold
+  start without Sindoh's program, the install onto the eMMC (stage 7),
+  WiFi set-up from our screen. Open list: TODO 41 and 44, and
+  "Owner at a printer".
+- Stock facts and recordings: [sindoh: 1x.md](https://github.com/catawalks/sindoh/blob/main/docs/1x.md),
+  [sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md).
+
 ## Who owns what
 
 One session coordinates: it alone drives the dev printer (serial, deploys,
@@ -144,6 +162,9 @@ from the `sindoh` checkout.
 - NAND: [nand_layout.md](nand_layout.md). Every NAND write needs the
   owner's OK; RAM-boot a kernel first.
 - **Never home Z with anything on the bed** (Z homes upward).
+- 1X: no writes to its eMMC, boot settings or database; never send
+  Ctrl-C or anything during the boot countdown on its console; any
+  connection to port 7126 is the emergency stop.
 - Motion or heat only with the owner present.
 - Check the printer is idle before restarting Klipper or the screen app.
 - Never publish Marvell firmware or images, or Wi-Fi networks.

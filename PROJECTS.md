@@ -134,15 +134,36 @@ values are copied from the stock app).
 
 ## 6. Other Sindoh models
 
-**Goal:** the same port on the 3DWOX 1X, 2X (dual extruder) and 30X.
+**Goal:** the same port on the 3DWOX 1X, 2X (dual extruder), 3DWOX 1
+and 30X, with one installer and one screen app for every model
+(owner 2026-11-20, TODO 38).
 
-**Status:** [docs/other_models.md](https://github.com/catawalks/sindoh/blob/main/docs/other_models.md). The OEM firmware
-is decrypted for all models except the 30X (key unknown).
+**Status (2026-11-22):**
+- **1X:** Klipper prints on the owner's 1X, started from an SD card
+  beside the stock system ([docs/1x_port_plan.md](docs/1x_port_plan.md),
+  stage 6 of 7; state in [docs/STATUS.md](docs/STATUS.md)). Not
+  installed on its eMMC yet.
+- **3DWOX 1:** a config in our layout from Fredrik Gustafsson's values
+  (`klipper/config/3dwox1/`); no printer of ours to test on (TODO 45).
+- **2X:** one is on its way to the owner; the 1X config is written as
+  the one-head case of the 2X.
+- Model facts: [sindoh: other_models.md](https://github.com/catawalks/sindoh/blob/main/docs/other_models.md).
+  The OEM firmware is decrypted for all models except the 30X (key
+  unknown).
 
-**Next:** 1X testing; the second extruder of the 2X; the 30X key.
+**Decisions:**
+- 2026-11-22 (owner): the fork branch gets a model-neutral name,
+  `sindoh-upc`, after the work printer's v0.1.1 test (TODO 43).
+- 2026-11-22 (owner): the 1X's nozzle-touch points are below the print
+  surface: leveling only, never Z zero or a mesh, on the stock bed.
 
-Note (owner, 2026-11-06): the 1X shows a shutdown screen on a long press
-of the power button. Look in its firmware for how it does that.
+**Next:** finish 1X stage 6 (TODO 41), its cold start and install
+(stage 7); the 2X's second head; the 30X key.
+
+Answered 2026-11-22 (the owner's note of 11-06 about the 1X's shutdown
+screen): its power key program is described in
+[sindoh: 1x.md](https://github.com/catawalks/sindoh/blob/main/docs/1x.md),
+"Shutdown, reboot and the recovery boot".
 
 ## 7. Spaghetti / failure detection
 

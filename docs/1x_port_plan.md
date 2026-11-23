@@ -1,8 +1,12 @@
 # Klipper on the Sindoh 3DWOX 1X: port plan
 
-**Status (2026-11-21): stages 1 to 4 done. Klipper runs on the 1X with
-our firmware on both UPC cores and reads its thermistors and home
-sensors; nothing of ours has driven a motor or a heater yet.** The
+**Status (2026-11-22): stages 1 to 5 done, stage 6 (a real config and
+a first print) nearly done; stage 7 (cold start, install) not begun.
+Klipper homes, heats, loads, levels and prints on the 1X, started from
+the SD card beside Sindoh's system.** The state in short is in
+[STATUS.md](STATUS.md), the open items in [../TODO.md](../TODO.md)
+(41, 44). The sections below are the record of each stage as it was
+done; "Stage 6 as it stands" is current. The
 owner's 1X is on stock firmware `ROD1X_200916_2` with a root serial
 console and (after the USB stick tool) SSH. Everything known about the
 machine is in [sindoh: 1x.md](https://github.com/catawalks/sindoh/blob/main/docs/1x.md);
@@ -446,66 +450,54 @@ position (X 256.4; at the home sensor, 262.7, the nozzle sits under the
 cleaning flap) and moves to 243.4 after the purge. Both load on the
 printer; neither has run.
 
-**Stage 6 started, night of 2026-11-21 (no motion, no heat).**
+**Stage 6 as it stands (2026-11-22).**
 
-- **Config** (first `x1_stage6.cfg`; since 11-22 three files as on the
-  DP200: `printer.cfg`, `x1_printer.cfg`, `x1_macros.cfg` in
-  `klipper/config/x1/`, started with `x1_stage4.sh start printer.cfg`):
-  the draft as a real config: cartesian
-  axes with homing, `[heater_bed]`, the filament routines, fans, lamp,
-  `[virtual_sdcard]` and `[display_status]`. Z homing asks `BED_CLEAR`
-  first, as on the DP200. Heaters keep the tested low limits (60 %
-  power, watermark). It loads; the home sensors read right through it
-  (X and Y triggered at home, Z open). No axis has moved under it.
-- **Web page**: `install/x1/x1_web.sh start` runs Moonraker (7125) and
-  Mainsail from the card's Debian root, on port 80 (owner 11-22: it
-  stops Sindoh's own web server, which nothing restarts; a reboot brings
-  it back). Sindoh's camera server (8080) feeds the page.
-- **Touch screen**: the panel is the DP200's (800x480, mounted the same
-  way, same touch controller), but 24 bits per pixel. Our screen app
-  (`install/display/dp200_screen.py`) now reads the board name and runs
-  on both. `x1_web.sh` freezes Sindoh's `appBrowser` with SIGSTOP instead
-  of killing it: nothing restarts it (`UIManager` did not react,
-  `/app/recovery_watchdog.sh` only watches for a read-only root), and
-  `x1_web.sh stop` lets it run again. Seen on the panel's memory; touch
-  not tried (calibration values are the DP200's).
-- **One app for every model** (owner 11-21/22): the functions are the
-  same on every printer; what differs is each model's Klipper config,
-  under the same macro names (`LOAD_FILAMENT`, `CLEAN_NOZZLE`,
-  `FILAMENT_DRY`, `LAMP_TOGGLE`, `BED_CLEAR`, later a leveling macro).
-  The app greys out a button ("not set up yet") only while the command
-  it needs is missing from Klipper's list (`/printer/gcode/help`).
-  Written for the 1X on 11-22, none run yet: `CLEAN_NOZZLE` (stock
-  positions), the dryer, `_SINDOH_ENSURE_HOMED`. Still missing on the
-  1X: `EMPTY_BIN`, the leveling macro, the probe offset routine, input
-  shaping, and the network, power and update pages (Sindoh's system
-  still owns those during the bring-up).
-
-**Leveling under Klipper (plan, nothing tried).** The nozzle is the
-probe and only touches metal at the three notches in the bed sheet
-(owner 11-21), so a bed mesh is not possible; stock does a three-point
-check and tells the user how far to turn the two front wheels
-(sindoh `docs/1x_stock_routines.md`). Klipper has this as
-`[screws_tilt_adjust]`:
-
-- `[probe]` on GPIO 81 (the contact input), `z_offset: 0`, with
-  `activate_gcode` switching on GPIO 153 (sensor enable) and GPIO 69
-  (nozzle voltage) and `deactivate_gcode` switching them off. Three
-  samples per point, as stock.
-- `[screws_tilt_adjust]` with the back center point as the fixed base
-  and the two front corners as the screws. `SCREWS_TILT_CALCULATE`
-  reports each wheel as a direction and a part of a turn; the screen
-  page shows it in clicks (stock: one click is 45 degrees).
-- A macro `BED_LEVEL` (the same name on every model): heat the nozzle
-  to 150 C, wipe it on the edge strip, home, `SCREWS_TILT_CALCULATE`.
-  On the DP200 the same name runs the pin probe and a mesh.
-- Open before a first try (owner present): the level that means
-  "contact" on GPIO 81, the three points in our coordinates (the stock
-  X values are in the routine's own numbers), the wheel's thread (mm
-  per turn), the wipe path, and whether Z should then home on a notch
-  instead of the top sensor alone.
-- Stock's optional "active leveling" (ten stored correction factors,
-  all zero on this printer) is left out.
+- **Config:** three files as on the DP200, in `klipper/config/x1/`:
+  `printer.cfg` (the owner's: Z zero, PID values), `x1_printer.cfg`
+  (hardware), `x1_macros.cfg` (routines). Started with
+  `x1_stage4.sh start printer.cfg`. The comments in the two `x1_`
+  files carry the measured values and where each came from.
+- **Coordinates:** the stock program's own frame: X 0 at the right
+  edge of the bed, growing to the left; home sensor edge 242.4, left
+  wall and stock home 262.7; purge bin center 247.8; Y sensor edge 5.5.
+  A print file's X is used as written, as stock does
+  ([1x_slicer_profiles.md](1x_slicer_profiles.md)). Whether the Y
+  direction is as we named it (front and back) is to be confirmed with
+  a print (TODO 41).
+- **Homing:** X, then Y, then Z, each moving off its sensor first if it
+  starts on it (the sensors stay on from their edge to the end stop).
+  Speeds from the stock recording: X 100, Y 75, Z 7.4 mm/s. Z asks
+  `BED_CLEAR` first, as on the DP200.
+- **Limits:** 197 mm/s (stock's ramp table top), `max_accel` 2500
+  (Sindoh's slicer value; position kept in a test at 2000), Z 12 mm/s.
+  Heaters at full power, PID tuned; nozzle 265 C, bed 100 C (a guess).
+- **Motor current:** reference PWM blocks X 29, Y 30, Z 31, E 32, C 21
+  (spares 13, 23), at the stock counts.
+- **Filament:** `LOAD_FILAMENT`, `UNLOAD_FILAMENT`, the wipe and the
+  bin routine (`EMPTY_BIN`, count of 15 purges) follow the stock
+  sequences recorded move by move (sindoh
+  `docs/1x_stock_routines.md`), with our jam checks and step messages.
+- **Bed leveling:** `[probe]` on GPIO 81 with GPIO 153 as its enable;
+  `BED_LEVEL` scrubs the nozzle, touches the three notches three times
+  each and says how many clicks to turn each front wheel (one click =
+  0.19 mm). `[screws_tilt_adjust]` is not used. The notches are
+  cut-outs below the print surface, so a touch never sets Z zero and
+  there is no mesh: Z zero is a paper test (`position_endstop` 2.100).
+- **Printing:** `PRINT_START` / `PRINT_END`, pause and resume, cancel.
+  First print 2026-11-22 (20 mm box). Test files:
+  `tools/gen_test_prints.py --model x1`.
+- **Web page and camera:** `install/x1/x1_web.sh start`: Moonraker
+  (7125), Mainsail on port 80 (Sindoh's web server is stopped; a reboot
+  brings it back), ustreamer for the camera (1280x720; Sindoh's server
+  only delivers frames while its own page is open).
+- **Touch screen:** our app on the panel (24 bit there); Sindoh's
+  `appBrowser` is frozen with SIGSTOP, never killed. One app for every
+  model: a button is off ("not set up yet") only while the command it
+  needs is missing from Klipper's list. What differs on the 1X while
+  stock runs underneath (network, power, update, info):
+  [touchscreen.md](touchscreen.md), "Other models".
+- **Missing on the 1X:** the probe offset routine (not needed: the
+  nozzle is the probe), input shaping, WiFi set-up from our screen.
 
 **Storage and the install target (read only, 2026-11-21).**
 
@@ -546,9 +538,9 @@ Install plan (stage 7, each write to the eMMC needs the owner's OK):
    - Motor current: seven `[output_pin motor_current_*]` in
      `x1_printer.cfg` hold the reference PWM at the stock counts (rule
      as on the DP200: high = 100 + database offset, period 200); read
-     back from the registers equal to what stock left. Which block is
-     which motor is known for the extruder (32) and the cartridge feed
-     (21) only; Y/Z are 30/31 and X is one of 13, 23, 29.
+     back from the registers equal to what stock left. Blocks: X 29,
+     Y 30, Z 31, E 32, C 21 (found by test 2026-11-22); 13 and 23 are
+     spares.
    - Still unknown for a real cold start: whether the select GPIOs
      (146, 147, 149, 152) and the UART pins work without the stock
      program's start-up, the reference blocks' second register (0x64
@@ -558,17 +550,13 @@ Install plan (stage 7, each write to the eMMC needs the owner's OK):
 
 ## Open questions
 
-- Heaters, settled on paper 2026-11-21 (sindoh
-  docs/1x_stock_routines.md): PWM block 5 is the nozzle, 28 the bed, 25
-  the 2X's other nozzle (unconnected on the 1X, where stock leaves it
-  switched on). Thermistors: ADC select 1 nozzle, 2 and 3 bed, the
-  DP200's tables and index bases. Not yet driven by Klipper. Whether
-  the 1X's hot end has one heater cartridge or two is still open.
+- Whether the 1X's hot end has one heater cartridge or two.
 - What the motor drivers do when the cores are held (they stayed as they
   were; not looked at closely).
-- Bed leveling hardware on the 1X (`gp_En_LevelSensor`, the active
-  leveling tables) and the "clutch" and "solenoid" the engine drives.
-- Which stepper block is which axis, and the 1X's kinematics limits.
+- The "clutch" the stock engine drives (the solenoid is the cartridge
+  latch, PWM block 8, in the config), and its optional
+  "active leveling" tables (all zero on this printer; left out).
+- The cold start unknowns (stage 7 item 4 above).
 - **Build for the 2X from the start** (owner, 2026-11-21: a 2X is on
   its way). Same board and chassis with a second head: one carriage
   homes at each end of X. The 1X's head is the stock "X2" carriage and

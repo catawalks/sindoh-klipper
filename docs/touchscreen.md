@@ -133,8 +133,11 @@ runs underneath:
   `/run/dp200/power`; the buttons are off unless the helper's flag
   `/run/dp200/power.ok` exists. A reboot starts Sindoh's firmware:
   Klipper has to be started again. The front power button is Sindoh's
-  business there: its program `/app/powerkeyd` keeps running, and a
-  press saves the files and cuts the power at once, also during a print.
+  business there: its program `/app/powerkeyd` keeps running and, when
+  the button is held, saves the files and cuts the power, also during
+  a print. (The program acts 20 ms after its input changes, but that
+  input comes from the power circuit, not straight from the button:
+  the owner has to hold it. Hold time not measured.)
 - **UPDATE:** Moonraker's updater for Mainsail, as on the DP200
   (`install/x1/x1_moonraker.conf`). Klipper and Moonraker are pinned to
   the commits on the card.

@@ -5,6 +5,22 @@ one. The detail for everything up to 2026-11-12 is in
 [TODO_archive_2026-11-12.md](TODO_archive_2026-11-12.md) and the other
 files in this folder; `git log` has the rest.
 
+## 2026-11-23
+
+- **Housekeeping (owner's request, night of 11-22).** `TODO.md`: the 1X
+  items rewritten as open items only, with a 1X list under "Owner at a
+  printer"; item 44 is now the screen app's open points. `STATUS.md`:
+  a 1X section, the stale lines removed. `1x_port_plan.md`: status
+  line, a current "Stage 6 as it stands", open questions pruned.
+  `1x_slicer_profiles.md` rewritten as one reference page (it was the
+  day's running notes). `PROJECTS.md` 6 and the top README name the 1X
+  port. `tools/README.md` lists the 1X tools. Stock facts moved to
+  their home in the sindoh repository (how stock reads a print file,
+  the power key program). The POWER page and the docs no longer say
+  the 1X's power button acts at once: its signal comes from the power
+  circuit and the owner has to hold it (time not measured). No link in
+  a live document is broken (the two archived lists keep old paths).
+
 ## 2026-11-22
 
 - 1X `max_accel: 2500` (owner: the value Sindoh's own slicer profiles
@@ -41,8 +57,10 @@ files in this folder; `git log` has the rest.
     (everything but the last step) went through and the stack came back
     with the normal start. **The reboot and the power off themselves
     have not been tried.** Found on the way: Sindoh's power key program
-    keeps running under Klipper, and any press of the front button
-    (20 ms) powers the printer off, also during a print.
+    keeps running under Klipper and powers the printer off from the
+    front button, also during a print (the program reacts within
+    20 ms of its input; the owner has to hold the button, so the hold
+    time is in the power circuit before that input).
 
 - **1X: how stock treats X in a print file** (owner's question before
   any X mirror change). Disassembled the stock G0/G1 handler and read

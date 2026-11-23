@@ -54,6 +54,21 @@ Either printer:
 16. **Homing clearance:** a few mm of Z clearance before X homing, so the
     nozzle doesn't drag across a failed print. Mind that Z homes upward.
 
+1X (get a fresh "bed empty" first; background in items 41 and 44):
+- **The big L** (`x1_xy_scale_150mm.gcode`, on the printer): shows
+  whether prints come out mirrored (corner at low X and low Y: where is
+  it on the bed?) and how the first layer lies over 150 mm (the bow).
+- **Z zero:** paper test at the bed center, then a first layer print
+  (`x1_first_layer.gcode`).
+- **Speed test at the new acceleration:**
+  `tools/x1_speed_test.py 197 2500 5` (passed at 2000).
+- **SYSTEM -> POWER:** REBOOT, then SHUT DOWN (dry-run only so far).
+  Also time the front power button: how long must it be held?
+- **Runout sensor** during a print; a held-back filament for the jam
+  check.
+- **Cold start** without Sindoh's program (port plan, stage 7 item 4).
+- Z and the extruder at their limits (12 and 86 mm/s).
+
 ## Printer tuning
 
 Print quality and speed settings, found with test prints (owner at the
@@ -246,66 +261,48 @@ stages 1-5 done on the dev printer):
     the USB stick's `_update_rodin_KlipperInstall` with the new remover
     since 11-20; v0.1.0 (`0ee46f50`) is kept next to it in
     `_update_rodin_KlipperInstall_v0.1.0`. Not installed anywhere yet.
-41. **1X port** (owner 11-20: start): plan, stages and everything found
-    so far in [docs/1x_port_plan.md](docs/1x_port_plan.md); what is done
-    is in the changelog. State: start of stage 6 (config
-    the three-file config loads; web page and touch screen run). Open:
-    - The jam check has not seen a real jam; its window values are
-      estimates.
-    - Runout: GPIO 80 is the runout sensor (config has it); not tried in
-      a print. The DP200 has no such switch: the owner prints Sindoh's
-      adapter, then test it and add it to the DP200 config.
-    - Installer for the 1X: write `x1_machine.cfg` from the database as
-      for the DP200 (X from MOTOR_PWM_X2OFFSET, Y, Z, E, and C from
-      MOTOR_PWM_COFFSET; outputs `motor_current_x/y/z/e/c`).
-    - Cold start without the stock program: prepared (`x1_tmc.py
-      setup`, motor current in the config; port plan, stage 7 item 4),
-      not tried. Needs a boot where Sindoh's engine never starts.
-    - Leveling: done 11-22 (`BED_LEVEL`, its screen page, run by touch).
-      Left from stock by choice: no re-homing between points, no
-      automatic second round.
-    - First print done 11-22 (20 mm box, came out fine). From it:
-      - **First layer too close at the bed center** (box 9.8 mm tall
-        for 10; owner: the center is bowed up). Z zero rests on one
-        paper test. Next: paper test at the center (bed empty), or
-        lower `position_endstop` by about 0.1 to 0.2, then a first
-        layer print.
-      - **No mesh on the stock bed** (owner: a real mesh would help
-        the bow). The nozzle touch only works at the notches; a mesh
-        needs a conductive sheet or another probe on the head (end
-        user / future change).
-      - Owner 11-22: stock prints on this 1X have never come out
-        mirrored, and neither Sindoh's slicer nor the firmware
-        mirrors, so most likely no X change is needed and the
-        front/back reading of Y is what is wrong. The L print decides.
-      - **X direction (owner decision, after a print):** the stock
-        program passes a print file's X straight through, in the same
-        left-growing frame as our config, and nothing in Sindoh's files
-        mirrors ([docs/1x_slicer_profiles.md](docs/1x_slicer_profiles.md)).
-        **Owner present:** print `x1_xy_scale_150mm.gcode` (or any
-        asymmetric part): L corner at the front right = mirrored. Then
-        decide whether to turn X around in the config (2X in mind).
-      - Bed center: Sindoh's slicer centers at X 114; our test prints
-        use X 110 (middle of the notches). Find the sheet's real
-        center before changing `gen_test_prints.py`.
-      - Taken from Sindoh's Cura values 11-22 (owner): retract 6 mm,
-        40 mm/s printing, 130 mm/s travel. `max_accel` 2500 from
-        Sindoh's own slicer (owner 11-22 night): **owner present, bed
-        empty:** `tools/x1_speed_test.py 197 2500 5` (passed at 2000).
-        Not printed yet. Next steps (owner): tune toward 60 mm/s
-        (Sindoh's "Fast"), more with input shaping. All four are starting points
-        to tune higher later (owner). The first layer stays
-        0.25 x 0.45.
-    - Bed `max_temp` 100 is a guess: no stock limit found. Z and the
-      extruder have not run at their stock limits (12 and 86 mm/s).
-    - Stage 7: install onto `/userdata` (plan in the port plan; every
-      eMMC write needs the owner's OK), a cold start without the stock
-      engine (driver set-up, reference PWM).
-    - Build for the 2X: second carriage, second nozzle (owner: a 2X is
-      on its way).
+41. **1X port** (owner 11-20): plan and stages in
+    [docs/1x_port_plan.md](docs/1x_port_plan.md), state in
+    [docs/STATUS.md](docs/STATUS.md), what is done in the changelog.
+    Stage 6 (a real config): homing, heaters, load/unload, bin, bed
+    leveling, print start/end and a first print are done. Open (the
+    checks that need the owner are in "Owner at a printer", 1X):
+    - **X direction.** The stock program passes a print file's X
+      straight through in the frame our config uses (X 0 at the right
+      edge, home at 262.7 on the left), and neither Sindoh's slicer nor
+      its Cura and Simplify3D files mirror
+      ([docs/1x_slicer_profiles.md](docs/1x_slicer_profiles.md)). Stock
+      prints have never come out mirrored (owner 11-22), so most
+      likely nothing needs turning around and our reading of which end
+      of Y is the bed's front is wrong. The L print decides; if Y is
+      the other way round, rename the leveling points and the "bed
+      forward" moves.
+    - **Z zero and the bed's bow:** the first print's first layer was
+      too close at the center (box 9.8 mm for 10). Z zero rests on one
+      paper test. No mesh is possible on the stock bed (the nozzle
+      only makes contact at the notches); a conductive sheet or a
+      second probe would be an end-user change.
+    - **Bed center:** Sindoh's slicer centers at X 114, our test
+      prints at X 110 (the middle of the notches). Find the sheet's
+      real center before changing `gen_test_prints.py`.
+    - **Print settings** (`gen_test_prints.py --model x1`): retract
+      6 mm, 40 mm/s, travel 130 mm/s, `max_accel` 2500 are Sindoh's
+      "Normal" values, not printed with yet. Then tune toward 60 mm/s
+      (Sindoh's "Fast"), further with input shaping (owner 11-22).
+      The first layer stays 0.25 x 0.45.
+    - Bed `max_temp` 100 is a guess (Sindoh's ABS profile uses 90).
+    - The jam check's window values are estimates.
+    - The DP200 has no runout switch: the owner prints Sindoh's
+      adapter; then test it and add it to the DP200 config.
+    - **Installer for the 1X:** write `x1_machine.cfg` from the
+      database as for the DP200 (X from MOTOR_PWM_X2OFFSET, Y, Z, E,
+      and C from MOTOR_PWM_COFFSET; outputs `motor_current_x/y/z/e/c`).
+    - **Stage 7:** install onto `/userdata` (every eMMC write needs
+      the owner's OK), after the cold start works.
+    - **2X:** second carriage and nozzle (a 2X is on its way).
     - Paper work: the stepper engine clock against the timer (step
       batching is off on the 1X), the microstep pins of the drivers.
-    - The DP200 firmware builds from the 1X-capable fork have not run on
+    - The DP200 firmware built from the 1X-capable fork has not run on
       a DP200.
 43. **Rename the fork branch `sindoh-dp200`** (owner 11-22: the port runs
     on several models now) to `sindoh-upc`, **after the work printer's
@@ -396,28 +393,27 @@ stages 1-5 done on the dev printer):
       drivers relate to the UPC, and heater/thermistor wiring. A serial
       console on its `ttyS0` would help.
 
-44. **Screen app: buttons act through config macros** (owner 11-22: the
-    app should not carry per-model code per button; the macros do what
-    the button means, and a missing macro shows "not set up yet"). Done
-    this way: the idle timeout (`SCREEN_TIMEOUT` / `SCREEN_WAKE`).
-    **Problem found 11-22 (owner):** a macro waits behind whatever
-    Klipper is running, so `SCREEN_WAKE` did not switch the lamp on
-    until a heat-up had finished. Lamp and wake must not go through
-    the G-code queue. Idea: a small module in the fork that switches an
-    output at once on a web request (Moonraker passes Klipper's own
-    endpoints through); the config still says what the timeout covers
-    (`variable_lamp`, `variable_display`), the app reads that and uses
-    the endpoint. To decide with the owner.
-    **1X, owner present:** press SYSTEM -> POWER -> REBOOT, then SHUT
-    DOWN (written and dry-run 11-22 night, last step never run; power
-    off uses GPIO 158 as Sindoh's power key program does). Decide
-    whether the front power button should be held off during a print
-    (today any press powers the 1X off at once; Sindoh's program could
-    be frozen while printing). With the updater on, Mainsail lists the
-    card's Klipper checkout as invalid (detached, untracked files):
-    do not use its "recover" there; the stage 7 install has no
-    checkout. WiFi set-up from our screen waits for stage 7.
-    Still coded in the app: the filament presets and temperatures, the
-    1X filament page's sensor names, the cool-down command list, and
-    which pages are off on the 1X. Move them when those pages are next
-    touched.
+44. **Screen app** ([docs/touchscreen.md](docs/touchscreen.md)).
+    - **Buttons act through config macros** (owner 11-22: no per-model
+      code per button; a missing macro shows "not set up yet"). Still
+      coded in the app: the filament presets and temperatures, the 1X
+      filament page's sensor names, the cool-down command list, and
+      which pages are off on the 1X. Move them when those pages are
+      next touched.
+    - **Lamp wake waits behind the G-code queue** (owner 11-22):
+      `SCREEN_WAKE` did not switch the lamp on until a heat-up had
+      finished. Idea: a small module in the fork that switches an
+      output at once on a web request; the config still says what the
+      timeout covers. To decide with the owner.
+    - **1X power button:** Sindoh's `/app/powerkeyd` keeps running
+      under Klipper and powers the printer off on the front button.
+      The program acts 20 ms after its input (GPIO 116) changes, but
+      the owner has to hold the button: the input comes from the power
+      circuit. Time the hold, then decide whether to hold it off during a print (freeze the
+      program while printing).
+    - **1X updater:** Mainsail lists the card's Klipper checkout as
+      invalid (detached, untracked files). Do not use its "recover"
+      there; the stage 7 install will have no checkout.
+    - WiFi set-up from our screen on the 1X waits for stage 7.
+    - The lamp fix of 11-22 (run `SCREEN_TIMEOUT` again after a
+      Klipper restart) is tested on the 1X only.

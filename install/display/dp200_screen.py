@@ -2875,10 +2875,11 @@ class UI:
         if printing:
             d.text((20, y), 'A print is running!', font=font(22), fill=C_WARN)
         if IS_1X:
-            # Sindoh's own power key program still runs: a press of the
-            # button saves the files and cuts the power (stock behaviour).
-            d.text((20, y + 30), 'The power button switches the printer off', font=font(18), fill=C_DIM)
-            d.text((20, y + 54), 'at once, also during a print. After a reboot', font=font(18), fill=C_DIM)
+            # Sindoh's own power key program still runs: holding the
+            # button saves the files and cuts the power (stock behaviour;
+            # how long it must be held is not measured yet).
+            d.text((20, y + 30), 'Holding the power button switches the printer', font=font(18), fill=C_DIM)
+            d.text((20, y + 54), 'off, also during a print. After a reboot', font=font(18), fill=C_DIM)
             d.text((20, y + 78), 'the printer runs Sindoh\'s firmware again.', font=font(18), fill=C_DIM)
             y += 24
         else:
