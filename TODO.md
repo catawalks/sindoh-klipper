@@ -62,7 +62,8 @@ Either printer:
   (`x1_first_layer.gcode`).
 - **Speed test at the new acceleration:**
   `tools/x1_speed_test.py 197 2500 5` (passed at 2000).
-- **SYSTEM -> POWER:** REBOOT, then SHUT DOWN (dry-run only so far).
+- **SYSTEM -> POWER:** SHUT DOWN (never run), and REBOOT from the
+  screen (the same helper rebooted fine from Mainsail's side 11-23).
 - **Remote reboot** (item 48): with the console back, copy the three
   files to the card's stage folder and restart the web side, then try
   Mainsail's power menu. Installed 11-23 with the screen app and
@@ -372,9 +373,10 @@ stages 1-5 done on the dev printer):
     own) writes the same request the touch screen's POWER page writes;
     a sudo rule lets Moonraker's user run it; a root without sudo (the
     1X card) gets a stand-in. Open:
-    - 1X: installed 11-23 (the stand-in sudo; Moonraker's user can
-      write the request). **Owner present:** press Reboot in
-      Mainsail's power menu (Klipper has to be started again after).
+    - 1X: reboot through Moonraker's API worked 11-23. Still to try
+      (owner present): Shutdown from Mainsail and SHUT DOWN / REBOOT
+      on the screen's POWER page (same helper; power off uses GPIO
+      158 and has never run).
     - DP200: the root builds install it (`build_rootfs.sh`,
       `rootfs_inside.sh`), not run since. **The stick payload and its
       installer do not carry it yet** (left alone on 11-23, the day of

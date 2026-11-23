@@ -169,6 +169,15 @@ powerd_stop() {
     [ -f /tmp/x1_powerd.pid ] && kill $(cat /tmp/x1_powerd.pid) 2>/dev/null
     rm -f /tmp/x1_powerd.pid $RUN/power.ok
 }
+# Stock asks for an Ethernet address once at boot and gives up if none
+# comes ("No lease, failing"; seen after a warm reboot, 2026-11-23): the
+# printer is then on WiFi only. With a cable in and no address, ask again
+# with stock's own command, in the background.
+eth_retry() {
+    [ "$(cat /sys/class/net/eth0/carrier 2>/dev/null)" = 1 ] || return
+    ifconfig eth0 2>/dev/null | grep -q 'inet addr' && return
+    (udhcpc -R -n -p /var/run/udhcpc.eth0.pid -i eth0 > /tmp/udhcpc_eth0.out 2>&1 &)
+}
 screen_stop() {
     [ -f /tmp/x1_screen.pid ] && kill $(cat /tmp/x1_screen.pid) 2>/dev/null
     rm -f /tmp/x1_screen.pid
@@ -183,6 +192,7 @@ start)
     sleep 1
     mkdir -p $ROOT/var/log/nginx $ROOT/var/lib/nginx $ROOT/run
     time_zone
+    eth_retry
     stock_info
     cp /tmp/sd/stage/x1_moonraker.conf $ROOT$K/printer_data/config/moonraker.conf
     # Klipper (our fork) and Moonraker stay at the commits on the card:

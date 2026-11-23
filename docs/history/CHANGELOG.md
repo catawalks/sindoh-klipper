@@ -7,6 +7,16 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- **1X: reboot from Moonraker works** (`POST /machine/reboot`, what
+  Mainsail's power menu sends; owner present, bed clear). Console
+  log: the helper went through web page, Moonraker, Klipper, heater
+  check, saving files, then `reboot`; stock came up with "Boot reason
+  0". Klipper started again from the card with the corrected X
+  config. After that warm reboot stock had no Ethernet address ("No
+  lease, failing"; WiFi worked): `x1_web.sh start` now asks again when
+  a cable is in and there is no address. Power off from the same path
+  and the screen's POWER buttons are not tried yet.
+
 - **1X: X was backwards; fixed.** The big L printed as a mirror image
   (owner: corner at the front right, thin arm along the front). Cause,
   found in the stock program: the 1X's head is the "X2" carriage, whose
