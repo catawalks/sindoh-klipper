@@ -92,6 +92,14 @@ IDLE_RELEASE = 5.0                    # s of idle Klipper that end a request
 # only warns. dp200-powerkey.sh syncs the cards on every press and shuts down
 # cleanly after LONG_POWER s if the hardware didn't (other SW1-4 settings).
 KEY_REG, KEY_BIT = 0xF8045000, 1 << 27
+# 1X: the button goes to the power circuit, which pulls this line low
+# once the button has been held about 3 s and keeps it low until the
+# button is let go (measured 2026-11-23); a tap never reaches Linux. So
+# there: line low = open the POWER page; still low KEY_OFF_1X s later =
+# shut down (not during a print). Sindoh's own power key program would
+# shut down at once; install/x1/x1_web.sh freezes it while we run.
+KEY_GPIO_1X = '/sys/class/gpio/gpio116/value'
+KEY_OFF_1X = 3.0
 HW_CUT = 2.0                          # measured roughly: "2 s hold" switched it off
 HOLD_WARN = 0.4                       # s held before the warning appears
 LONG_POWER = 5.0
@@ -360,7 +368,8 @@ class PowerKey:
     def __init__(self):
         import mmap
         self.m = None
-        if IS_1X:                               # another SoC: that address is not its button
+        if IS_1X:                               # another SoC: its button line is a GPIO file
+            self.m = KEY_GPIO_1X if os.path.exists(KEY_GPIO_1X) else None
             return
         try:
             fd = os.open('/dev/mem', os.O_RDONLY | os.O_SYNC)
@@ -372,6 +381,8 @@ class PowerKey:
     def pressed(self):
         if self.m is None:
             return False
+        if IS_1X:
+            return _read(self.m, '1') == '0'
         return bool(struct.unpack_from('<I', self.m, KEY_REG & 0xfff)[0] & KEY_BIT)
 
 # ---------------------------------------------------------------------------
@@ -838,6 +849,18 @@ class UI:
 
     def key_event(self, down, now):
         """Power button edges from the main loop."""
+        if IS_1X:
+            # "down" here means: held long enough for the power circuit
+            # to tell us. Open the POWER page; key_tick shuts down if it
+            # stays held.
+            self.key_down = now if down else None
+            if down:
+                self.last_touch = now
+                self.key_warned = False
+                if not self.screen.startswith('powering'):
+                    self.confirm = None
+                    self.screen = 'power'
+            return
         if down:
             self.key_down = now
             self.last_touch = now              # wakes the screen
@@ -846,6 +869,23 @@ class UI:
             if held < LONG_POWER and not self.screen.startswith('powering'):
                 self.confirm = None
                 self.screen = 'power'
+
+    def key_tick(self, now):
+        """1X: the button is still held KEY_OFF_1X s after the POWER page
+        opened: shut down, unless a print runs (then the page's own SHUT
+        DOWN, which asks, is the way)."""
+        if not IS_1X or self.key_down is None or self.screen.startswith('powering'):
+            return
+        if now - self.key_down < KEY_OFF_1X:
+            return
+        st = self.st or {}
+        if (st.get('print_stats') or {}).get('state') in ('printing', 'paused'):
+            if not getattr(self, 'key_warned', False):
+                self.key_warned = True
+                self.flash('A print is running: use SHUT DOWN on this page', 10)
+            return
+        self.key_down = None
+        self.power_request('poweroff')
 
     def cal_accept(self):
         """ACCEPT the paper test. PROBE OFFSET then needs the accepted
@@ -1773,7 +1813,7 @@ class UI:
         if self.screen.startswith('powering'):
             self.page_powering(d)
             return im
-        if self.key_down is not None and time.time() - self.key_down >= HOLD_WARN:
+        if not IS_1X and self.key_down is not None and time.time() - self.key_down >= HOLD_WARN:
             self.page_key_held(d)
             return im
         if self.screen == 'console':
@@ -2087,17 +2127,21 @@ class UI:
         ps = st['print_stats']
         d.text((20, 160), (ps.get('filename') or '?')[:34], font=font(20), fill=C_DIM)
         d.text((20, 188), 'Starting print', font=font(30), fill=C_TXT)
-        cur = start_phase(st)
-        msg = (st.get('display_status') or {}).get('message')
-        if msg and cur != 'ask':
-            # the model's PRINT_START says what it is doing (M117): show
-            # that, not the DP200's list of steps guessed from temperatures
-            for i, l in enumerate(wrap(d, msg, font(26), PW - 40)[:3]):
-                d.text((20, 250 + i * 36), l, font=font(26), fill=C_WARN)
-        for i, (key, text) in enumerate(() if msg and cur != 'ask' else START_STEPS):
+        pst = st.get('gcode_macro PRINT_START') or {}
+        steps = pst.get('steps')
+        if isinstance(steps, (list, tuple)) and steps:
+            # the model's PRINT_START lists its own steps and says which
+            # one runs (variables "steps" and "step")
+            names = [str(s) for s in steps][:9]
+            at = 0 if pst.get('pending') else int(pst.get('step') or 0)
+        else:
+            # the DP200's list, the running step guessed from temperatures
+            names = [text for _, text in START_STEPS]
+            at = START_KEYS.index(start_phase(st))
+        for i, text in enumerate(names):
             y = 234 + i * 32
-            done = START_KEYS.index(cur) > i
-            now = key == cur
+            done = at > i
+            now = at == i
             mark = 'OK' if done else '>' if now else ''
             d.text((24, y), mark, font=font(20), fill=C_ON if done else C_WARN)
             d.text((66, y), text, font=font(22 if now else 20),
@@ -2888,11 +2932,13 @@ class UI:
         if printing:
             d.text((20, y), 'A print is running!', font=font(22), fill=C_WARN)
         if IS_1X:
-            # Sindoh's own power key program still runs: holding the
-            # button saves the files and cuts the power (stock behaviour;
-            # how long it must be held is not measured yet).
-            d.text((20, y + 30), 'Holding the power button switches the printer', font=font(18), fill=C_DIM)
-            d.text((20, y + 54), 'off, also during a print. After a reboot', font=font(18), fill=C_DIM)
+            if self.key_down is not None and not printing:
+                left = max(0.0, KEY_OFF_1X - (time.time() - self.key_down))
+                d.text((20, y + 30), 'Keep holding: SHUT DOWN in %d s' % (int(left) + 1), font=font(22), fill=C_WARN)
+                d.text((20, y + 58), 'Let go to stay on this page.', font=font(18), fill=C_DIM)
+            else:
+                d.text((20, y + 30), 'Power button: hold 3 s for this page, keep', font=font(18), fill=C_DIM)
+                d.text((20, y + 54), 'holding 3 s more to shut down. After a reboot', font=font(18), fill=C_DIM)
             d.text((20, y + 78), 'the printer runs Sindoh\'s firmware again.', font=font(18), fill=C_DIM)
             y += 24
         else:
@@ -3253,7 +3299,8 @@ def view_key(ui):
             (int(time.time() - ui.fil_job['t0']), fil_phase(st), (st.get('display_status') or {}).get('message'),
              round(st['extruder']['temperature'])) if ui.screen == 'fil_run' and ui.fil_job
             else None,
-            start_phase(st) if job_state(st) == 'starting' else None)
+            (start_phase(st), (st.get('gcode_macro PRINT_START') or {}).get('step'))
+            if job_state(st) == 'starting' else None)
 
 # ---------------------------------------------------------------------------
 def main():
@@ -3298,6 +3345,7 @@ def main():
             ui.key_event(btn, now)
             if btn:
                 unblank()
+        ui.key_tick(now)
         if ui.screen.startswith('powering') and now - ui.power_at > 90:
             # still running: dp200-powerkey.sh didn't act (not started?)
             ui.screen = 'home'

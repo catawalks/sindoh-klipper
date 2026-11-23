@@ -7,6 +7,18 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- **1X power button handling written** (owner: held 3 s opens the POWER
+  page, 3 s more shuts down): the screen app reads GPIO 116, opens the
+  page, counts down and asks the power helper to power off, except
+  during a print; `x1_web.sh` freezes Sindoh's `powerkeyd` while we
+  run, with an 8 s fallback in the helper. **"Starting print" page:**
+  a model's `PRINT_START` can list its steps (`steps`, `step`); the 1X
+  now does (bed question, homing, bed, nozzle, purge and wipe), and
+  heats the nozzle over the bin. Compiled and linted; not on the
+  printer yet (a Benchy was printing).
+- 1X PrusaSlicer bundle `install/slicer/1X_Klipper_PrusaSlicer.ini`;
+  the owner's first sliced print (3DBenchy) started from Mainsail.
+
 - 1X power button measured (owner pressing, the line logged): a tap
   and a 1 s press are invisible to Linux; on a long hold GPIO 116 goes
   low after about 3 s and stays low until release. Design notes in

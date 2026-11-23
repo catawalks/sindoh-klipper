@@ -160,14 +160,27 @@ power_shims() {
         chmod 775 $RUN
     fi
 }
+# The front power button. Sindoh's /app/powerkeyd shuts the printer down
+# the moment the power circuit reports the button (GPIO 116 low, after a
+# hold of about 3 s). While our screen app runs, the button is ours
+# (dp200_screen.py: the POWER page, then shut down if it stays held), so
+# powerkeyd is frozen, not killed; "stop" lets it run again. powerd below
+# is the fallback when the screen app is not there: the line low for
+# KEY_FALLBACK seconds in a row shuts down.
+KEY_GPIO=/sys/class/gpio/gpio116/value
+KEY_FALLBACK=8
+powerkey_hold() { for p in $(pidof powerkeyd); do kill -STOP $p; done; }
+powerkey_release() { for p in $(pidof powerkeyd); do kill -CONT $p; done; }
 powerd_start() {
     [ -f /tmp/x1_powerd.pid ] && kill $(cat /tmp/x1_powerd.pid) 2>/dev/null
     cp $ST/x1_web.sh /tmp/x1_power.sh
     sh /tmp/x1_power.sh powerd > /tmp/x1_power.log 2>&1 &
+    powerkey_hold
 }
 powerd_stop() {
     [ -f /tmp/x1_powerd.pid ] && kill $(cat /tmp/x1_powerd.pid) 2>/dev/null
     rm -f /tmp/x1_powerd.pid $RUN/power.ok
+    powerkey_release
 }
 # Stock asks for an Ethernet address once at boot and gives up if none
 # comes ("No lease, failing"; seen after a warm reboot, 2026-11-23): the
@@ -266,7 +279,14 @@ powerd)                             # the loop behind SHUT DOWN / REBOOT (starte
     rm -f $RUN/power                # a request left on the card by an earlier run
     echo $$ > /tmp/x1_powerd.pid
     : > $RUN/power.ok
+    low=0
     while :; do
+        # fallback for the button (the screen app normally acts first)
+        if [ "$(cat $KEY_GPIO 2>/dev/null)" = 0 ]; then low=$((low+1)); else low=0; fi
+        if [ $low -ge $KEY_FALLBACK ]; then
+            echo "x1_power: button held $KEY_FALLBACK s with no answer from the screen app"
+            power_do poweroff; exit 0
+        fi
         if [ -f $RUN/power ]; then
             w=$(cat $RUN/power)
             # empty: caught between create and write; read it again next round

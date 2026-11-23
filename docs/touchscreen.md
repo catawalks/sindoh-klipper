@@ -72,6 +72,7 @@ is greyed out and says "not set up yet". For a new model, write these:
 | `CLEAN_NOZZLE` | MOVE, CLEAN | Counts a purge. |
 | `EMPTY_BIN`, `BIN_EMPTIED` | MOVE, EMPTY BIN | Purges are counted in `save_variables` `bin_count`. |
 | `JOG AXIS=<X/Y/Z> D=<mm>` | MOVE, JOG | Refuses an axis that is not homed, stops at the limits. |
+| `PRINT_START` variables `steps` and `step` | the "Starting print" page | `steps` is a list of step names in the order the start runs them, `step` the index of the running one (the macro sets it with `SET_GCODE_VARIABLE` as it goes; 0 while the bed question is open). The page lists them and marks the running one. A model without these variables gets the DP200's fixed list, with the step guessed from temperatures. |
 | `BED_FORWARD` | MOVE, BED FORWARD | Only Y moves (homes Y first if needed, never Z: a part may be on the bed). Refuses while printing. |
 | `G28`, `BED_CLEAR` | MOVE, HOME | Z homing needs `BED_CLEAR` first. |
 | `BED_LEVEL SCRUB=<0/1>` | MOVE, BED LEVEL, on a model without a mesh probe | Three touches with the nozzle. The page shows the macro's `M117` line while it runs, then reads the result from the macro `_LEVEL`: `back`, `fl`, `fr` (touch heights), `click` (mm per wheel click), `cw_raises`, `ok`. A model that defines `BED_MESH_CALIBRATE` gets the DP200's mesh-and-screws page instead. |
@@ -135,12 +136,16 @@ runs underneath:
   `/run/dp200/power.ok` exists. Mainsail's power menu and a typed
   `reboot` reach the same helper through `dp200-power-request`
   (TODO 48). A reboot starts Sindoh's firmware:
-  Klipper has to be started again. The front power button is Sindoh's
-  business there: its program `/app/powerkeyd` keeps running and, when
-  the button is held, saves the files and cuts the power, also during
-  a print. (The program acts 20 ms after its input changes, but that
-  input comes from the power circuit, not straight from the button:
-  the owner has to hold it about 3 s.)
+  Klipper has to be started again. **The front power button** cannot work as on the DP200: Linux
+  never sees a tap, only "held about 3 s", for as long as the button
+  stays down (GPIO 116 low; sindoh `docs/1x.md`). So on the 1X: held
+  3 s = the POWER page opens (and the screen wakes); still held
+  `KEY_OFF_1X` (3 s) later = shut down, with a countdown on the page;
+  during a print it does not shut down but says to use the page's SHUT
+  DOWN, which asks. `x1_web.sh` freezes Sindoh's own `/app/powerkeyd`
+  (it would shut down at once) while our programs run and lets it go
+  on "stop"; its helper shuts down by itself if the line stays low
+  8 s and the screen app did not act.
 - **UPDATE:** Moonraker's updater for Mainsail, as on the DP200
   (`install/x1/x1_moonraker.conf`). Klipper and Moonraker are pinned to
   the commits on the card.

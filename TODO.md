@@ -457,13 +457,13 @@ stages 1-5 done on the dev printer):
       a 1 s press; GPIO 116 goes low only once the button has been
       held about 3 s and stays low until it is let go; the printer
       does not switch off by itself during a 5 s hold. Sindoh's
-      `/app/powerkeyd` shuts down the moment the line goes low. To
-      build: our own watcher in its place (powerkeyd frozen while
-      Klipper runs): line low = open the screen's POWER page; still
-      low after a further few seconds = shut down through the power
-      helper; never act during a print without a confirmation.
-      Owner to choose the times and whether a hold during a print
-      asks first.
+      `/app/powerkeyd` shuts down the moment the line goes low.
+      Built 11-23 (owner's choice): held 3 s = the POWER page, 3 s
+      more = shut down, not during a print; powerkeyd frozen while we
+      run; an 8 s fallback in the helper. **Not on the printer yet**
+      (written during a print): deploy, then try a 3 s hold, a 6 s
+      hold, and a hold during a print. The shut down itself (GPIO
+      158) has still never run.
     - **1X updater:** Mainsail lists the card's Klipper checkout as
       invalid (detached, untracked files). Do not use its "recover"
       there; the stage 7 install will have no checkout.
