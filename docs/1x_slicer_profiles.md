@@ -79,17 +79,50 @@ Our `PRINT_START` does the same things in macros: clean, home, purge
 calls `PRINT_START BED= EXTRUDER=` and `PRINT_END` instead; `G200` and
 `M2` are not defined in our config.
 
-## The X direction
+## The X direction: what Sindoh does
 
-Cura's definition has X 0 to 228 with no mirror setting, while the
-motor frame we measured grows to the LEFT (home at 262.7 on the left).
-So the stock firmware must turn slicer X around before moving, or every
-stock print would be mirrored. Sindoh's Simplify3D profile for the
-3DWOX 1 has `flipX` set, which points the same way. Our config uses the
-motor frame as is, so **G-code sliced for a normal bed prints mirrored
-left to right on our port** until X is turned around in the config
-(stepper direction and positions) or in the slicer. Not changed yet:
-owner's decision (TODO 41).
+Looked up 2026-11-22 in the stock motion program (the G0/G1 handler
+`parsedData::parseGcode_G0_G1` and `..._calcPulse`, disassembled on the
+PC) and in a print file sliced by Sindoh's own slicer (the 1X's
+`/example/PLA/LINE TEST_PLA.gcode`, 3DWOX Desktop 1.5).
+
+- **The stock program does not turn X around.** It takes the X of a
+  print file as it stands, checks it, and converts the difference to
+  the last position into steps at 0.0125 mm per step. There is no
+  offset and no sign change on the way.
+- **A print file's X is the motor frame we measured.** The handler
+  accepts X from 0 to 228, plus exactly two values outside the bed:
+  262.7 and -38.2. 262.7 is the home position at the left wall, where
+  the 1X's head parks; -38.2 is the matching park position past the
+  other end, for the 2X's other head. Y is accepted from 0 to 200.
+- **Sindoh's slicer puts the bed center at X 114, Y 100**: its line
+  test (a 20 mm part on a raft) spans X 101.9 to 126.1 and Y 87.9 to
+  112.1. Our test prints are centered at X 110, the middle between the
+  two front notches (-7.5 and 228.5), 4 mm to the right of that.
+- **Neither of Sindoh's third-party profiles mirrors.** The Cura
+  definition has no such setting. The Simplify3D profile's
+  `flipXoverride` is 1, which is Simplify3D's "not flipped" (an earlier
+  note here read it as a flip; that was wrong).
+- Their start G-code in that file: T0, M140/M104 without waiting,
+  M107, G200, G21, G90, G92 E-20, M190, M109, G28, `M298` ("move
+  nozzles on bed plate"), G0 Z3. The header gives a Z offset without a
+  raft of -0.15 mm.
+
+So in the stock machine a print file's X 0 is at the right edge of the
+bed and X grows to the left, exactly as in our config, and nothing in
+Sindoh's chain that we can read turns it around. What that leaves:
+
+1. Sindoh's own slicer mirrors the model before writing the file (not
+   visible in a round sample part), and files from Cura with Sindoh's
+   own profile come out mirrored on a stock 1X; or
+2. our picture of the directions is wrong somewhere, and nothing is
+   mirrored.
+
+Only a print can tell: an asymmetric part under our config behaves as
+the same file would under stock. `x1_xy_scale_150mm.gcode` is an L
+whose corner is at low X and low Y: corner at the front right = the
+frame mirrors, front left = it does not. Decide about turning X around
+after that print (TODO 41).
 
 A Cura post-processing script in the archive
 (`DisplayInformationIn3DWOX.py`) writes the comment lines the stock

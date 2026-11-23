@@ -274,13 +274,16 @@ stages 1-5 done on the dev printer):
         the bow). The nozzle touch only works at the notches; a mesh
         needs a conductive sheet or another probe on the head (end
         user / future change).
-      - **X direction (owner decision):** X grows to the left in our
-        config, and Sindoh's Cura definition has X 0 to 228 with no
-        mirror, so normally sliced G-code prints mirrored on our port
-        ([docs/1x_slicer_profiles.md](docs/1x_slicer_profiles.md)).
-        Turn X around in the config (X 0 at the right, positions
-        re-measured, 2X in mind) or leave it to the slicer; confirm
-        with an asymmetric print.
+      - **X direction (owner decision, after a print):** the stock
+        program passes a print file's X straight through, in the same
+        left-growing frame as our config, and nothing in Sindoh's files
+        mirrors ([docs/1x_slicer_profiles.md](docs/1x_slicer_profiles.md)).
+        **Owner present:** print `x1_xy_scale_150mm.gcode` (or any
+        asymmetric part): L corner at the front right = mirrored. Then
+        decide whether to turn X around in the config (2X in mind).
+      - Bed center: Sindoh's slicer centers at X 114; our test prints
+        use X 110 (middle of the notches). Find the sheet's real
+        center before changing `gen_test_prints.py`.
       - Taken from Sindoh's Cura values 11-22 (owner): retract 6 mm,
         40 mm/s printing, 130 mm/s travel, `max_accel` 2000 (speed
         test passed at 2000). Not printed yet. All four are starting points

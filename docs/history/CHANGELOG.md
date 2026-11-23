@@ -7,6 +7,16 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X: how stock treats X in a print file** (owner's question before
+  any X mirror change). Disassembled the stock G0/G1 handler and read
+  Sindoh's own line test file from the printer: X is passed straight
+  through in the frame we use (0 to 228 on the bed, 262.7 = home at the
+  left wall, -38.2 = the 2X's other park position), bed center X 114,
+  and neither the firmware nor Sindoh's Cura or Simplify3D files mirror
+  (the earlier reading of Simplify3D's flip setting was wrong). Whether
+  prints come out mirrored is left to an asymmetric print. Write-up:
+  [1x_slicer_profiles.md](../1x_slicer_profiles.md).
+
 - 1X speed test at the new acceleration (owner's go, bed empty):
   `tools/x1_speed_test.py 197 2000 5`, X and Y both kept their position
   within 0.5 mm at the home sensors.
