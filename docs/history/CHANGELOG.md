@@ -7,6 +7,11 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- Sindoh's own slicer profiles (3DWOX Desktop, 23 models) and a cube
+  sliced for the 1X read: speeds per profile (Fast 60 mm/s, Normal 40),
+  machine values, and the cube's engraved Z is not mirrored in the
+  file. Added to [1x_slicer_profiles.md](../1x_slicer_profiles.md).
+
 - **1X screen: NETWORK, POWER and UPDATE work, INFO filled in, lamp
   timeout fixed** (owner: the three buttons were grayed out, the lamp
   did not time out with the screen, INFO was mostly empty).

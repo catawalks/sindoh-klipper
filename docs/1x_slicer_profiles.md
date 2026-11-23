@@ -128,3 +128,44 @@ A Cura post-processing script in the archive
 (`DisplayInformationIn3DWOX.py`) writes the comment lines the stock
 screen shows: `;ESTIMATION_TIME`, `;TOTAL_LAYER`, `;DIMENSION`,
 `;ESTIMATION_FILAMENT_CARTRIDGE_0`.
+
+## Sindoh's own slicer (3DWOX Desktop 1.6): profiles and a sliced cube
+
+Read 2026-11-22 from the owner's installation (`profile\` folder: 23
+models, per model a machine file, the start/end code and the print
+profiles) and from an XYZ calibration cube the owner sliced for the 1X
+with "Fast". Not copied into any repository.
+
+1X print profiles (PLA; all with a raft, 15 % infill, fan 50 % from
+0.6 mm, retract 6 mm at 30 mm/s, nozzle 200 C, bed 60 C, Z offset
+without a raft -0.15 mm):
+
+| Profile | Layer | Print | First layer | Top/bottom | Travel |
+|---|---|---|---|---|---|
+| Fast | 0.2 | 60 mm/s | 20 | 20 | 130 |
+| Normal | 0.2 | 40 | 20 | 20 | 130 |
+| Fine | 0.1 | 25 | 20 | 10 | 60 |
+| Silent | 0.2 | 40 | 20 | 20 | 60 |
+
+ABS: 230 C, bed 90 C, fan 8 %, retract 3 mm. Flexible: 240 C, 30 mm/s,
+retract 7 mm at 70 mm/s, travel 100.
+
+Machine file, 1X: bed 228 x 200 x 300, acceleration 2500 mm/s2, corner
+speed ("bump") 25 mm/s for X and Y, 0.4 for Z, 5 for E; nozzles 0.4
+(0.2 and 0.6 selectable). The slicer's speed limits there (600 mm/s
+X/Y, 40 Z) are far above the firmware's and mean nothing for the
+machine. The same values serve nearly every model; the 5X and 7X have
+1600 mm/s2 and bump 20, the "1X DP302" 800 and 8. Bed sizes: DP200,
+3DWOX 1, DP102/103: 210 x 200 x 195; 2X as the 1X; 5X 350 x 350 x 350;
+7X 370 x 390 x 450. Every model has the same start code (M107, G200,
+G21, G90, G92 E-20) and end code (M2).
+
+**The cube is not mirrored in the file.** Its top face carries an
+engraved Z; drawn from the G-code with X to the right and Y up, it
+reads as a normal Z. So Sindoh's slicer does not mirror either. With
+the firmware passing X through (above), a stock 1X prints a file
+exactly as our config does. Whatever a stock print looks like, ours
+looks the same: if stock parts are not mirror images, no change to our
+X is needed, and the earlier "mirrored" reasoning has a direction
+wrong somewhere (most likely which end of Y is the front). The L print
+settles it.
