@@ -7,6 +7,18 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- **DP200 `PRINT_START` lists its steps too** (owner: the DP200 should
+  follow the macro as well): `steps` / `step`, an `M117` line per step,
+  and the nozzle now heats over the bin before `CLEAN_NOZZLE` (which
+  then only purges and wipes), so "Heating the nozzle" and "Purging
+  and wiping" are separate steps. The app's built-in list stays as the
+  fallback for an older macro file.
+- **1X `PRIME_LINE`** (owner): 120 mm along the front edge of the bed
+  (X 54 to 174, `prime_y` 1.0 behind Y 0) and 40 mm back beside it, as
+  on the DP200. The PrusaSlicer bundle calls it and has no skirt any
+  more; the test prints use it.
+  Both compiled and linted only; nothing has run on a printer.
+
 - **1X power button handling written** (owner: held 3 s opens the POWER
   page, 3 s more shuts down): the screen app reads GPIO 116, opens the
   page, counts down and asks the power helper to power off, except

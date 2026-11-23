@@ -289,6 +289,8 @@ stages 1-5 done on the dev printer):
       "Normal" values, not printed with yet. Then tune toward 60 mm/s
       (Sindoh's "Fast"), further with input shaping (owner 11-22).
       The first layer stays 0.25 x 0.45.
+    - `PRIME_LINE` (11-23): never drawn. Check where the front edge
+      of the sheet really is and set `prime_y` (now 1.0).
     - Bed `max_temp` 100 is a guess (Sindoh's ABS profile uses 90).
     - The jam check's window values are estimates.
     - The DP200 has no runout switch: the owner prints Sindoh's
@@ -353,8 +355,10 @@ stages 1-5 done on the dev printer):
     - The DP200 firmware from the current fork (f97fa268) has never
       run on a DP200: test it on the dev printer first, or build the
       payload with the firmware of v0.1.0 and only new host files.
-    - `BED_FORWARD`, the new `LV_PROBE_CALIBRATE_SAVE` and the Z
-      homing that first moves off a pressed switch, on a DP200 (owner
+    - `BED_FORWARD`, the new `LV_PROBE_CALIBRATE_SAVE`, the Z
+      homing that first moves off a pressed switch, and the
+      `PRINT_START` with its step list (11-23: the nozzle now heats
+      over the bin before the purge), on a DP200 (owner
       present). The work printer's own edit (Z `position_min` -5) is
       the new shipped value.
     - `docs/INSTALL.md` still tells users to type
