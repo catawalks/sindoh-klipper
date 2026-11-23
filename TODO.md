@@ -250,17 +250,8 @@ stages 1-5 done on the dev printer):
     so far in [docs/1x_port_plan.md](docs/1x_port_plan.md); what is done
     is in the changelog. State: start of stage 6 (config
     the three-file config loads; web page and touch screen run). Open:
-    - **Owner present:** unload, then load, to try the two load changes
-      of 11-21 (feed ahead while heating; park over the dump station:
-      check the nozzle is clear of the cleaning flap). The jam check has
-      not seen a real jam; its window values are estimates.
-    - **Owner present:** first homing under the real config (bed empty),
-      then the touch screen by hand (calibration is the DP200's).
-    - Bed `max_temp` is 75 (bring-up value): find stock's limit before
-      printing anything that wants a hotter bed.
-    - **Owner present:** leveling with the nozzle-contact probe and
-      `[screws_tilt_adjust]` (plan in the port plan; a bed mesh is not
-      possible, the nozzle only makes contact at the three notches).
+    - The jam check has not seen a real jam; its window values are
+      estimates.
     - Runout: GPIO 80 is the runout sensor (config has it); not tried in
       a print. The DP200 has no such switch: the owner prints Sindoh's
       adapter, then test it and add it to the DP200 config.
@@ -273,10 +264,22 @@ stages 1-5 done on the dev printer):
     - Leveling: done 11-22 (`BED_LEVEL`, its screen page, run by touch).
       Left from stock by choice: no re-homing between points, no
       automatic second round.
-    - **Owner present:** a first print with `PRINT_START` /
-      `PRINT_END` (written 11-22, not run). Bed `max_temp` 100 is a
-      guess: no stock limit found. Z and the extruder have not run at
-      their stock limits (12 and 86 mm/s).
+    - First print done 11-22 (20 mm box, came out fine). From it:
+      - **First layer too close at the bed center** (box 9.8 mm tall
+        for 10; owner: the center is bowed up). Z zero rests on one
+        paper test. Next: paper test at the center (bed empty), or
+        lower `position_endstop` by about 0.1 to 0.2, then a first
+        layer print.
+      - **No mesh on the stock bed** (owner: a real mesh would help
+        the bow). The nozzle touch only works at the notches; a mesh
+        needs a conductive sheet or another probe on the head (end
+        user / future change).
+      - X grows to the left: check whether prints come out mirrored
+        (print something asymmetric).
+      - Compare our test settings with Sindoh's slicer profiles
+        (`D:\DP200\CURA`, `D:\DP200\Simpified3D`).
+    - Bed `max_temp` 100 is a guess: no stock limit found. Z and the
+      extruder have not run at their stock limits (12 and 86 mm/s).
     - Stage 7: install onto `/userdata` (plan in the port plan; every
       eMMC write needs the owner's OK), a cold start without the stock
       engine (driver set-up, reference PWM).

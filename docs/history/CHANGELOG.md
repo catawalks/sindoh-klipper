@@ -7,6 +7,16 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X: first print under Klipper.** `x1_box_20mm.gcode` (20 x 20 x
+  10 mm open box, PLA, bed 60 C, nozzle 210 C), started from Moonraker
+  and released by the owner's YES to the bed question. `PRINT_START`
+  and `PRINT_END` ran for the first time, start to finish: 15 min in
+  all, 6.4 min printing, 350 mm of filament. Owner: came out fine;
+  measured 19.9 x 20.0 x 9.8 mm. The first layer was a bit close to the
+  bed (owner: the bed center is bowed up, and the short height comes
+  from the squashed first layers). Z zero is from one paper test;
+  follow-ups in TODO 41.
+
 - `tools/gen_test_prints.py --model x1`: the three test prints for the
   1X (bed centre 110, 100; no prime line, two skirt loops instead; 5 mm
   retract for the long tube). The DP200 files are unchanged apart from
