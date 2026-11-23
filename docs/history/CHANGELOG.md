@@ -7,6 +7,14 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- **1X: PC_DEBUG2 identified** (owner restarted the printer with the
+  cable on it; listen only): it is the debug port of the SoC's
+  low-power processor (Cortex-R4 firmware inside `uboot_r4.bin`). One
+  version line 6 s after power-on, nothing else, also not on a button
+  press. It takes dangerous commands: never type on it. Of no use to
+  the port. The power button has to be held about 3 s (owner). Facts:
+  sindoh `docs/1x.md` (4f5b123).
+
 - **Work printer: the v0.1.1 test payload installed from the stick**
   (owner). His notes from using it led to:
   - **BED FORWARD** on the screen's MOVE page (macro `BED_FORWARD` in

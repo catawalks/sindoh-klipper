@@ -140,7 +140,7 @@ runs underneath:
   the button is held, saves the files and cuts the power, also during
   a print. (The program acts 20 ms after its input changes, but that
   input comes from the power circuit, not straight from the button:
-  the owner has to hold it. Hold time not measured.)
+  the owner has to hold it about 3 s.)
 - **UPDATE:** Moonraker's updater for Mainsail, as on the DP200
   (`install/x1/x1_moonraker.conf`). Klipper and Moonraker are pinned to
   the commits on the card.

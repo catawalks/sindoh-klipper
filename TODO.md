@@ -63,11 +63,6 @@ Either printer:
 - **Speed test at the new acceleration:**
   `tools/x1_speed_test.py 197 2500 5` (passed at 2000).
 - **SYSTEM -> POWER:** REBOOT, then SHUT DOWN (dry-run only so far).
-  Also time the front power button: how long must it be held?
-- **PC Debug 2** (the console cable is on it since 11-23; silent under
-  Klipper at every speed): press REBOOT on the screen while the PC
-  listens through the restart, and try a short button press. Then the
-  cable goes back to the console port (needed to start Klipper).
 - **Remote reboot** (item 48): with the console back, copy the three
   files to the card's stage folder and restart the web side, then try
   Mainsail's power menu. Same visit: the screen app and `x1_macros.cfg`
@@ -456,9 +451,8 @@ stages 1-5 done on the dev printer):
       timeout covers. To decide with the owner.
     - **1X power button:** Sindoh's `/app/powerkeyd` keeps running
       under Klipper and powers the printer off on the front button.
-      The program acts 20 ms after its input (GPIO 116) changes, but
-      the owner has to hold the button: the input comes from the power
-      circuit. Time the hold, then decide whether to hold it off during a print (freeze the
+      The owner has to hold the button about 3 s (11-23); the
+      program then acts within 20 ms of its input. Decide whether to hold it off during a print (freeze the
       program while printing).
     - **1X updater:** Mainsail lists the card's Klipper checkout as
       invalid (detached, untracked files). Do not use its "recover"
