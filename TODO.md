@@ -274,10 +274,16 @@ stages 1-5 done on the dev printer):
         the bow). The nozzle touch only works at the notches; a mesh
         needs a conductive sheet or another probe on the head (end
         user / future change).
-      - X grows to the left: check whether prints come out mirrored
-        (print something asymmetric).
-      - Compare our test settings with Sindoh's slicer profiles
-        (`D:\DP200\CURA`, `D:\DP200\Simpified3D`).
+      - **X direction (owner decision):** X grows to the left in our
+        config, and Sindoh's Cura definition has X 0 to 228 with no
+        mirror, so normally sliced G-code prints mirrored on our port
+        ([docs/1x_slicer_profiles.md](docs/1x_slicer_profiles.md)).
+        Turn X around in the config (X 0 at the right, positions
+        re-measured, 2X in mind) or leave it to the slicer; confirm
+        with an asymmetric print.
+      - From Sindoh's slicer profiles (same doc): try retract 6 mm,
+        PLA at 200 C after the first layer, fan 50%, first layer
+        0.2 x 0.4 in `gen_test_prints.py --model x1`.
     - Bed `max_temp` 100 is a guess: no stock limit found. Z and the
       extruder have not run at their stock limits (12 and 86 mm/s).
     - Stage 7: install onto `/userdata` (plan in the port plan; every

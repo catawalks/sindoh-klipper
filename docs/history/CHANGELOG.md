@@ -7,6 +7,15 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X: Sindoh's slicer profiles read and compared** with our test
+  print settings: [1x_slicer_profiles.md](../1x_slicer_profiles.md).
+  Close on layer height, speeds, walls, skirt and bed temperature;
+  Sindoh retracts 6 mm (ours 5), prints PLA at 200 C with the fan at
+  50%, and uses a raft by default in Cura. Their machine limits match
+  what we found in the stock program. Their Cura definition has no X
+  mirror, so G-code sliced the normal way would print mirrored on our
+  left-growing X: open decision in TODO 41. No settings changed.
+
 - **1X: first print under Klipper.** `x1_box_20mm.gcode` (20 x 20 x
   10 mm open box, PLA, bed 60 C, nozzle 210 C), started from Moonraker
   and released by the owner's YES to the bed question. `PRINT_START`
