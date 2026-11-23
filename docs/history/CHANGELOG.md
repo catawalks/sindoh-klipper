@@ -20,6 +20,9 @@ files in this folder; `git log` has the rest.
   the 1X's power button acts at once: its signal comes from the power
   circuit and the owner has to hold it (time not measured). No link in
   a live document is broken (the two archived lists keep old paths).
+  The eight 1X bring-up test configs moved from `klipper/config/x1/`
+  to `klipper/config/x1/bringup/` (with an index), so the folder holds
+  the three files a printer uses.
 
 ## 2026-11-22
 
