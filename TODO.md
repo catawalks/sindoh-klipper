@@ -362,8 +362,10 @@ stages 1-5 done on the dev printer):
     - The DP200 firmware from the current fork (f97fa268) has never
       run on a DP200: test it on the dev printer first, or build the
       payload with the firmware of v0.1.0 and only new host files.
-    - `BED_FORWARD` and the new `LV_PROBE_CALIBRATE_SAVE` on a DP200
-      (owner present).
+    - `BED_FORWARD`, the new `LV_PROBE_CALIBRATE_SAVE` and the Z
+      homing that first moves off a pressed switch, on a DP200 (owner
+      present). The work printer's own edit (Z `position_min` -5) is
+      the new shipped value.
     - `docs/INSTALL.md` still tells users to type
       `LV_PROBE_CALIBRATE_SAVE Z=<value>` (right for v0.1.0 and
       v0.1.1): change it with the release that carries the new macro.

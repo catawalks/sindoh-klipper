@@ -18,6 +18,13 @@ files in this folder; `git log` has the rest.
     after `LV_PROBE_CALIBRATE`, and only a plausible paper-test
     height). `Z=` still overrides; the screen's PROBE OFFSET wizard,
     which already did this, is unchanged.
+  - **Z on a fresh install** (owner, work printer): the paper test
+    needed Z below -2, and after it `G28 Z` failed because the bed sat
+    in the Z switch and the back-off did not free it. Now: Z
+    `position_min` -5; Z homing lowers the bed 10 mm first when the
+    switch is already pressed (as X and Y do); `homing_retract_dist`
+    back to 5 (the 2 of 11-22 never shipped); the probe save macro
+    accepts heights below Z 0.
   Templates compile and each case was run against stand-in printer
   states on the PC; nothing has run on a printer.
 
