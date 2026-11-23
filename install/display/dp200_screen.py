@@ -54,9 +54,13 @@ SCREEN_NEEDS = {'jog': ('JOG',), 'bedlevel': ('BED_MESH_CALIBRATE|BED_LEVEL',), 
                 'shaper': ('SHAPER_CALIBRATE',)}
 CAL_NEEDS = {'zend': ('Z_ENDSTOP_CALIBRATE',), 'probe': ('LV_PROBE_CALIBRATE',)}
 # 1X bring-up: it runs beside Sindoh's own system, which still owns the
-# network set-up and the power button; no updater is set up there yet.
-BRINGUP_OFF_SCREENS = ('network', 'power')
-BRINGUP_OFF_KINDS = ('upd_open',)
+# network set-up (the NETWORK page shows the ports; joining a WiFi network
+# and the IP settings stay on Sindoh's side) and the power button. SHUT
+# DOWN and REBOOT need the helper that install/x1/x1_web.sh starts on the
+# stock side; it leaves POWER_OK while it runs.
+BRINGUP_OFF_SCREENS = ('wifi',)
+BRINGUP_OFF_KINDS = ('net_cfg',)
+POWER_OK = '/run/dp200/power.ok'
 WEB_PORT = ''
 EXT_CMD_RE = re.compile(r'^[A-Z_][A-Z0-9_]*$')
 FB_BYTES = int(_read('/sys/class/graphics/fb0/bits_per_pixel', '16') or 16) // 8
@@ -224,6 +228,9 @@ def draw_shutdown(d, what, step):
                    fill=C_DIM, anchor='mm')
         else:
             # the old Windows 95 screen, in its colours
+            if IS_1X:                           # the helper cuts the power itself
+                d.text((PW // 2, 360), 'Switching off...', font=font(36), fill=C_TXT, anchor='mm')
+                return
             for i, l in enumerate(("It's now safe", 'to turn off', 'your printer.')):
                 d.text((PW // 2, 260 + i * 62), l, font=font(46), fill=(255, 160, 0), anchor='mm')
             for i, l in enumerate(('Hold the POWER BUTTON', 'for about 2 seconds.')):
@@ -472,13 +479,15 @@ def system_info(ip):
         uptime = '-'
     return [
         ('Build', first(BUILD_FILE, 'not stamped (SD build)')),
-        ('Installed on', 'internal NAND' if os.path.exists(ON_NAND) else 'microSD card'),
+        ('Installed on', 'internal NAND' if os.path.exists(ON_NAND) else
+         'microSD, beside stock' if IS_1X else 'microSD card'),
         ('Klipper', req('/printer/info', 'software_version')),
         ('Moonraker', req('/server/info', 'moonraker_version')),
         ('Mainsail', mainsail),
         ('Kernel', stock.get('kernel') or os.uname().release),
         ('Sindoh FW', stock.get('firmware') or ('- (mainline boot)' if not stock else '-')),
         ('Model ID', stock.get('model') or '-'),
+        ('Board', BOARD or '-'),
         ('Serial', stock.get('serial') or '-'),
         ('Recovery set', 'Sindoh app %s' % rec if rec else '- (read at install)'),
         ('IP address', ip),
@@ -613,6 +622,8 @@ class UI:
         if action[0] in BRINGUP_OFF_KINDS:
             return True
         if action[0] == 'screen' and action[1] in BRINGUP_OFF_SCREENS:
+            return True
+        if action[0] == 'power' and not os.path.exists(POWER_OK):
             return True
         if self.cmds is None:
             return False
@@ -806,6 +817,16 @@ class UI:
                 write_shutdown_frames(what)
             except Exception as e:             # no progress frames: still go ahead
                 print('shutdown frames: %s' % e, flush=True)
+            if IS_1X:
+                # the helper holds the cores as they are: heaters and motors
+                # off through Klipper first (it checks the heater outputs too)
+                try:
+                    data = json.dumps({'script': 'TURN_OFF_HEATERS\nM84'}).encode()
+                    req = urllib.request.Request(API + '/printer/gcode/script', data=data, method='POST',
+                                                 headers={'Content-Type': 'application/json'})
+                    urllib.request.urlopen(req, timeout=10).read()
+                except Exception as e:
+                    log('power %s: heaters off through Klipper failed: %s' % (what, e))
             try:
                 os.makedirs(os.path.dirname(POWER_REQ), exist_ok=True)
                 with open(POWER_REQ, 'w') as f:
@@ -849,8 +870,14 @@ class UI:
             self.upd = {'error': 'Moonraker: %s' % fail_text(e)}
             return
         m = vi.get('mainsail', {})
+        klipper = (vi.get('klipper') or {}).get('version', '-')
+        if klipper in ('-', '?', ''):          # a checkout the updater cannot read
+            try:
+                klipper = get('/printer/info').get('software_version') or klipper
+            except Exception:
+                pass
         self.upd = {'mainsail': m.get('version', '-'), 'mainsail_new': m.get('remote_version', '?'),
-                    'klipper': (vi.get('klipper') or {}).get('version', '-'),
+                    'klipper': klipper,
                     'moonraker': (vi.get('moonraker') or {}).get('version', '-')}
 
     def _bg(self, label, fn, req=None):
@@ -1435,7 +1462,8 @@ class UI:
             if iface == 'mlan0':
                 ssid = self.wf['status'].get('ssid', b'').decode('utf-8', 'replace') \
                     if self.wf['status'].get('wpa_state') == 'COMPLETED' else ''
-                state = ('on %s' % ssid) if ssid else 'not connected'
+                # no access to the WiFi program (1X beside stock): go by the address
+                state = ('on %s' % ssid) if ssid else 'connected' if i['ip'] and i['up'] else 'not connected'
             else:
                 state = 'cable connected' if i['link'] else 'no cable'
             d.text((20, y), '%s: %s' % (name, state), font=font(22), fill=C_TXT)
@@ -1449,10 +1477,13 @@ class UI:
             y += 30 + len(rows) * 24 + 14
         if n['dns']:
             d.text((20, y), 'DNS: %s' % ', '.join(n['dns'][:2]), font=font(17), fill=C_DIM)
+            y += 26
+        if IS_1X:
+            d.text((20, y), 'Set up on Sindoh\'s own screen for now.', font=font(17), fill=C_DIM)
         self.grid(d, [('WIFI', ('screen', 'wifi'), C_BTN, 28, 'networks'),
                       ('WIFI IP', ('net_cfg', 'mlan0'), C_BTN, 24, 'DHCP / static'),
                       ('ETHERNET IP', ('net_cfg', 'eth0'), C_BTN, 22, 'DHCP / static')],
-                  top=508, rows_h=80)
+                  top=540 if IS_1X else 508, rows_h=72 if IS_1X else 80)
 
     def page_ipcfg(self, d, st):
         n = self.net
@@ -1826,7 +1857,27 @@ class UI:
                 except Exception:
                     self.sleep_display = True      # no such macro: screen only
             threading.Thread(target=read, daemon=True).start()
-        if out == getattr(self, 'sleep_out', False) or not ready:
+        # A Klipper restart puts its outputs back to their start values (the
+        # lamp comes on again) and forgets what SCREEN_TIMEOUT did: run it
+        # again once Klipper is back, if still timed out (2026-11-22: the 1X
+        # lamp stayed on beside a black screen). A restart is over within
+        # one idle poll, so it is also told by Klipper's print clock
+        # starting over.
+        ept = ((self.st or {}).get('toolhead') or {}).get('estimated_print_time')
+        if ready and ept is not None:
+            if ept < getattr(self, 'sleep_ept', 0.0):
+                self.sleep_out = False
+            self.sleep_ept = ept
+        if not ready:
+            self.sleep_out = False
+            return
+        if not out and not getattr(self, 'sleep_init', False):
+            # this program was restarted while timed out: undo what the
+            # earlier run's SCREEN_TIMEOUT did (the macro restores only
+            # what it switched off itself)
+            self.sleep_init = True
+            self.sleep_out = True
+        if out == getattr(self, 'sleep_out', False):
             return
         self.sleep_out = out
         script = 'SCREEN_TIMEOUT' if out else 'SCREEN_WAKE'
@@ -2761,8 +2812,8 @@ class UI:
         for i, (k, v) in enumerate(rows):
             d.text((20, 300 + i * 32), k, font=f, fill=C_DIM)
             d.text((150, 300 + i * 32), v, font=f, fill=C_TXT)
-        d.text((20, 400), 'Klipper and Moonraker come with the DP200', font=font(17), fill=C_DIM)
-        d.text((20, 422), 'port\'s releases (USB stick for now).', font=font(17), fill=C_DIM)
+        d.text((20, 400), 'Klipper and Moonraker come with the %s' % MODEL, font=font(17), fill=C_DIM)
+        d.text((20, 422), 'port\'s releases%s.' % ('' if IS_1X else ' (USB stick for now)'), font=font(17), fill=C_DIM)
         newer = u.get('mainsail_new') not in (None, '?', u.get('mainsail'))
         printing = st['print_stats']['state'] in ('printing', 'paused')
         items = [('CHECK NOW', ('upd_check',), C_BTN, 26, 'latest versions')]
@@ -2823,15 +2874,25 @@ class UI:
         warn = ' The running print will be lost.' if printing else ''
         if printing:
             d.text((20, y), 'A print is running!', font=font(22), fill=C_WARN)
-        d.text((20, y + 30), 'Holding the button ~%d s cuts the power at once.' % HW_CUT,
-               font=font(18), fill=C_DIM)
-        d.text((20, y + 54), 'Better: SHUT DOWN first, then hold the button.',
-               font=font(18), fill=C_DIM)
+        if IS_1X:
+            # Sindoh's own power key program still runs: a press of the
+            # button saves the files and cuts the power (stock behaviour).
+            d.text((20, y + 30), 'The power button switches the printer off', font=font(18), fill=C_DIM)
+            d.text((20, y + 54), 'at once, also during a print. After a reboot', font=font(18), fill=C_DIM)
+            d.text((20, y + 78), 'the printer runs Sindoh\'s firmware again.', font=font(18), fill=C_DIM)
+            y += 24
+        else:
+            d.text((20, y + 30), 'Holding the button ~%d s cuts the power at once.' % HW_CUT,
+                   font=font(18), fill=C_DIM)
+            d.text((20, y + 54), 'Better: SHUT DOWN first, then hold the button.',
+                   font=font(18), fill=C_DIM)
         items = [
             ('SHUT DOWN', ('confirm', 'Shut down the printer?' + warn, ('power', 'poweroff')),
              C_RED, 28, 'power off'),
-            ('REBOOT', ('confirm', 'Reboot the printer?' + warn, ('power', 'reboot')),
-             C_BTN, 28, 'whole printer'),
+            ('REBOOT', ('confirm', ('Reboot the printer? It starts Sindoh\'s firmware; Klipper has '
+                                    'to be started again.' if IS_1X else 'Reboot the printer?') + warn,
+                        ('power', 'reboot')),
+             C_BTN, 28, 'to Sindoh firmware' if IS_1X else 'whole printer'),
         ]
         if st is not None:
             items.append(('KLIPPER', ('confirm', 'Restart Klipper host?' + warn,

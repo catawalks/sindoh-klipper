@@ -7,6 +7,35 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X screen: NETWORK, POWER and UPDATE work, INFO filled in, lamp
+  timeout fixed** (owner: the three buttons were grayed out, the lamp
+  did not time out with the screen, INFO was mostly empty).
+  - **Lamp:** `SCREEN_TIMEOUT` ran once when the screen went dark; a
+    Klipper restart after that (a config deploy) switched the lamp back
+    on and nothing switched it off again. The app now runs
+    `SCREEN_TIMEOUT` again after a restart (told by Klipper's print
+    clock starting over: the restart is shorter than one idle poll) and
+    `SCREEN_WAKE` once when the app itself starts. Tried on the 1X: lamp
+    off again 8 s after a firmware restart. Both models.
+  - **NETWORK:** the page shows both ports; WiFi set-up and IP settings
+    stay off while Sindoh's system owns the network.
+  - **UPDATE:** Moonraker's updater for Mainsail in
+    `x1_moonraker.conf`; `x1_web.sh` pins Klipper and Moonraker to the
+    commits on the card. Reads v2.19.0, up to date.
+  - **INFO:** `x1_web.sh` writes `stock_info` (kernel, Sindoh firmware,
+    model ID, serial); it was missing because only the DP200's start
+    script wrote it. New row "Board".
+  - **POWER:** helper `x1_web.sh powerd` on the stock side does SHUT
+    DOWN and REBOOT: stops our programs, holds the cores, checks the
+    heater outputs, unmounts the card, then `reboot`, or for power off
+    the steps of Sindoh's `/app/powerkeyd` (read by disassembly: sync,
+    remount read-only, 1 s, GPIO 158 to 1). Dry run on the printer
+    (everything but the last step) went through and the stack came back
+    with the normal start. **The reboot and the power off themselves
+    have not been tried.** Found on the way: Sindoh's power key program
+    keeps running under Klipper, and any press of the front button
+    (20 ms) powers the printer off, also during a print.
+
 - **1X: how stock treats X in a print file** (owner's question before
   any X mirror change). Disassembled the stock G0/G1 handler and read
   Sindoh's own line test file from the printer: X is passed straight

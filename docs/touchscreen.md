@@ -118,6 +118,26 @@ line.
 
 ## Other models
 
-The 1X's panel is the same size in pixels (800×480, stored sideways) but
-24 bit, and its touch device and buttons are not mapped yet. The app has
-not been run there. See [1x_port_plan.md](1x_port_plan.md), stage 6.
+**1X** (bring-up, beside Sindoh's own system; started by
+`install/x1/x1_web.sh`). Same app; the panel is the same size in pixels
+(800×480, stored sideways) but 24 bit. What differs while stock still
+runs underneath:
+
+- **NETWORK** shows both ports (address, gateway, MAC, DNS). Joining a
+  WiFi network and the IP settings stay on Sindoh's side for now, so
+  those three buttons are off. The WiFi name is not shown (the WiFi
+  program's socket is on the stock side).
+- **POWER:** SHUT DOWN and REBOOT are done by a helper on the stock side
+  (`x1_web.sh powerd`, see the script). The app turns heaters and motors
+  off, draws its progress frames and writes the request to
+  `/run/dp200/power`; the buttons are off unless the helper's flag
+  `/run/dp200/power.ok` exists. A reboot starts Sindoh's firmware:
+  Klipper has to be started again. The front power button is Sindoh's
+  business there: its program `/app/powerkeyd` keeps running, and a
+  press saves the files and cuts the power at once, also during a print.
+- **UPDATE:** Moonraker's updater for Mainsail, as on the DP200
+  (`install/x1/x1_moonraker.conf`). Klipper and Moonraker are pinned to
+  the commits on the card.
+- **INFO:** `x1_web.sh` writes `/run/dp200/stock_info` (kernel, Sindoh
+  firmware version, model ID, serial number), which the DP200's start
+  script does there.

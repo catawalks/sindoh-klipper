@@ -401,6 +401,15 @@ stages 1-5 done on the dev printer):
     endpoints through); the config still says what the timeout covers
     (`variable_lamp`, `variable_display`), the app reads that and uses
     the endpoint. To decide with the owner.
+    **1X, owner present:** press SYSTEM -> POWER -> REBOOT, then SHUT
+    DOWN (written and dry-run 11-22 night, last step never run; power
+    off uses GPIO 158 as Sindoh's power key program does). Decide
+    whether the front power button should be held off during a print
+    (today any press powers the 1X off at once; Sindoh's program could
+    be frozen while printing). With the updater on, Mainsail lists the
+    card's Klipper checkout as invalid (detached, untracked files):
+    do not use its "recover" there; the stage 7 install has no
+    checkout. WiFi set-up from our screen waits for stage 7.
     Still coded in the app: the filament presets and temperatures, the
     1X filament page's sensor names, the cool-down command list, and
     which pages are off on the 1X. Move them when those pages are next
