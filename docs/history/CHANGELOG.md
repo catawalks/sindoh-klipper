@@ -23,8 +23,10 @@ files in this folder; `git log` has the rest.
     in the Z switch and the back-off did not free it. Now: Z
     `position_min` -5; Z homing lowers the bed 10 mm first when the
     switch is already pressed (as X and Y do); `homing_retract_dist`
-    back to 5 (the 2 of 11-22 never shipped); the probe save macro
-    accepts heights below Z 0.
+    stays 2 (owner: it only has to undo the fast approach, and the
+    macro now handles a bed that starts inside the switch; still to
+    check on a DP200); the probe save macro accepts heights below
+    Z 0.
   Templates compile and each case was run against stand-in printer
   states on the PC; nothing has run on a printer.
 
