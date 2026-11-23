@@ -1,0 +1,4 @@
+# Moonraker (user klipper) may ask for a reboot or power-off: these are
+# dp200-power-request, which hands the request to the helper outside the
+# Klipper root. Nothing else is allowed without a password.
+klipper ALL=(root) NOPASSWD: /usr/local/sbin/reboot, /usr/local/sbin/poweroff, /usr/local/sbin/halt

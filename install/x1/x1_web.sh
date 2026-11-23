@@ -16,6 +16,7 @@
 # It also starts the power helper (powerd, below) for the touch screen's
 # SHUT DOWN and REBOOT, and writes what SYSTEM -> INFO shows about the
 # stock side. By hand: sh /tmp/sd/stage/x1_web.sh power reboot|poweroff [dry]
+# The same helper serves Mainsail's power menu (power_shims, below).
 ROOT=/tmp/sd
 ST=$ROOT/stage
 RUN=$ROOT/run/dp200                # the screen app's /run/dp200 (on the card)
@@ -133,6 +134,32 @@ power_do() {
     sleep 3
     poweroff -f                     # still here: the output did not cut the power
 }
+# Mainsail's power menu and "reboot" typed in the Debian root: Moonraker
+# runs "sudo reboot" / "sudo poweroff" there, which cannot restart the
+# printer from inside. dp200-power-request (install/rootfs/usr/local/sbin,
+# the same on every model) stands in for those commands and writes the
+# request powerd acts on. A root with sudo gets a rule for it; the card's
+# root has none, so it gets a stand-in "sudo" that only passes those two
+# on, and /run/dp200 is opened to the klipper user.
+power_shims() {
+    [ -f $ST/dp200-power-request ] || { echo "no dp200-power-request in $ST: Mainsail's reboot stays off"; return; }
+    mkdir -p $ROOT/usr/local/sbin $ROOT/usr/local/bin $RUN
+    cp $ST/dp200-power-request $ROOT/usr/local/sbin/dp200-power-request
+    chmod 755 $ROOT/usr/local/sbin/dp200-power-request
+    for n in reboot poweroff halt; do ln -sf dp200-power-request $ROOT/usr/local/sbin/$n; done
+    if [ -x $ROOT/usr/bin/sudo ]; then
+        grep -q "Stand-in for sudo" $ROOT/usr/local/bin/sudo 2>/dev/null && rm -f $ROOT/usr/local/bin/sudo
+        if [ -f $ST/dp200-power.sudoers ] && [ -d $ROOT/etc/sudoers.d ]; then
+            cp $ST/dp200-power.sudoers $ROOT/etc/sudoers.d/dp200-power
+            chmod 440 $ROOT/etc/sudoers.d/dp200-power
+        fi
+    elif [ -f $ST/sudo-standin ]; then
+        cp $ST/sudo-standin $ROOT/usr/local/bin/sudo
+        chmod 755 $ROOT/usr/local/bin/sudo
+        inroot chgrp klipper /run/dp200
+        chmod 775 $RUN
+    fi
+}
 powerd_start() {
     [ -f /tmp/x1_powerd.pid ] && kill $(cat /tmp/x1_powerd.pid) 2>/dev/null
     cp $ST/x1_web.sh /tmp/x1_power.sh
@@ -211,6 +238,7 @@ EOF
         $K/moonraker/moonraker/moonraker.py -d $K/printer_data" > $ROOT/tmp/moonraker.out 2>&1 &
     inroot /usr/sbin/nginx -c $CONF
     webcam_start
+    power_shims
     powerd_start
     screen_start
     echo "x1_web: started. Page on port $PORT, Moonraker on 7125 (give it about 30 s)"
@@ -230,7 +258,9 @@ powerd)                             # the loop behind SHUT DOWN / REBOOT (starte
     : > $RUN/power.ok
     while :; do
         if [ -f $RUN/power ]; then
-            w=$(cat $RUN/power); rm -f $RUN/power
+            w=$(cat $RUN/power)
+            # empty: caught between create and write; read it again next round
+            [ -n "$w" ] && rm -f $RUN/power
             case "$w" in poweroff|reboot) power_do $w; exit 0 ;; esac
         fi
         sleep 1

@@ -7,6 +7,19 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- **1X: PC Debug 2 listened to** (owner moved the console cable there):
+  no byte at 115200 in 52 s, through a lamp switch, a beep and a
+  firmware restart, and none at 9600 to 921600. Linux uses only the
+  console port and the motor driver port; the SoC's other two UARTs are
+  disabled in Sindoh's device tree. A boot and a button press are still
+  to be heard (TODO, "Owner at a printer"). Nothing was sent.
+- **Reboot and power off from Mainsail, for every model** (owner): the
+  stand-in commands `dp200-power-request` (as `reboot`, `poweroff`,
+  `halt`), a sudo rule, and a sudo stand-in for roots without sudo;
+  wired into `x1_web.sh` and the DP200 root builds. Tried on the PC
+  only; not on a printer (TODO 48). `x1_web.sh powerd` no longer
+  drops a request it reads while the file is still empty.
+
 - **Housekeeping (owner's request, night of 11-22).** `TODO.md`: the 1X
   items rewritten as open items only, with a 1X list under "Owner at a
   printer"; item 44 is now the screen app's open points. `STATUS.md`:

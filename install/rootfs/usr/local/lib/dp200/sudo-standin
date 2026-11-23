@@ -1,0 +1,14 @@
+#!/bin/sh
+# Stand-in for sudo in a Klipper root built without it (the 1X card root).
+# It runs nothing as root: it only passes Moonraker's "sudo reboot" and
+# "sudo poweroff" on to dp200-power-request, which needs no root where the
+# start script has made /run/dp200 writable for the klipper user.
+# Installed as /usr/local/bin/sudo ONLY when the root has no real sudo.
+while [ $# -gt 0 ]; do
+    case "$1" in -S|-n|-k|--) shift ;; *) break ;; esac
+done
+case "$1" in
+reboot|poweroff|halt) exec /usr/local/sbin/dp200-power-request "$([ "$1" = halt ] && echo poweroff || echo "$1")" ;;
+esac
+echo "sudo: not available on this printer (only reboot and poweroff)" >&2
+exit 1

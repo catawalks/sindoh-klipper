@@ -1,0 +1,31 @@
+#!/bin/sh
+# Reboot or power off the printer from inside the Klipper root.
+#
+# The Klipper root cannot restart the machine itself (on a stick or card
+# install it is a chroot beside Sindoh's system), so a request is handed
+# to the helper outside it, the same way the touch screen's POWER page
+# does: the word "reboot" or "poweroff" in /run/dp200/power. The helper
+# (dp200-powerkey.sh on a DP200, x1_web.sh powerd on a 1X) stops Klipper,
+# switches heaters and motors off, saves the files and does it.
+#
+# Installed as /usr/local/sbin/reboot, poweroff and halt (links), ahead of
+# the system's own in the PATH, so Moonraker's "sudo reboot" and
+# "sudo poweroff" (Mainsail's power menu) and a plain "reboot" typed in
+# the root all take this path.
+#   dp200-power-request reboot|poweroff
+REQ=/run/dp200/power
+what=$(basename "$0")
+case "$what" in reboot|poweroff|halt) ;; *) what=$1 ;; esac
+[ "$what" = halt ] && what=poweroff
+case "$what" in
+reboot|poweroff) ;;
+*)  echo "usage: dp200-power-request reboot|poweroff" >&2; exit 2 ;;
+esac
+mkdir -p /run/dp200 2>/dev/null
+# written in one step: the helper polls the file once a second
+if echo "$what" > $REQ.new 2>/dev/null && mv $REQ.new $REQ; then
+    echo "dp200: $what requested"
+else
+    echo "dp200: cannot write $REQ (no power helper on this install?)" >&2
+    exit 1
+fi

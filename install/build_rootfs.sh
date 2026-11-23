@@ -120,6 +120,11 @@ echo "== 8. DP200 configuration and boot scripts"
 install -d "$OUT/etc/dp200" "$OUT/dp200" "$KHOME/printer_data/config" \
     "$KHOME/printer_data/gcodes" "$KHOME/printer_data/logs"
 install -m 755 "$HERE/rootfs/etc/dp200/rc.dp200" "$OUT/etc/dp200/rc.dp200"
+# reboot / poweroff from Mainsail or a shell in this root: handed to the
+# helper outside it (see the script)
+install -m 755 "$HERE/rootfs/usr/local/sbin/dp200-power-request" "$OUT/usr/local/sbin/dp200-power-request"
+for n in reboot poweroff halt; do ln -sf dp200-power-request "$OUT/usr/local/sbin/$n"; done
+install -m 440 "$HERE/rootfs/etc/sudoers.d/dp200-power" "$OUT/etc/sudoers.d/dp200-power"
 install -m 755 "$HERE/display/dp200_screen.py" "$HERE/display/dp200_wifi.py" "$HERE/display/dp200_net.py" "$OUT/usr/local/bin/"
 install -m 755 "$HERE/printer/"*.sh "$OUT/dp200/"
 cp -n "$HERE/rootfs/home/klipper/printer_data/config/moonraker.conf" "$KHOME/printer_data/config/" || true

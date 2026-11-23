@@ -131,7 +131,9 @@ runs underneath:
   (`x1_web.sh powerd`, see the script). The app turns heaters and motors
   off, draws its progress frames and writes the request to
   `/run/dp200/power`; the buttons are off unless the helper's flag
-  `/run/dp200/power.ok` exists. A reboot starts Sindoh's firmware:
+  `/run/dp200/power.ok` exists. Mainsail's power menu and a typed
+  `reboot` reach the same helper through `dp200-power-request`
+  (TODO 48). A reboot starts Sindoh's firmware:
   Klipper has to be started again. The front power button is Sindoh's
   business there: its program `/app/powerkeyd` keeps running and, when
   the button is held, saves the files and cuts the power, also during

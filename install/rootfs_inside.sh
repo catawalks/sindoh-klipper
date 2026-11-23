@@ -85,6 +85,11 @@ else
 fi
 install -d /etc/dp200 /dp200 $KHOME/printer_data/config $KHOME/printer_data/gcodes $KHOME/printer_data/logs
 install -m 755 $PORT/install/rootfs/etc/dp200/rc.dp200 /etc/dp200/rc.dp200
+# reboot / poweroff from Mainsail or a shell in this root: handed to the
+# helper outside it (see the script)
+install -m 755 $PORT/install/rootfs/usr/local/sbin/dp200-power-request /usr/local/sbin/dp200-power-request
+for n in reboot poweroff halt; do ln -sf dp200-power-request /usr/local/sbin/$n; done
+install -m 440 $PORT/install/rootfs/etc/sudoers.d/dp200-power /etc/sudoers.d/dp200-power
 install -m 755 $PORT/install/display/dp200_screen.py $PORT/install/display/dp200_wifi.py $PORT/install/display/dp200_net.py /usr/local/bin/
 install -m 755 $PORT/install/printer/*.sh $PORT/install/printer/*.py /dp200/
 # PID 1 for a mainline boot of this root (unused on stock)

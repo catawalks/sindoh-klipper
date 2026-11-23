@@ -64,6 +64,13 @@ Either printer:
   `tools/x1_speed_test.py 197 2500 5` (passed at 2000).
 - **SYSTEM -> POWER:** REBOOT, then SHUT DOWN (dry-run only so far).
   Also time the front power button: how long must it be held?
+- **PC Debug 2** (the console cable is on it since 11-23; silent under
+  Klipper at every speed): press REBOOT on the screen while the PC
+  listens through the restart, and try a short button press. Then the
+  cable goes back to the console port (needed to start Klipper).
+- **Remote reboot** (item 48): with the console back, copy the three
+  files to the card's stage folder and restart the web side, then try
+  Mainsail's power menu.
 - **Runout sensor** during a print; a held-back filament for the jam
   check.
 - **Cold start** without Sindoh's program (port plan, stage 7 item 4).
@@ -343,6 +350,28 @@ stages 1-5 done on the dev printer):
     then we need our own setting. Proposal: SYSTEM page, pick a region
     then a city from the system's zone list (it has the daylight saving
     rules), default = what stock had.
+48. **Reboot and power off from Mainsail, every model** (owner 11-23:
+    people will want to restart their printer remotely). Moonraker runs
+    `sudo reboot` / `sudo poweroff` inside the Klipper root, which
+    cannot restart the machine. Built 11-23, tried on the PC only:
+    `dp200-power-request` (in `install/rootfs/usr/local/sbin/`,
+    installed as `reboot`, `poweroff` and `halt` ahead of the system's
+    own) writes the same request the touch screen's POWER page writes;
+    a sudo rule lets Moonraker's user run it; a root without sudo (the
+    1X card) gets a stand-in. Open:
+    - 1X: install (`x1_web.sh start` does it from the stage folder)
+      and try it. Needs the console.
+    - DP200: the root builds install it (`build_rootfs.sh`,
+      `rootfs_inside.sh`), not run since. **The stick payload and its
+      installer do not carry it yet** (left alone on 11-23, the day of
+      the v0.1.1 work-printer test): add the three files to the
+      payload and the upgrade step.
+    - On our own kernel Moonraker may refuse with "inside a
+      container": it reads the name of process 1 and expects `init`
+      or `systemd` (ours is `init.mainline`). Check on the dev
+      printer (`/machine/system_info`, "virtualization").
+    - The planned 1X install that boots our system directly (stage 7)
+      keeps this path: only the helper behind the request file changes.
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
     beeper): USB audio card 0 + amplifier enable GPIO 180, stock plays
     MP3s with mplayer ([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md),
