@@ -27,6 +27,10 @@ print (the 20 mm box of 11-22).
 | Infill | 15%, lines | 20% | none (open box) |
 | Bed adhesion | **raft** by default; skirt 2 lines, 3 mm gap | skirt 2 lines, 4 mm gap | skirt 2 lines, 3 mm gap |
 
+Taken over on 11-22 (owner): retract 6 mm, 40 mm/s printing, 130 mm/s
+travel and acceleration 2000, as starting points to tune higher later.
+The "Ours" columns show the values of the first print, before that.
+
 Close: layer height, speeds, walls, skirt, bed temperature. Different:
 
 - **Nozzle 210 C** is the stock firmware's own PLA value (210 first

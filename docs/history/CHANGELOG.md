@@ -7,6 +7,13 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- **1X: Sindoh's Cura values taken over** (owner): test prints with
+  retract 6 mm (at our 35 mm/s), 40 mm/s printing and 130 mm/s travel
+  (`gen_test_prints.py --model x1`; the DP200 files are unchanged), and
+  `max_accel: 2000` in `x1_printer.cfg`. The first layer stays
+  0.25 mm high and 0.45 wide at 20 mm/s. On the printer and the card;
+  nothing printed or moved with the new values yet.
+
 - **1X: Sindoh's slicer profiles read and compared** with our test
   print settings: [1x_slicer_profiles.md](../1x_slicer_profiles.md).
   Close on layer height, speeds, walls, skirt and bed temperature;

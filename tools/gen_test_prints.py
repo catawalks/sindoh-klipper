@@ -24,6 +24,8 @@ FIL_AREA = math.pi * (1.75 / 2) ** 2
 CX, CY = 100.0, 100.0          # bed centre (200 x 200 mm bed)
 PRIME = True                   # the model has a PRIME_LINE macro
 RETRACT = 4.0
+SPEED = 30                     # print speed after the first layer, mm/s
+TRAVEL = 100                   # travel speed, mm/s
 
 
 def e_per_mm(width, height):
@@ -44,7 +46,8 @@ class G:
     def emit(self, s):
         self.lines.append(s)
 
-    def travel(self, x, y, speed=100):
+    def travel(self, x, y, speed=None):
+        speed = TRAVEL if speed is None else speed
         if self.x is not None and math.hypot(x - self.x, y - self.y) > 2 and not self.retracted:
             self.emit('G1 E-%.2f F%d' % (self.retract, self.rs))
             self.retracted = True
@@ -165,7 +168,7 @@ def box(bed, ext):
         g.layer(z, n)
         if n == 2:
             g.emit('M106 S255')                     # part fan from layer 3 (PLA)
-        speed = 20 if n == 0 else 30
+        speed = 20 if n == 0 else SPEED
         if n == 0:
             g.skirt(epm, speed)
         half = 10.0
@@ -194,7 +197,7 @@ def xy_scale(bed, ext):
         g.layer(z, n)
         if n == 2:
             g.emit('M106 S255')
-        speed = 20 if n == 0 else 30
+        speed = 20 if n == 0 else SPEED
         if n == 0:
             # two skirt loops 3 mm outside the part: the nozzle is primed
             # again after the travel from the prime line
@@ -232,12 +235,16 @@ def main():
     ap.add_argument('--extruder', type=int, default=210)
     ap.add_argument('--model', default='dp200', choices=('dp200', 'x1'))
     a = ap.parse_args()
-    global CX, CY, PRIME, RETRACT
+    global CX, CY, PRIME, RETRACT, SPEED, TRAVEL
     if a.model == 'x1':
         # 3DWOX 1X: the bed's notches are at X -7.5 and 228.5, Y 0.2 and
         # 200.2; no prime line macro; a long tube from the extruder to the
-        # nozzle (857 mm), so a longer retract
-        CX, CY, PRIME, RETRACT = 110.0, 100.0, False, 5.0
+        # nozzle (857 mm), so a longer retract. Retract 6 mm, 40 mm/s
+        # printing and 130 mm/s travel are Sindoh's Cura values for the
+        # 1X (docs/1x_slicer_profiles.md; owner 2026-11-22). The first
+        # layer stays 0.25 x 0.45 at 20 mm/s.
+        CX, CY, PRIME, RETRACT = 110.0, 100.0, False, 6.0
+        SPEED, TRAVEL = 40, 130
     os.makedirs(a.outdir, exist_ok=True)
     for fn, g in (('%s_first_layer.gcode' % a.model, first_layer(a.bed, a.extruder)),
                   ('%s_box_20mm.gcode' % a.model, box(a.bed, a.extruder)),

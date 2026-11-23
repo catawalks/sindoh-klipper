@@ -281,9 +281,12 @@ stages 1-5 done on the dev printer):
         Turn X around in the config (X 0 at the right, positions
         re-measured, 2X in mind) or leave it to the slicer; confirm
         with an asymmetric print.
-      - From Sindoh's slicer profiles (same doc): try retract 6 mm,
-        PLA at 200 C after the first layer, fan 50%, first layer
-        0.2 x 0.4 in `gen_test_prints.py --model x1`.
+      - Taken from Sindoh's Cura values 11-22 (owner): retract 6 mm,
+        40 mm/s printing, 130 mm/s travel, `max_accel` 2000. Not
+        printed yet; the speed test ran at 1500 only, repeat it at
+        2000 (bed empty, owner's go). All four are starting points
+        to tune higher later (owner). The first layer stays
+        0.25 x 0.45.
     - Bed `max_temp` 100 is a guess: no stock limit found. Z and the
       extruder have not run at their stock limits (12 and 86 mm/s).
     - Stage 7: install onto `/userdata` (plan in the port plan; every
