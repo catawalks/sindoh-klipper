@@ -282,9 +282,8 @@ stages 1-5 done on the dev printer):
         re-measured, 2X in mind) or leave it to the slicer; confirm
         with an asymmetric print.
       - Taken from Sindoh's Cura values 11-22 (owner): retract 6 mm,
-        40 mm/s printing, 130 mm/s travel, `max_accel` 2000. Not
-        printed yet; the speed test ran at 1500 only, repeat it at
-        2000 (bed empty, owner's go). All four are starting points
+        40 mm/s printing, 130 mm/s travel, `max_accel` 2000 (speed
+        test passed at 2000). Not printed yet. All four are starting points
         to tune higher later (owner). The first layer stays
         0.25 x 0.45.
     - Bed `max_temp` 100 is a guess: no stock limit found. Z and the

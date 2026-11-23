@@ -7,6 +7,10 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-22
 
+- 1X speed test at the new acceleration (owner's go, bed empty):
+  `tools/x1_speed_test.py 197 2000 5`, X and Y both kept their position
+  within 0.5 mm at the home sensors.
+
 - **1X: Sindoh's Cura values taken over** (owner): test prints with
   retract 6 mm (at our 35 mm/s), 40 mm/s printing and 130 mm/s travel
   (`gen_test_prints.py --model x1`; the DP200 files are unchanged), and
