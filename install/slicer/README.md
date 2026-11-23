@@ -1,4 +1,6 @@
-# Slicer profiles for the DP200 with Klipper
+# Slicer profiles for Klipper on Sindoh printers
+
+The DP200 first; the 1X is at the end.
 
 All profiles describe the same machine:
 
@@ -75,3 +77,19 @@ exclude-object.
 - **Simplify3D, IdeaMaker and others:** set the values above by hand.
   Use the start and end G-code as given, and turn off the slicer's own
   temperature commands at the start.
+
+## 3DWOX 1X (bring-up)
+
+`1X_Klipper_PrusaSlicer.ini`: **File → Import → Import Config Bundle**.
+It adds the printer "Sindoh 1X Klipper", the print profile "1X 0.20mm
+Klipper" and the filament "1X PLA".
+
+- **Bed:** 228 × 200 mm, X 0 / Y 0 at the front left, height 300 mm: the
+  same as Sindoh's own slicer.
+- **Start G-code:** `PRINT_START BED=… EXTRUDER=…` (asks whether the bed
+  is empty, heats, homes, purges over the bin and wipes). There is no
+  prime line on the 1X; two skirt loops prime the nozzle.
+- **Values:** Sindoh's "Normal" profile for the 1X (40 mm/s, travel
+  130 mm/s, retract 6 mm, PLA at 200 °C, fan 50 %), with our first layer
+  (0.25 mm, 210 °C, 20 mm/s). Not tuned; the comparison with Sindoh's
+  profiles is in [../../docs/1x_slicer_profiles.md](../../docs/1x_slicer_profiles.md).
