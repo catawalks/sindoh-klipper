@@ -28,6 +28,11 @@ LOG=/var/log/dp200-init.log
 mnt() { grep -q " $2 " /proc/mounts 2>/dev/null || mount -t "$1" -o "$3" "$1" "$2"; }
 
 mount -t proc proc /proc 2>/dev/null
+# Moonraker takes the machine for a container, and then refuses to reboot
+# or shut it down from Mainsail, unless process 1 is called "init" or
+# "systemd" (it reads /proc/1/sched; seen on the dev printer 2026-11-23:
+# "lxc"). This script is process 1 under its own name, so rename it.
+[ $$ = 1 ] && printf init > /proc/self/comm 2>/dev/null
 mnt sysfs /sys nosuid,nodev,noexec
 mnt devtmpfs /dev mode=755
 mkdir -p /dev/pts /dev/shm

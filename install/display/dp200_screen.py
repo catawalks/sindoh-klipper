@@ -2377,7 +2377,7 @@ class UI:
                                       'out the purge bin?' % BIN_DROP), ('gcode', 'EMPTY_BIN', 'Empty bin', 'bin')),
              C_FULL if n >= BIN_THRESHOLD else C_BTN, 28, '%d / %d purges' % (n, BIN_THRESHOLD)),
             ('BED LEVEL', ('screen', 'bedlevel'), C_BTN, 28, 'probe + screws'),
-            ('CALIBRATE', ('screen', 'calibrate'), C_BTN, 28, 'Z, probe, PID, shaper'),
+            ('CALIBRATE', ('screen', 'calibrate'), C_BTN, 28, 'Z, probe, PID, ...'),
             ('MOTORS OFF', ('gcode', 'M84', 'Motors off')),
         ]
         if paused:

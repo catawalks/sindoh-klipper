@@ -7,6 +7,15 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- 1X restarted under Klipper (console back on PC_DEBUG1) with the day's
+  files: the MOVE page with BED FORWARD, the remote reboot commands
+  (stand-in sudo on the card; the request folder is writable for
+  Moonraker's user). Nothing pressed yet.
+- Dev printer found on WiFi at 10.10.0.21 (kernel 6.18.59): its
+  Moonraker reports a container ("lxc"), which blocks Mainsail's
+  reboot there; `init.mainline` now names process 1 `init` (not
+  deployed).
+
 - **1X: PC_DEBUG2 identified** (owner restarted the printer with the
   cable on it; listen only): it is the debug port of the SoC's
   low-power processor (Cortex-R4 firmware inside `uboot_r4.bin`). One

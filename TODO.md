@@ -65,8 +65,8 @@ Either printer:
 - **SYSTEM -> POWER:** REBOOT, then SHUT DOWN (dry-run only so far).
 - **Remote reboot** (item 48): with the console back, copy the three
   files to the card's stage folder and restart the web side, then try
-  Mainsail's power menu. Same visit: the screen app and `x1_macros.cfg`
-  of 11-23 (BED FORWARD) go onto the card.
+  Mainsail's power menu. Installed 11-23 with the screen app and
+  macros of that day: try BED FORWARD on the MOVE page too.
 - **Runout sensor** during a print; a held-back filament for the jam
   check.
 - **Cold start** without Sindoh's program (port plan, stage 7 item 4).
@@ -364,7 +364,10 @@ stages 1-5 done on the dev printer):
     - `docs/INSTALL.md` still tells users to type
       `LV_PROBE_CALIBRATE_SAVE Z=<value>` (right for v0.1.0 and
       v0.1.1): change it with the release that carries the new macro.
-    - The dev printer did not answer on the network on 11-23.
+    - The dev printer answers on WiFi, 10.10.0.21 (Ethernet .147 is
+      down); Moonraker only, no shell, while the serial cable is on
+      the 1X. Config and macro files can go there through Moonraker;
+      the screen app and firmware cannot.
 48. **Reboot and power off from Mainsail, every model** (owner 11-23:
     people will want to restart their printer remotely). Moonraker runs
     `sudo reboot` / `sudo poweroff` inside the Klipper root, which
@@ -374,17 +377,19 @@ stages 1-5 done on the dev printer):
     own) writes the same request the touch screen's POWER page writes;
     a sudo rule lets Moonraker's user run it; a root without sudo (the
     1X card) gets a stand-in. Open:
-    - 1X: install (`x1_web.sh start` does it from the stage folder)
-      and try it. Needs the console.
+    - 1X: installed 11-23 (the stand-in sudo; Moonraker's user can
+      write the request). **Owner present:** press Reboot in
+      Mainsail's power menu (Klipper has to be started again after).
     - DP200: the root builds install it (`build_rootfs.sh`,
       `rootfs_inside.sh`), not run since. **The stick payload and its
       installer do not carry it yet** (left alone on 11-23, the day of
       the v0.1.1 work-printer test): add the three files to the
       payload and the upgrade step.
-    - On our own kernel Moonraker may refuse with "inside a
-      container": it reads the name of process 1 and expects `init`
-      or `systemd` (ours is `init.mainline`). Check on the dev
-      printer (`/machine/system_info`, "virtualization").
+    - On our own kernel Moonraker refuses with "inside a container"
+      (confirmed on the dev printer 11-23: it reports "lxc", because
+      process 1 is called `init.mainline`). `init.mainline` now
+      renames itself to `init`; not on the printer yet (needs a
+      shell there: the serial cable is on the 1X).
     - The planned 1X install that boots our system directly (stage 7)
       keeps this path: only the helper behind the request file changes.
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
