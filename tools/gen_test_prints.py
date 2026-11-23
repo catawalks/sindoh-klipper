@@ -13,7 +13,7 @@
 Both start with PRINT_START (heat, home, bed mesh, purge/wipe) and PRIME_LINE, and end with
 PRINT_END, use relative E (M83) and label the object for [exclude_object].
 Usage: gen_test_prints.py OUTDIR [--bed 60] [--extruder 210]
-       gen_test_prints.py OUTDIR --model x1     (3DWOX 1X: bed centre 110, 100,
+       gen_test_prints.py OUTDIR --model x1     (3DWOX 1X: bed centre 114, 100,
            files x1_*.gcode, no PRIME_LINE: two skirt loops prime instead)
 """
 import argparse
@@ -237,13 +237,13 @@ def main():
     a = ap.parse_args()
     global CX, CY, PRIME, RETRACT, SPEED, TRAVEL
     if a.model == 'x1':
-        # 3DWOX 1X: the bed's notches are at X -7.5 and 228.5, Y 0.2 and
-        # 200.2; no prime line macro; a long tube from the extruder to the
+        # 3DWOX 1X: the bed is X 0 to 228 (Sindoh's slicer centers at
+        # 114, 100); no prime line macro; a long tube from the extruder to the
         # nozzle (857 mm), so a longer retract. Retract 6 mm, 40 mm/s
         # printing and 130 mm/s travel are Sindoh's Cura values for the
         # 1X (docs/1x_slicer_profiles.md; owner 2026-11-22). The first
         # layer stays 0.25 x 0.45 at 20 mm/s.
-        CX, CY, PRIME, RETRACT = 110.0, 100.0, False, 6.0
+        CX, CY, PRIME, RETRACT = 114.0, 100.0, False, 6.0
         SPEED, TRAVEL = 40, 130
     os.makedirs(a.outdir, exist_ok=True)
     for fn, g in (('%s_first_layer.gcode' % a.model, first_layer(a.bed, a.extruder)),

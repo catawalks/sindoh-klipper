@@ -1,4 +1,4 @@
-# Status (overwrite in place; last updated 2026-11-22)
+# Status (overwrite in place; last updated 2026-11-23)
 
 The project: Klipper on Sindoh 3DWOX printers, on the printer's own SoC.
 Two DP200 setups exist, and they are different on purpose; a third
@@ -129,7 +129,9 @@ power save is on** (the new default with our kernel, TODO 26) and X uses
 - **Config:** `klipper/config/x1/` (`printer.cfg`, `x1_printer.cfg`,
   `x1_macros.cfg`), the DP200's layout. Limits: 197 mm/s, `max_accel`
   2500 (speed-tested at 2000), Z zero by paper test (`position_endstop`
-  2.100).
+  2.100). X is the stock and slicer frame since 11-23 (0 at the bed's
+  left edge, home on the left at negative X); before that it was
+  mirrored.
 - **Not yet:** a print with the 11-22 speed settings, the mirror check
   (big L), reboot and shut down from the screen (dry-run only), a cold
   start without Sindoh's program, the install onto the eMMC (stage 7),

@@ -24,12 +24,13 @@ s = get('/printer/objects/query?configfile=settings')['status']['configfile']['s
 print('limits', s['printer']['max_velocity'], s['printer']['max_accel'])
 g('G28 X'); g('G28 Y'); g('G90')
 g('SET_VELOCITY_LIMIT VELOCITY=%g ACCEL=%g' % (speed, accel))
-for ax, lo, hi, edge, sign in (('x', 20, 230, 242.4, 1), ('y', 20, 190, 5.5, -1)):
+# lo is the end near home; the sensor is on from its edge toward home
+for ax, lo, hi, edge, sign in (('x', -5, 205, -17.85, -1), ('y', 20, 190, 5.5, -1)):
     A = ax.upper()
-    g('G1 %s%g F6000' % (A, hi if ax == 'x' else lo))
+    g('G1 %s%g F6000' % (A, lo))
     for i in range(trips):
-        g('G1 %s%g F%d' % (A, lo if ax == 'x' else hi, speed * 60))
-        g('G1 %s%g F%d' % (A, hi if ax == 'x' else lo, speed * 60))
+        g('G1 %s%g F%d' % (A, hi, speed * 60))
+        g('G1 %s%g F%d' % (A, lo, speed * 60))
     g('M400')
     before = edge - sign * 0.5      # just off the sensor
     after = edge + sign * 0.5       # just on it

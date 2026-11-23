@@ -1744,7 +1744,13 @@ class UI:
         ty = (y0 + y1) // 2 - size // 2 - (10 if sub else 0)
         d.text(((x0 + x1 - tw) // 2, ty), label, font=f, fill=fg)
         if sub:
-            fs = font(18)
+            # a caption never leaves its button: smaller type first, then cut
+            ss, room = 18, x1 - x0 - 16
+            while ss > 13 and d.textlength(sub, font=font(ss)) > room:
+                ss -= 1
+            fs = font(ss)
+            while len(sub) > 4 and d.textlength(sub, font=fs) > room:
+                sub = sub[:-2].rstrip() + '…'
             sw = d.textlength(sub, font=fs)
             d.text(((x0 + x1 - sw) // 2, ty + size + 6), sub, font=fs, fill=C_DIM)
         if action is not None:
@@ -2082,7 +2088,13 @@ class UI:
         d.text((20, 160), (ps.get('filename') or '?')[:34], font=font(20), fill=C_DIM)
         d.text((20, 188), 'Starting print', font=font(30), fill=C_TXT)
         cur = start_phase(st)
-        for i, (key, text) in enumerate(START_STEPS):
+        msg = (st.get('display_status') or {}).get('message')
+        if msg and cur != 'ask':
+            # the model's PRINT_START says what it is doing (M117): show
+            # that, not the DP200's list of steps guessed from temperatures
+            for i, l in enumerate(wrap(d, msg, font(26), PW - 40)[:3]):
+                d.text((20, 250 + i * 36), l, font=font(26), fill=C_WARN)
+        for i, (key, text) in enumerate(() if msg and cur != 'ask' else START_STEPS):
             y = 234 + i * 32
             done = START_KEYS.index(cur) > i
             now = key == cur
@@ -2369,7 +2381,7 @@ class UI:
             ('JOG', ('screen', 'jog'), C_BTN, 30, 'X / Y / Z'),
             ('LOWER BED', lower, C_BTN, 30, None if lower or not paused else
              ('already low' if homed == 'xyz' else no)),
-            ('BED FORWARD', ('gcode', 'BED_FORWARD', 'Bed forward'), C_BTN, 26, 'to the front'),
+            ('BED FORWARD', ('gcode', 'BED_FORWARD', 'Bed forward'), C_BTN, 28),
             ('CLEAN', ('confirm', 'Heat, purge and wipe the nozzle?',
                        ('gcode', 'CLEAN_NOZZLE', 'Clean nozzle')), C_BTN, 30, 'nozzle'),
             ('EMPTY BIN', ('confirm', ('Lower the bed and move the head aside, to take out the purge bin?' if IS_1X else
@@ -2377,7 +2389,7 @@ class UI:
                                       'out the purge bin?' % BIN_DROP), ('gcode', 'EMPTY_BIN', 'Empty bin', 'bin')),
              C_FULL if n >= BIN_THRESHOLD else C_BTN, 28, '%d / %d purges' % (n, BIN_THRESHOLD)),
             ('BED LEVEL', ('screen', 'bedlevel'), C_BTN, 28, 'probe + screws'),
-            ('CALIBRATE', ('screen', 'calibrate'), C_BTN, 28, 'Z, probe, PID, ...'),
+            ('CALIBRATE', ('screen', 'calibrate'), C_BTN, 28, 'Z, probe, PID'),
             ('MOTORS OFF', ('gcode', 'M84', 'Motors off')),
         ]
         if paused:

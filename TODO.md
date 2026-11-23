@@ -55,9 +55,9 @@ Either printer:
     nozzle doesn't drag across a failed print. Mind that Z homes upward.
 
 1X (get a fresh "bed empty" first; background in items 41 and 44):
-- **The big L** (`x1_xy_scale_150mm.gcode`, on the printer): shows
-  whether prints come out mirrored (corner at low X and low Y: where is
-  it on the bed?) and how the first layer lies over 150 mm (the bow).
+- **The big L again** (`x1_xy_scale_150mm.gcode`, regenerated for the
+  corrected X frame): the corner must now be at the front LEFT. Also
+  shows how the first layer lies over 150 mm (the bow).
 - **Z zero:** paper test at the bed center, then a first layer print
   (`x1_first_layer.gcode`).
 - **Speed test at the new acceleration:**
@@ -270,24 +270,18 @@ stages 1-5 done on the dev printer):
     Stage 6 (a real config): homing, heaters, load/unload, bin, bed
     leveling, print start/end and a first print are done. Open (the
     checks that need the owner are in "Owner at a printer", 1X):
-    - **X direction.** The stock program passes a print file's X
-      straight through in the frame our config uses (X 0 at the right
-      edge, home at 262.7 on the left), and neither Sindoh's slicer nor
-      its Cura and Simplify3D files mirror
-      ([docs/1x_slicer_profiles.md](docs/1x_slicer_profiles.md)). Stock
-      prints have never come out mirrored (owner 11-22), so most
-      likely nothing needs turning around and our reading of which end
-      of Y is the bed's front is wrong. The L print decides; if Y is
-      the other way round, rename the leveling points and the "bed
-      forward" moves.
+    - **X direction: fixed 11-23.** Our config had X backwards (0 at
+      the right, home at 262.7: the stock program's printed range,
+      which is the 2X's other carriage) and printed mirror images
+      (the big L). Now the stock frame: X 0 at the bed's left edge,
+      home sensor at -17.85, wall at -38.2; every X value converted
+      (new = 224.5 - old). Homing, park, wipe and leveling checked on
+      the printer; a print in the new frame is still to come.
     - **Z zero and the bed's bow:** the first print's first layer was
       too close at the center (box 9.8 mm for 10). Z zero rests on one
       paper test. No mesh is possible on the stock bed (the nozzle
       only makes contact at the notches); a conductive sheet or a
       second probe would be an end-user change.
-    - **Bed center:** Sindoh's slicer centers at X 114, our test
-      prints at X 110 (the middle of the notches). Find the sheet's
-      real center before changing `gen_test_prints.py`.
     - **Print settings** (`gen_test_prints.py --model x1`): retract
       6 mm, 40 mm/s, travel 130 mm/s, `max_accel` 2500 are Sindoh's
       "Normal" values, not printed with yet. Then tune toward 60 mm/s

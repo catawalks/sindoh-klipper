@@ -67,7 +67,7 @@ Where ours differs, and why:
 
 | | 3DWOX Desktop | Cura definition | Stock program (measured) | Our config |
 |---|---|---|---|---|
-| Bed | 228 x 200 x 300 | 228 x 200 x 300 | X -3.1 to 262.7, Y to 200 | X -8 to 262.7, Y 200.5, Z 310 |
+| Bed | 228 x 200 x 300 | 228 x 200 x 300 | X -38.2 to 232.5 (travel), Y to 200 | X -38.2 to 232.5, Y 200.5, Z 310 |
 | Max speed X, Y | 600 mm/s (no meaning) | 200 | ramp tables to 197.7 | 197 |
 | Max speed Z | 40 (no meaning) | 10 | 12.0 | 12 |
 | Max speed E | 25 | 50 | 86.7 | 86 (extrude-only) |
@@ -102,17 +102,16 @@ A Cura post-processing script in the archive
 screen shows: `;ESTIMATION_TIME`, `;TOTAL_LAYER`, `;DIMENSION`,
 `;ESTIMATION_FILAMENT_CARTRIDGE_0`.
 
-## Mirroring: nothing in Sindoh's chain does it
+## Mirroring: nothing in Sindoh's chain does it, and none is needed
 
 - 3DWOX Desktop does not mirror: the calibration cube's engraved Z,
   drawn from the G-code with X to the right and Y up, reads as a
-  normal Z.
-- The Cura definition has no mirror setting; Simplify3D's
+  normal Z. The Cura definition has no mirror setting; Simplify3D's
   `flipXoverride` is 1, its "not flipped".
-- The stock program passes a file's X straight through, in the frame
-  our config uses (sindoh `1x_stock_routines.md`).
+- The stock program uses a file's X as written, and its X is the
+  slicer's: 0 at the left edge of the bed, growing to the right
+  (sindoh `1x_stock_routines.md`, "The stock X frame").
 
-So a file prints under our config exactly as under stock. Stock prints
-have never come out mirrored on this printer (owner 11-22). Sindoh's
-slicer centers the bed at X 114, Y 100; our test prints use X 110
-(TODO 41).
+Our config had X the other way round until 2026-11-23 and printed
+mirror images; it now uses the stock frame. Sindoh's slicer centers
+the bed at X 114, Y 100, and so do our test prints.

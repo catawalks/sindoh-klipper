@@ -457,13 +457,15 @@ printer; neither has run.
   (hardware), `x1_macros.cfg` (routines). Started with
   `x1_stage4.sh start printer.cfg`. The comments in the two `x1_`
   files carry the measured values and where each came from.
-- **Coordinates:** the stock program's own frame: X 0 at the right
-  edge of the bed, growing to the left; home sensor edge 242.4, left
-  wall and stock home 262.7; purge bin center 247.8; Y sensor edge 5.5.
-  A print file's X is used as written, as stock does
-  ([1x_slicer_profiles.md](1x_slicer_profiles.md)). Whether the Y
-  direction is as we named it (front and back) is to be confirmed with
-  a print (TODO 41).
+- **Coordinates:** the stock program's own frame, which is also what
+  slicers expect: X 0 at the LEFT edge of the bed, growing to the
+  right (bed 0 to 228); the head homes on the left, home sensor edge
+  at -17.85, left wall and stock home at -38.2, purge bin center at
+  -23.3; Y 0 with the bed at the back, sensor edge 5.5. (Until
+  2026-11-23 the config had X mirrored, built on the X range the
+  stock program prints, which is the 2X's other carriage; prints came
+  out as mirror images. Old X = 224.5 - new X; the sections above
+  that date use the old numbers.)
 - **Homing:** X, then Y, then Z, each moving off its sensor first if it
   starts on it (the sensors stay on from their edge to the end stop).
   Speeds from the stock recording: X 100, Y 75, Z 7.4 mm/s. Z asks

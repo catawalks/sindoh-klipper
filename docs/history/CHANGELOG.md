@@ -7,6 +7,27 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- **1X: X was backwards; fixed.** The big L printed as a mirror image
+  (owner: corner at the front right, thin arm along the front). Cause,
+  found in the stock program: the 1X's head is the "X2" carriage, whose
+  range is -38.2 to 232.5 with home on the left at the low end
+  (`StepperAbsoluteMoveX2`, `StepperHomeX2FindHome`); the range the
+  program prints at start-up, -3.1 to 262.7, which the config was
+  built on since 11-21, belongs to the 2X's other carriage. So stock X
+  is 0 at the bed's left edge and grows to the right, and nothing in
+  Sindoh's chain ever needed a mirror. Config converted (new X =
+  224.5 - old): direction pin inverted, homing toward negative, sensor
+  edge -17.85, limits -38.2 and 232.5, all macro positions, the scrub
+  path, test prints centered at X 114, the speed test. On the printer
+  with the owner: direction check, homing X and Y, park, wipe, bed
+  center, and a full `BED_LEVEL` with scrub (front corners -0.05 and
+  +0.06 mm against the back). Stock facts: sindoh
+  `docs/1x_stock_routines.md`, "The stock X frame".
+- Screen: BED FORWARD without a caption; a caption can no longer leave
+  its button (smaller type, then cut); the print start page shows the
+  model's own step message when it gives one, not the DP200's list
+  (the 1X showed a mesh step it does not have).
+
 - 1X restarted under Klipper (console back on PC_DEBUG1) with the day's
   files: the MOVE page with BED FORWARD, the remote reboot commands
   (stand-in sudo on the card; the request folder is writable for
