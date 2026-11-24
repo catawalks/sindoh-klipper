@@ -92,10 +92,15 @@ All of these are done from Mainsail's console. Clear the bed first.
 1. **Z endstop and probe offset (paper test):**
    1. home with `G28`;
    2. run `LV_PROBE_CALIBRATE`;
-   3. follow the prompts with a sheet of paper under the nozzle;
-   4. `ACCEPT`;
-   5. `LV_PROBE_CALIBRATE_SAVE Z=<value shown>`;
-   6. `SAVE_CONFIG`.
+   3. with a sheet of paper under the nozzle, lower it with
+      `TESTZ Z=-0.1` (repeat; `TESTZ Z=+0.05` to go back up) until the
+      paper drags;
+   4. `LV_PROBE_CALIBRATE_SAVE` (it accepts the paper test and works out
+      the offset itself; no number to type);
+   5. `SAVE_CONFIG`.
+
+   The touch screen's MOVE -> CALIBRATE -> PROBE OFFSET runs the same
+   steps.
 2. **Heater tuning:** run these, with `SAVE_CONFIG` after each:
    - `PID_CALIBRATE HEATER=heater_bed TARGET=60`;
    - `PID_CALIBRATE HEATER=extruder TARGET=210`.

@@ -7,6 +7,12 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-24
 
+- **DP200 motor currents on the stock counts**: the installer's
+  `dp200_machine.cfg` and the `dp200_printer.cfg` defaults now use the
+  1X rule (ceil(high·255/200)+0.25)/255 (checked for every offset
+  -99..99 on the PC). Before, some values landed one count low (0.425
+  gave 84, not 85). INSTALL.md: the probe offset steps for the new
+  `LV_PROBE_CALIBRATE_SAVE` (no number to type).
 - **DP201 is not a DP200** (owner): PLA only, no heated bed. Taken out
   of the supported list (README, INSTALL); the installer refuses a
   model ID containing "201". The DP102 is identical to the DP200.

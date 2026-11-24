@@ -427,8 +427,11 @@ fi
 # install or upgrade, into dp200_machine.cfg (included by dp200_printer.cfg;
 # printer.cfg can still override it). Motor current: karas.db CONF_ENGINE_PWM
 # row NO=4 (the row the stock app reads, docs/stock_routines.md),
-# MOTOR_PWM_{X,Y,Z,E}OFFSET -99..99 -> REF duty (100 + offset) / 200, as
-# stock. Values differ per unit (dev DP200 -15/+20/+30/+50; a 3DWOX 1 had
+# MOTOR_PWM_{X,Y,Z,E}OFFSET -99..99 -> REF high count 100 + offset in a
+# period of 200, as stock. Klipper's value is (ceil(high * 255 / 200) +
+# 0.25) / 255: Klipper sends value * 255 as an 8-bit count and the UPC
+# port sets count * 200 / 255, both cut off (dp200_printer.cfg, "Motor
+# current"). Values differ per unit (dev DP200 -15/+20/+30/+50; a 3DWOX 1 had
 # +99 on every axis). Anything missing or out of range: no file, and the
 # shared defaults in dp200_printer.cfg stay.
 machine_cfg() {
@@ -444,8 +447,10 @@ machine_cfg() {
           print "# (karas.db CONF_ENGINE_PWM NO=4, firmware " fw "). Replaced on every"
           print "# install or upgrade: put your own overrides in printer.cfg."
           for (i = 1; i <= 4; i++) {
-              v = (100 + $i) / 200
-              printf "\n[output_pin motor_current_%s]\n# MOTOR_PWM_%sOFFSET %d\nvalue: %.3f\nshutdown_value: %.3f\n", ax[i], toupper(ax[i]), $i, v, v
+              n = (100 + $i) * 255 / 200
+              c = (n == int(n)) ? n : int(n) + 1
+              v = (c + 0.25) / 255
+              printf "\n[output_pin motor_current_%s]\n# MOTOR_PWM_%sOFFSET %d\nvalue: %.4f\nshutdown_value: %.4f\n", ax[i], toupper(ax[i]), $i, v, v
           } }' > /tmp/dp200_machine.cfg || { echo "machine cfg: offsets not usable, shared defaults kept"; rm -f /tmp/dp200_machine.cfg; return 1; }
     cp /tmp/dp200_machine.cfg $CFG/dp200_machine.cfg && rm -f /tmp/dp200_machine.cfg
 }
