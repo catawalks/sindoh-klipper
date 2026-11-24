@@ -22,6 +22,9 @@ files in this folder; `git log` has the rest.
 - Model IDs of every firmware line read from the motion programs (sindoh
   `docs/model_ids.md`): a 3DWOX 5X on the 7X line, OEM 2X IDs, and the
   3DWOX 1's Trinamic board check (all offsets 99), noted in TODO.
+- [3dwox1_install_plan.md](../3dwox1_install_plan.md): what installing on
+  the 3DWOX 1 line takes (plan only). The DP203 read from the stock
+  program: DP201 head and Z, DP200 bed and leveling.
 - **1X power button, one hold** (owner: no second press): the pulse shows
   "Powering off in 3 s" with CANCEL, then powers off; a running print or
   move gets the emergency stop at once, as the button is the e-stop on

@@ -345,7 +345,13 @@ stages 1-5 done on the dev printer):
       program reads a board-select pin and, on the TMC2224 ("Trinamic")
       board, sets every motor offset to 99; Fredrik's +99 unit is such
       a board, so `3dwox1_printer.cfg`'s current note (0.995 from +99)
-      needs a second look before anyone runs it. Also found: a 3DWOX 5X
+      needs a second look before anyone runs it. **Plan to install on the
+      3DWOX 1 line** (Mimaki 3DFF-222 included):
+      [docs/3dwox1_install_plan.md](docs/3dwox1_install_plan.md) (11-24;
+      open: RODUP_ versions, NAND room, the TMC2224 set-up). **DP203**
+      (`3DP203KQ`, Korea): the DP201's head and Z with the DP200's bed and
+      leveling (sindoh `docs/dp200_family_models.md`); a model file would
+      be the DP200's bed plus Z 188, not built. Also found: a 3DWOX 5X
       on the 7X line, OEM 2X IDs (`B101500`, `RIZE2XCKH`), Stanley
       `ST3000`.
     - **2X:** second carriage and nozzle (a 2X is on its way).
