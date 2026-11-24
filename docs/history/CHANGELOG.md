@@ -29,6 +29,9 @@ files in this folder; `git log` has the rest.
   untested), installer `FAMILY=dp203`. The stock TMC2224 set-up read from
   the 3DWOX 1, 1X, 2X and 7X programs (sindoh `docs/tmc2224_setup.md`);
   the 3DWOX 1 plan has the registers and the room on its NAND root.
+- DP200 homing: the bed goes down 2 mm before X or Y homes
+  (`_SINDOH_Z_CLEARANCE`, TODO 16; untested). TODO: the 1X items are
+  numbered 51-60.
 - **Dev DP200 SSH** (not run yet): `rc.dp200` starts dropbear on port
   2222, key login only, only when `/root/.ssh/authorized_keys` exists;
   `dropbear-bin` in both root builds; `tools/dev_ssh_setup.sh`; the

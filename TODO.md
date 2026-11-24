@@ -79,7 +79,9 @@ Either printer:
    ([docs/1x_install_plan.md](docs/1x_install_plan.md), "Order of work"
    1). Then the owner's OK for the first eMMC writes (root to
    `/userdata/klipper/`, then `S99klipper`).
-- Z and the extruder at their limits (12 and 86 mm/s).
+59. Z and the extruder at their limits (12 and 86 mm/s).
+60. **Power button** (item 44): a hold with CANCEL, a hold to the end
+   (the first real power off), and a hold during a print (emergency stop).
 
 ## Printer tuning
 
