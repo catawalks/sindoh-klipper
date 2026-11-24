@@ -322,10 +322,16 @@ stages 1-5 done on the dev printer):
     - **DP201** (owner 11-24): not a DP200 twin. Same RODIN_ firmware,
       but PLA only with **no heated bed**; the part-cooling fan moved to
       the side of the head (same pins, no config change). The DP102 is
-      identical to the DP200. The installer now refuses a model ID with
-      "201" in it (the real ID is unknown). To support it: its model
-      ID and a survey report from an owner, then a config without
-      `heater_bed` and a PRINT_START without bed heating.
+      identical to the DP200. From the stock program (11-24, sindoh
+      `docs/dp200_family_models.md`): Sindoh tells "Rodin P" (DP200)
+      from "Rodin E" (DP201) by the model ID (`MachineTLI`); a DP201
+      also gets `ifBedNotUsed = 1`, Z max 194.6 mm (DP200 200.6), its
+      own leveling points and nozzle fan settings. The installer now
+      takes only the Rodin P IDs and refuses Rodin E and unknown IDs.
+      Next: a DP201 config (no `heater_bed`, no bed heating in
+      PRINT_START and the screen, Z about 6 mm shorter, its leveling
+      points), chosen by the installer from the ID; then a DP201 owner
+      to test it.
     - **2X:** second carriage and nozzle (a 2X is on its way).
     - Paper work: the stepper engine clock against the timer (step
       batching is off on the 1X), the microstep pins of the drivers.

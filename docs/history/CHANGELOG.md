@@ -10,6 +10,9 @@ files in this folder; `git log` has the rest.
 - **DP201 is not a DP200** (owner): PLA only, no heated bed. Taken out
   of the supported list (README, INSTALL); the installer refuses a
   model ID containing "201". The DP102 is identical to the DP200.
+  Then from Sindoh's own model table (RODIN_200730_2 motion program,
+  sindoh `docs/dp200_family_models.md`): the installer accepts only the
+  DP200-family ("Rodin P") IDs and refuses DP201-family and unknown IDs.
 - **1X power button, one hold** (owner: no second press): the pulse shows
   "Powering off in 3 s" with CANCEL, then powers off; a running print or
   move gets the emergency stop at once, as the button is the e-stop on

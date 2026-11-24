@@ -215,11 +215,19 @@ if [ "$FW" = unknown ]; then
     OTHER=`sed -n "s/.*['\"]\([A-Z0-9]*_[0-9][0-9A-Za-z_]*\)['\"].*/\1/p" /snapshot_version.sh 2>/dev/null | head -1`
     fail "not a DP200-family fw" "${OTHER:-no version found}"
 fi
-# The DP201's model ID is not known to us yet (no DP201 seen); any ID with
-# 201 in it is refused. Sindoh's list (sindoh docs/tli_list.txt) has none.
+# Model by its ID (TLI), with the stock program's own table (sindoh
+# docs/dp200_family_models.md, engine_getMachineModel in RODIN_200730_2):
+# "Rodin P" = DP200 family, supported; "Rodin E" = DP201 family (no heated
+# bed, 6 mm less Z), refused until it has its own config. The stock
+# program treats an unknown ID as Rodin E, so it is refused too.
 TLI=`sqlite3 /app/nvram/karas.db 'select MachineTLI from INST_MACHINE' 2>/dev/null | head -1`
 case "$TLI" in
-*201*) fail "DP201 not supported yet" "no heated bed: $TLI" ;;
+3DP200|3DP102|3DP200K|3DP200A|3DP200CM|3DP200J|3DP200Q|3DP102Q|3DP200KQ|3DP200AQ|\
+3DP200CMQ|3DP200JQ|3DP200H|3DP200CMH|3DP200JH|3DP200KH|3DP200C|3DP200CQ|\
+ST3DP1|ST3DP1Q|LEON3D|LEON3DQ) ;;
+3DP201*|3DP202*|ORAL3DQ|RDPL*|3DPL*)
+    fail "DP201 not supported yet" "no heated bed: $TLI" ;;
+*)  fail "unknown model ID" "${TLI:-none}" ;;
 esac
 GZ_MB=$(size_mb "$PAYLOAD")
 RAW_MB=$(( `cat "$PAYLOAD.size" 2>/dev/null || echo 3000000` / 1024 ))
