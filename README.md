@@ -10,7 +10,7 @@ but it is young. Read the install guide fully before you start.
 
 | | |
 |---|---|
-| **Supported printers** | Sindoh 3DWOX **DP200** (and the identical **DP102**), and Stanley Model 1 / other brands converted to DP200Q, on Sindoh firmware `RODIN_200730_2` |
+| **Supported printers** | Sindoh 3DWOX **DP200** (and the identical **DP102**) and its rebrands (Stanley Model 1, Leon 3D, ESUN China), also converted to DP200Q, on Sindoh firmware `RODIN_200730_2`. The stock firmware runs them all alike: only the boot logo and the regional defaults differ (catawalks/sindoh `docs/model_ids.md`) |
 | **Not yet** | DP201 (same firmware, but PLA only with no heated bed: its config is written, untested, for the next release), 3DWOX 1, 2X, 1X, 7X (the installer refuses them by name; a 1X port is in progress, see [docs/1x_port_plan.md](docs/1x_port_plan.md)). Research on them: [catawalks/sindoh](https://github.com/catawalks/sindoh) |
 | **Download** | [Releases](https://github.com/catawalks/sindoh-klipper/releases) |
 | **Install guide** | [docs/INSTALL.md](docs/INSTALL.md) |
