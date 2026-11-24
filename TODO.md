@@ -308,9 +308,17 @@ stages 1-5 done on the dev printer):
       Sindoh's boot and integrity checks read; a "warm takeover" hook
       first, the cold start later). `install/x1/x1_machine_cfg.sh`
       writes the motor currents from the database (tried read-only on
-      the printer: X 0, Y +40, Z +40, E +50, C +9). Its E value
-      (0.7525, by the rule in `x1_printer.cfg`) differs from the
-      config's 0.755 by one count of 200: decide which is right.
+      the printer: X 0, Y +40, Z +40, E +50, C +9). Owner 11-24: use
+      the stock counts and the warm takeover is not the favorite;
+      next to look at: the cold start with our own `/run.sh` put in
+      place by the hook (no Sindoh file changed), after a by-hand
+      cold-start test with the owner present.
+    - **DP200 motor currents** (found 11-24 on the 1X): the DP200
+      installer writes `(100 + offset) / 200`, which Klipper cuts to
+      one count below stock for some offsets (e.g. -15 gives 84, stock
+      85). Use the 1X rule `(ceil(high * 255 / 200) + 0.25) / 255` in
+      `unmistakable_klipper_install.sh` and `dp200_printer.cfg` with the
+      next payload (TODO 49), and read back with `devmem` on a DP200.
     - **2X:** second carriage and nozzle (a 2X is on its way).
     - Paper work: the stepper engine clock against the timer (step
       batching is off on the 1X), the microstep pins of the drivers.
@@ -471,12 +479,17 @@ stages 1-5 done on the dev printer):
       nothing more however long the button is held; a tap never
       reaches Linux. The first design (keep holding 3 s more to shut
       down) could not work: owner's test 11-23, the countdown stuck
-      at 1. Now: first hold = POWER page, a second hold while it is
-      open = shut down (a print: it asks). On the printer since
-      11-23 night. **Owner present:** one hold (page opens), a second
-      hold (first real power off, GPIO 158), and a hold during a
-      print. The screen log says "power button held (first/second
-      hold)" with the time.
+      at 1. The second design (hold again on the POWER page) was
+      rejected by the owner 11-24. Now (11-24, on the printer): one
+      hold = "Powering off in 3 s" with CANCEL, then power off; a
+      running print or move gets the emergency stop at once (the
+      owner uses the button as the e-stop on stock). **Owner present:**
+      a hold with CANCEL, a hold to the end (first real power off,
+      GPIO 158), and a hold during a print. The screen log says "power
+      button held: power off in 3 s" with the time.
+    - **The R4 core** (PC_DEBUG2): its firmware's commands studied from
+      the PC (sindoh `docs/1x_r4.md`); see there for whether it can
+      reach the power circuit.
     - **1X updater:** Mainsail lists the card's Klipper checkout as
       invalid (detached, untracked files). Do not use its "recover"
       there; the stage 7 install will have no checkout.

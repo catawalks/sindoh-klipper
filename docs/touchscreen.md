@@ -139,10 +139,13 @@ runs underneath:
   Klipper has to be started again. **The front power button** cannot work as on the DP200: Linux
   never sees a tap. Once the button has been held about 3 s the power
   circuit sends one pulse (GPIO 116 low for about 3 s), and holding on
-  sends nothing more (sindoh `docs/1x.md`). So on the 1X: the first
-  hold opens the POWER page (and wakes the screen); a second hold
-  while that page is open (within `KEY_ARM_1X`, 60 s) shuts down;
-  during a print the second hold only asks. `x1_web.sh` freezes
+  sends nothing more (sindoh `docs/1x.md`). So on the 1X one hold
+  shuts down: the pulse shows "Powering off in 3 s" with a CANCEL
+  button (`KEY_CANCEL_1X`), then powers off. If a print or a move is
+  running, the pulse first sends the emergency stop, so the button
+  stays the e-stop it is on stock; CANCEL then leaves Klipper stopped
+  (FIRMWARE RESTART). The on-screen STOP (top right, hold 1 s) is the
+  other e-stop. `x1_web.sh` freezes
   Sindoh's own `/app/powerkeyd` (it would shut down at once) while our
   programs run and lets it go on "stop"; if the screen app is not
   running, its helper shuts down on the first hold, as stock does.

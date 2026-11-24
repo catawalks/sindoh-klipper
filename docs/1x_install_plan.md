@@ -118,9 +118,15 @@ since 11-21. The hook:
 programs: no stock heating, no stock screen at boot. Needs (1) the cold
 start without the motion program to work (prepared, not tried:
 [1x_port_plan.md](1x_port_plan.md), stage 7 item 4), and (2) a way to
-keep `/run.sh` from starting `UIManager`, which means changing a
-Sindoh file (`/etc/profile` or `/run.sh`) or a hook that runs before
-the console login and stops it. To decide after step A works.
+keep `/run.sh` from starting `UIManager`. Candidate (owner 11-24:
+the warm takeover is not the favorite, so this comes next): the same
+`S99klipper` bind-mounts our own `/run.sh` from `/userdata/klipper`
+over Sindoh's before the console logs in (rcS runs before the
+getty). Ours does Sindoh's hardware set-up (pins, `upc_6270.ko`, the
+gadget, `mdev`, clocks) and starts our system instead of `UIManager`.
+No Sindoh file changes, `/run.sh` is outside the folders the
+integrity check reads, the mount is gone at the next boot, and
+`BOOT_STOCK` or a missing install skips the mount.
 
 ## The way back to stock
 

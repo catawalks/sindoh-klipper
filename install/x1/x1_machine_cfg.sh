@@ -8,8 +8,10 @@
 # MOTOR_PWM_X2OFFSET (the 1X's head is the "X2" carriage), _YOFFSET,
 # _ZOFFSET, _EOFFSET and _COFFSET (cartridge feed), each -99..99. The
 # stock program sets each motor's reference PWM to a high count of
-# 100 + offset in a period of 200; Klipper's output_pin value is
-# (high + 0.5) / 200 (sindoh docs/1x.md, "Motor currents"). The printer's
+# 100 + offset in a period of 200. Klipper's output_pin value is
+# (ceil(high * 255 / 200) + 0.25) / 255: Klipper sends value * 255 as an
+# 8-bit count and the UPC port sets count * 200 / 255, both cut off
+# (x1_printer.cfg, "Motor current"; read back 2026-11-24). The printer's
 # own printer.cfg can still override what this file sets. Anything
 # missing or out of range: no file is written and x1_printer.cfg's
 # defaults stay.
@@ -29,7 +31,9 @@ echo "$OFFS" | awk -F'|' -v fw="${FW:-?}" '
       print "# Replaced on every install or upgrade: put your own overrides in"
       print "# printer.cfg."
       for (i = 1; i <= 5; i++) {
-          v = (100 + $i + 0.5) / 200
+          n = (100 + $i) * 255 / 200
+          c = (n == int(n)) ? n : int(n) + 1
+          v = (c + 0.25) / 255
           printf "\n[output_pin motor_current_%s]\n# MOTOR_PWM_%sOFFSET %d\nvalue: %.4f\nshutdown_value: %.4f\n", ax[i], col[i], $i, v, v
       } }' > "$OUT.new" || { echo "x1_machine_cfg: offsets not usable, defaults kept"; rm -f "$OUT.new"; exit 1; }
 mv "$OUT.new" "$OUT"

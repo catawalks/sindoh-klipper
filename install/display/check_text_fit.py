@@ -48,10 +48,11 @@ CUR = ''
 for name in pages:
     if name in skip:
         continue
-    for armed in ((False, True) if name == 'power' else (False,)):
-        CUR = name + (' (armed)' if armed else '')
+    for estop in ((False, True) if name == 'key_off' else (False,)):
+        CUR = name + (' (e-stop)' if estop else '')
         ui.screen = name
-        ui.key_armed = S.time.time() if armed else 0.0
+        ui.key_estop = estop
+        ui.key_off_at = S.time.time() + S.KEY_CANCEL_1X if name == 'key_off' else 0.0
         ui.last_touch = S.time.time()
         try:
             ui.render()

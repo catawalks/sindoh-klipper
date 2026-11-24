@@ -13,7 +13,7 @@ Run as root inside the Debian chroot with Debian's python3-pil:
 Anything that moves or heats asks for confirmation first. STOP (bottom
 right on every screen) is an emergency stop: hold it for 1 second.
 """
-import json, os, re, select, shutil, socket, struct, sys, threading, time, urllib.error, urllib.parse, urllib.request
+import json, math, os, re, select, shutil, socket, struct, sys, threading, time, urllib.error, urllib.parse, urllib.request
 from PIL import Image, ImageChops, ImageDraw, ImageFont
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 try:
@@ -96,13 +96,14 @@ KEY_REG, KEY_BIT = 0xF8045000, 1 << 27
 # when the button has been held about 3 s: this line goes low for about
 # 3 s, whether the button is let go or held on (measured 2026-11-23: low
 # 3.0 s on a 5 s hold; a longer hold gave no second pulse). A tap never
-# reaches Linux, and "keep holding" cannot be told from "let go". So:
-# the first hold opens the POWER page; a second hold while that page is
-# open (within KEY_ARM_1X s) shuts down. During a print the second hold
-# only asks. Sindoh's own power key program would shut down on the first
-# pulse; install/x1/x1_web.sh freezes it while we run.
+# reaches Linux, and "keep holding" cannot be told from "let go". So one
+# hold shuts down: the pulse shows a KEY_CANCEL_1X s countdown with a
+# CANCEL button, then powers off. If a print or a move is running, the
+# pulse first sends the emergency stop (the owner's habit on stock: the
+# power button is the e-stop). Sindoh's own power key program would cut
+# at once; install/x1/x1_web.sh freezes it while we run.
 KEY_GPIO_1X = '/sys/class/gpio/gpio116/value'
-KEY_ARM_1X = 60.0
+KEY_CANCEL_1X = 3.0
 HW_CUT = 2.0                          # measured roughly: "2 s hold" switched it off
 HOLD_WARN = 0.4                       # s held before the warning appears
 LONG_POWER = 5.0
@@ -569,6 +570,8 @@ class UI:
         self.msg = None                # (text, until)
         self.press = None              # (u, v, t0)
         self.key_down = None           # time the power button went down
+        self.key_off_at = 0.0          # 1X: power off at this time (CANCEL stops it)
+        self.key_estop = False         # 1X: that pulse sent the emergency stop
         self.power_at = 0.0            # when a reboot/power-off was requested
         self.last_touch = time.time()
         self.ip = my_ip()
@@ -804,6 +807,12 @@ class UI:
             self._bg('Sensor ' + ('on' if action[1] else 'off'), lambda: self.adxl_switch(action[1]))
         elif kind == 'power':
             self.power_request(action[1])
+        elif kind == 'key_cancel':                     # 1X: power button countdown
+            self.key_off_at = 0.0
+            self.screen = 'home'
+            log('power button: power off canceled')
+            if self.key_estop:
+                self.flash('Power off canceled. Klipper is stopped: FIRMWARE RESTART', 10)
         elif kind == 'revert_go':                      # second YES: marker, then reboot
             try:
                 with open(REVERT_MARK, 'w') as f:
@@ -854,27 +863,24 @@ class UI:
         """Power button edges from the main loop."""
         if IS_1X:
             # "down" here is the power circuit's pulse: the button has been
-            # held about 3 s (see KEY_ARM_1X)
+            # held about 3 s (see KEY_CANCEL_1X)
             self.key_down = now if down else None
             if not down:
                 return
             self.last_touch = now
-            armed = (self.screen == 'power' and now - getattr(self, 'key_armed', 0.0) < KEY_ARM_1X)
-            log('power button held (%s)' % ('second hold' if armed else 'first hold'))
-            if self.screen.startswith('powering'):
+            if self.screen.startswith('powering') or self.key_off_at:
                 return
-            if not armed:
-                self.key_armed = now
-                self.confirm = None
-                self.screen = 'power'
-                return
-            self.key_armed = 0.0
             st = self.st or {}
-            if (st.get('print_stats') or {}).get('state') in ('printing', 'paused'):
-                self.confirm = ('Shut down the printer? The running print will be lost.',
-                                ('power', 'poweroff'))
-                return
-            self.power_request('poweroff')
+            running = ((st.get('print_stats') or {}).get('state') in ('printing', 'paused')
+                       or (st.get('idle_timeout') or {}).get('state') == 'Printing')
+            log('power button held: power off in %g s%s'
+                % (KEY_CANCEL_1X, ', emergency stop first' if running else ''))
+            self.key_estop = running
+            if running:
+                threading.Thread(target=self.emergency_stop, daemon=True).start()
+            self.key_off_at = now + KEY_CANCEL_1X
+            self.confirm = None
+            self.screen = 'key_off'
             return
         if down:
             self.key_down = now
@@ -1810,6 +1816,9 @@ class UI:
         st = self.st
         if self.screen.startswith('powering'):
             self.page_powering(d)
+            return im
+        if self.screen == 'key_off':
+            self.page_key_off(d)
             return im
         if not IS_1X and self.key_down is not None and time.time() - self.key_down >= HOLD_WARN:
             self.page_key_held(d)
@@ -2930,13 +2939,8 @@ class UI:
         if printing:
             d.text((20, y), 'A print is running!', font=font(22), fill=C_WARN)
         if IS_1X:
-            armed = time.time() - getattr(self, 'key_armed', 0.0) < KEY_ARM_1X
-            if armed:
-                lines = [('Hold the power button again to shut down%s.'
-                          % (' (it asks first: a print is running)' if printing else ''), font(20), C_WARN)]
-            else:
-                lines = [('Power button: hold it about 3 s to open this page, then hold it '
-                          'again to shut down.', font(18), C_DIM)]
+            lines = [('Power button: hold it about 3 s to shut down (3 s to cancel). '
+                      'During a print it is the emergency stop.', font(18), C_DIM)]
             lines.append(('A reboot starts Sindoh\'s firmware; Klipper has to be started '
                           'again.', font(18), C_DIM))
             yy = y + 30
@@ -2965,6 +2969,21 @@ class UI:
         if os.path.exists(OUR_KERNEL):          # our kernel only (see REVERT_MARK)
             items.append(('TO STOCK', back_to_stock_confirm(warn), C_RED, 26, 'factory firmware'))
         self.grid(d, items, top=y + 100)
+
+    def page_key_off(self, d):
+        """1X: the power button was held; power off after the countdown."""
+        left = max(0.0, self.key_off_at - time.time())
+        d.rectangle((0, 0, PW, PH), fill=(60, 16, 16))
+        y = 200
+        if self.key_estop:
+            d.text((30, y), 'EMERGENCY STOP sent', font=font(30), fill=C_WARN)
+            y += 50
+        d.text((30, y), 'Power button held', font=font(34), fill=C_TXT)
+        d.text((30, y + 56), 'Powering off in %d s' % math.ceil(left), font=font(30), fill=C_WARN)
+        frac = 1.0 - left / KEY_CANCEL_1X
+        d.rounded_rectangle((30, y + 110, PW - 30, y + 150), radius=8, outline=(200, 120, 120), width=2)
+        d.rounded_rectangle((32, y + 112, 32 + int((PW - 64) * frac), y + 148), radius=7, fill=(240, 60, 60))
+        self.button(d, (30, y + 190, PW - 30, y + 300), 'CANCEL', ('key_cancel',), C_BTN, 34)
 
     def page_key_held(self, d):
         """Power button held: the hardware is about to cut the power."""
@@ -3349,6 +3368,10 @@ def main():
             ui.key_event(btn, now)
             if btn:
                 unblank()
+        if ui.key_off_at and now >= ui.key_off_at:
+            ui.key_off_at = 0.0
+            if ui.screen == 'key_off':
+                ui.power_request('poweroff')
         if ui.screen.startswith('powering') and now - ui.power_at > 90:
             # still running: dp200-powerkey.sh didn't act (not started?)
             ui.screen = 'home'
@@ -3393,13 +3416,13 @@ def main():
                bool(ui.dimmed()), ui.screen, ui.confirm is not None, view_key(ui), ui.err,
                ui.wf['rev'], ui.net['rev'], ui.shp['rev'], ui.bl['rev'], ui.con['rev'],
                ui.cmds is None, ui.jog_key(),
-               ui.screen == 'power' and time.time() - getattr(ui, 'key_armed', 0.0) < KEY_ARM_1X, ui.lv['rev'],
+               ui.screen == 'key_off' and math.ceil(ui.key_off_at - time.time()), ui.lv['rev'],
                ui.screen == 'bedlevel' and ui.lv['mode'] == 'running' and ui.st and
                ((ui.st.get('display_status') or {}).get('message'), round(ui.st['extruder']['temperature'])))
         if events or ui.press or ui.key_down is not None or key != last_key:
             panel.show(ui.render())
             last_key = key
-        timeout = 0.05 if ui.press or ui.key_down is not None else \
+        timeout = 0.05 if ui.press or ui.key_down is not None or ui.key_off_at else \
             max(0.0, min(next_poll - time.time(), 0.1 if pkey.m is not None else 0.5))
         select.select([touch.fd], [], [], timeout)
 

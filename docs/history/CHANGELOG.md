@@ -7,6 +7,14 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-24
 
+- **1X power button, one hold** (owner: no second press): the pulse shows
+  "Powering off in 3 s" with CANCEL, then powers off; a running print or
+  move gets the emergency stop at once, as the button is the e-stop on
+  stock. On the printer; text check 0 problems on both models.
+- **1X motor currents on the stock counts:** read back with `devmem`,
+  0.7525 gave E 149 (Klipper cuts the 8-bit count at start-up). New rule
+  `(ceil(high * 255 / 200) + 0.25) / 255` in `x1_printer.cfg` and
+  `x1_machine_cfg.sh`; read back 100, 140, 140, 150, 109 = stock.
 - 1X boot hook written, not installed: `install/x1/S99klipper` (the one
   file for `/etc/init.d`) and `install/x1/x1_boot.sh` (waits for stock's
   motion program, then starts ours; skips on `BOOT_STOCK`, an
