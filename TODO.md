@@ -487,9 +487,10 @@ stages 1-5 done on the dev printer):
       a hold with CANCEL, a hold to the end (first real power off,
       GPIO 158), and a hold during a print. The screen log says "power
       button held: power off in 3 s" with the time.
-    - **The R4 core** (PC_DEBUG2): its firmware's commands studied from
-      the PC (sindoh `docs/1x_r4.md`); see there for whether it can
-      reach the power circuit.
+    - **The R4 core** (PC_DEBUG2): studied from the PC 11-24 (sindoh
+      `docs/1x_r4.md`). It does not reach the power board; the only
+      link is GPIO 116 in and 158 out. A real press signal would need
+      a hardware change (owner's call; nothing planned).
     - **1X updater:** Mainsail lists the card's Klipper checkout as
       invalid (detached, untracked files). Do not use its "recover"
       there; the stage 7 install will have no checkout.
