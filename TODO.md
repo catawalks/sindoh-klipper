@@ -55,9 +55,9 @@ Either printer:
     nozzle doesn't drag across a failed print. Mind that Z homes upward.
 
 1X (get a fresh "bed empty" first; background in items 41 and 44):
-- **A complete print in the corrected X frame** (the L's outline was
-  right on 11-23; `x1_xy_scale_150mm.gcode` also shows how the first
-  layer lies over 150 mm, the bed's bow).
+- **First layer over the whole bed** (`x1_xy_scale_150mm.gcode`, the
+  bed's bow) after the Z paper test; the Benchy of 11-23 printed fine
+  in the corrected X frame.
 - **Z zero:** paper test at the bed center, then a first layer print
   (`x1_first_layer.gcode`).
 - **Speed test at the new acceleration:**
@@ -464,10 +464,10 @@ stages 1-5 done on the dev printer):
       `/app/powerkeyd` shuts down the moment the line goes low.
       Built 11-23 (owner's choice): held 3 s = the POWER page, 3 s
       more = shut down, not during a print; powerkeyd frozen while we
-      run; an 8 s fallback in the helper. **Not on the printer yet**
-      (written during a print): deploy, then try a 3 s hold, a 6 s
-      hold, and a hold during a print. The shut down itself (GPIO
-      158) has still never run.
+      run; an 8 s fallback in the helper. On the printer since 11-23
+      evening. **Owner present:** a 3 s hold, a 6 s hold, and a hold
+      during a print. The shut down itself (GPIO 158) has still
+      never run.
     - **1X updater:** Mainsail lists the card's Klipper checkout as
       invalid (detached, untracked files). Do not use its "recover"
       there; the stage 7 install will have no checkout.

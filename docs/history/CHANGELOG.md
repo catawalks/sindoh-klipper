@@ -7,6 +7,16 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- **1X: first complete print in the corrected X frame and first sliced
+  print:** 3DBenchy, sliced by the owner in PrusaSlicer with
+  `1X_Klipper_PrusaSlicer.ini` (first version, with skirt), started
+  from Mainsail. Completed: 96 min printing, 4.19 m of filament. Z zero
+  was still the old paper test (first layer tight at the center).
+- Then on the 1X (printer idle): the power button handling, the
+  step-listing print start page and `PRIME_LINE`. Klipper lists the new
+  macros and `PRINT_START`'s steps; Sindoh's `powerkeyd` is frozen
+  while our programs run. No button press and no print with them yet.
+
 - **DP200 `PRINT_START` lists its steps too** (owner: the DP200 should
   follow the macro as well): `steps` / `step`, an `M117` line per step,
   and the nozzle now heats over the bin before `CLEAN_NOZZLE` (which
