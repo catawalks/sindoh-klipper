@@ -496,8 +496,33 @@ def system_info(ip):
     try:
         v = os.statvfs('/')
         disk = '%d MB free of %d MB' % (v.f_bavail * v.f_frsize >> 20, v.f_blocks * v.f_frsize >> 20)
+        disk_short = '%d MB free, internal' % (v.f_bavail * v.f_frsize >> 20)
     except OSError:
-        disk = '-'
+        disk = disk_short = '-'
+    # G-code on a USB stick or SD card (install/printer/dp200-storage.sh
+    # mounts it over the G-code folder): its own row; "Storage" stays the
+    # internal flash
+    gcode = None
+    gdir = '/home/klipper/printer_data/gcodes'
+    try:
+        if os.stat(gdir).st_dev != os.stat('/').st_dev:
+            v = os.statvfs(gdir)
+            where = 'card/stick'
+            with open('/proc/mounts') as f:
+                for l in f:
+                    p = l.split()
+                    # (inside the chroot the mount shows with the stock
+                    # side's path, /klipper/home/...)
+                    if len(p) > 1 and p[1].endswith(gdir):
+                        where = ('SD card' if 'mmcblk' in p[0] else
+                                 'stick' if p[0].startswith('/dev/sd') else where)
+            # short enough for the INFO column (290 px at 19 pt bold)
+            def sz(b):
+                mb = b >> 20
+                return '%.1f GB' % (mb / 1024) if mb >= 1024 else '%d MB' % mb
+            gcode = '%s free, %s' % (sz(v.f_bavail * v.f_frsize), where)
+    except OSError:
+        pass
     mem = read_meminfo()
     try:
         with open('/proc/uptime') as f:
@@ -519,7 +544,8 @@ def system_info(ip):
         ('Serial', stock.get('serial') or '-'),
         ('Recovery set', 'Sindoh app %s' % rec if rec else '- (read at install)'),
         ('IP address', ip),
-        ('Storage', disk),
+        ('Storage', disk_short if gcode else disk),
+    ] + ([('G-code', gcode)] if gcode else []) + [
         ('Memory', mem),
         ('Uptime', uptime),
     ]
@@ -2913,7 +2939,8 @@ class UI:
     def page_info(self, d, st):
         """SYSTEM -> INFO: build and versions, the stock firmware, storage."""
         d.text((20, 160), 'System information', font=font(28), fill=C_TXT)
-        f, lh = font(19), 31
+        # 29 px rows when the G-code row is there: clear of the footer's message line
+        f, lh = font(19), 31 if len(self.info or []) <= 15 else 29
         for i, (k, v) in enumerate(self.info or []):
             y = 206 + i * lh
             d.text((20, y), k, font=f, fill=C_DIM)

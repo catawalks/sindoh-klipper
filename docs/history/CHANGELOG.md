@@ -29,6 +29,9 @@ files in this folder; `git log` has the rest.
   untested), installer `FAMILY=dp203`. The stock TMC2224 set-up read from
   the 3DWOX 1, 1X, 2X and 7X programs (sindoh `docs/tmc2224_setup.md`);
   the 3DWOX 1 plan has the registers and the room on its NAND root.
+- Screen INFO: a "G-code" row (free space and where: stick or SD card)
+  when G-code storage is on a stick or card; "Storage" says internal.
+  The work printer's v0.1.1 test (11-24) showed only the internal flash there.
 - DP200 homing: the bed goes down 2 mm before X or Y homes
   (`_SINDOH_Z_CLEARANCE`, TODO 16; untested). TODO: the 1X items are
   numbered 51-60.
