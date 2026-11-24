@@ -32,6 +32,10 @@ files in this folder; `git log` has the rest.
 - Screen INFO: a "G-code" row (free space and where: stick or SD card)
   when G-code storage is on a stick or card; "Storage" says internal.
   The work printer's v0.1.1 test (11-24) showed only the internal flash there.
+- **v0.1.1 storage on the work printer** (build `75734d4`, 11-24, owner):
+  USB stick and SD card each work (upload, print, delete, emergency stop,
+  firmware restart); with both in the card is used; with neither the
+  internal flash and its files come back. Not yet: the remover with storage in.
 - DP200 homing: the bed goes down 2 mm before X or Y homes
   (`_SINDOH_Z_CLEARANCE`, TODO 16; untested). TODO: the 1X items are
   numbered 51-60.

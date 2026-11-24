@@ -272,8 +272,10 @@ stages 1-5 done on the dev printer):
     what doesn't fit, show free space), logs on the storage, a screen
     message when storage is in use. **Work printer 11-24 (v0.1.1, build `75734d4`):** a USB stick
     with `dp200_storage`: Mainsail showed its space, upload, print,
-    emergency stop, firmware restart and delete all worked. Still: the SD
-    card, a boot without either, the remover with storage in. The
+    emergency stop, firmware restart and delete all worked. The SD card
+    the same (upload, delete, emergency stop and firmware restart from
+    Mainsail); both in: the card is used; neither: back to the internal
+    flash with its own files. Still: the remover with storage in. The
     screen's INFO page now has a G-code row for it (next payload). **Test payload `32ec81c0`** (build
     `75734d4`, fork and firmware as v0.1.0, content audit clean) is on
     the USB stick's `_update_rodin_KlipperInstall` with the new remover
