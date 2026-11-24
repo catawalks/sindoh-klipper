@@ -63,8 +63,6 @@ Either printer:
    the corrected X frame; its quality is the owner's to judge.
 52. **Z zero:** paper test at the bed center, then a first layer print
    (`x1_first_layer.gcode`).
-53. **Speed test at the new acceleration:**
-   `tools/x1_speed_test.py 197 2500 5` (passed at 2000).
 54. **SYSTEM -> POWER:** SHUT DOWN (never run), and REBOOT from the
    screen (the same helper rebooted fine from Mainsail's side 11-23).
 55. **Remote reboot** (item 48): through Moonraker's reboot request

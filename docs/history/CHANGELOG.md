@@ -32,6 +32,8 @@ files in this folder; `git log` has the rest.
 - Screen INFO: a "G-code" row (free space and where: stick or SD card)
   when G-code storage is on a stick or card; "Storage" says internal.
   The work printer's v0.1.1 test (11-24) showed only the internal flash there.
+- 1X speed test at 2500 mm/s2 (TODO 53): X and Y, 5 trips each at
+  197 mm/s, both within 0.5 mm at their home sensors (bed empty, owner).
 - **1X speaker**: `sindoh_sound` in the fork (`bb71f595`: PLAY_TONE,
   PLAY_TUNE, PLAY_SOUND) and `x1_web.sh`'s `soundd` (stock mplayer, the
   amplifier on GPIO 180 only while playing). Ran on the 1X.
