@@ -407,9 +407,9 @@ stages 1-5 done on the dev printer):
     then we need our own setting. Proposal: SYSTEM page, pick a region
     then a city from the system's zone list (it has the daylight saving
     rules), default = what stock had.
-49. **Next stick payload (v0.1.2)** (owner 11-23: the installed
-    v0.1.1 test payload is from 11-20 and lacks the screen and macro
-    work since). It should carry: JOG, the MOVE page order with BED
+49. **Next stick payload (v0.1.2)** (owner 11-23; 11-24: the work
+    printer runs build `3940525` = v0.1.0, which lacks the screen and
+    macro work since). It should carry: JOG, the MOVE page order with BED
     FORWARD, the lamp going off with the screen (`SCREEN_TIMEOUT` /
     `SCREEN_WAKE`, restart fix), step messages during load and
     unload, homing at 100 mm/s with a 2 mm Z back-off, the automatic
