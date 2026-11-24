@@ -92,14 +92,17 @@ IDLE_RELEASE = 5.0                    # s of idle Klipper that end a request
 # only warns. dp200-powerkey.sh syncs the cards on every press and shuts down
 # cleanly after LONG_POWER s if the hardware didn't (other SW1-4 settings).
 KEY_REG, KEY_BIT = 0xF8045000, 1 << 27
-# 1X: the button goes to the power circuit, which pulls this line low
-# once the button has been held about 3 s and keeps it low until the
-# button is let go (measured 2026-11-23); a tap never reaches Linux. So
-# there: line low = open the POWER page; still low KEY_OFF_1X s later =
-# shut down (not during a print). Sindoh's own power key program would
-# shut down at once; install/x1/x1_web.sh freezes it while we run.
+# 1X: the button goes to the power circuit, which sends Linux one pulse
+# when the button has been held about 3 s: this line goes low for about
+# 3 s, whether the button is let go or held on (measured 2026-11-23: low
+# 3.0 s on a 5 s hold; a longer hold gave no second pulse). A tap never
+# reaches Linux, and "keep holding" cannot be told from "let go". So:
+# the first hold opens the POWER page; a second hold while that page is
+# open (within KEY_ARM_1X s) shuts down. During a print the second hold
+# only asks. Sindoh's own power key program would shut down on the first
+# pulse; install/x1/x1_web.sh freezes it while we run.
 KEY_GPIO_1X = '/sys/class/gpio/gpio116/value'
-KEY_OFF_1X = 3.0
+KEY_ARM_1X = 60.0
 HW_CUT = 2.0                          # measured roughly: "2 s hold" switched it off
 HOLD_WARN = 0.4                       # s held before the warning appears
 LONG_POWER = 5.0
@@ -850,16 +853,28 @@ class UI:
     def key_event(self, down, now):
         """Power button edges from the main loop."""
         if IS_1X:
-            # "down" here means: held long enough for the power circuit
-            # to tell us. Open the POWER page; key_tick shuts down if it
-            # stays held.
+            # "down" here is the power circuit's pulse: the button has been
+            # held about 3 s (see KEY_ARM_1X)
             self.key_down = now if down else None
-            if down:
-                self.last_touch = now
-                self.key_warned = False
-                if not self.screen.startswith('powering'):
-                    self.confirm = None
-                    self.screen = 'power'
+            if not down:
+                return
+            self.last_touch = now
+            armed = (self.screen == 'power' and now - getattr(self, 'key_armed', 0.0) < KEY_ARM_1X)
+            log('power button held (%s)' % ('second hold' if armed else 'first hold'))
+            if self.screen.startswith('powering'):
+                return
+            if not armed:
+                self.key_armed = now
+                self.confirm = None
+                self.screen = 'power'
+                return
+            self.key_armed = 0.0
+            st = self.st or {}
+            if (st.get('print_stats') or {}).get('state') in ('printing', 'paused'):
+                self.confirm = ('Shut down the printer? The running print will be lost.',
+                                ('power', 'poweroff'))
+                return
+            self.power_request('poweroff')
             return
         if down:
             self.key_down = now
@@ -869,23 +884,6 @@ class UI:
             if held < LONG_POWER and not self.screen.startswith('powering'):
                 self.confirm = None
                 self.screen = 'power'
-
-    def key_tick(self, now):
-        """1X: the button is still held KEY_OFF_1X s after the POWER page
-        opened: shut down, unless a print runs (then the page's own SHUT
-        DOWN, which asks, is the way)."""
-        if not IS_1X or self.key_down is None or self.screen.startswith('powering'):
-            return
-        if now - self.key_down < KEY_OFF_1X:
-            return
-        st = self.st or {}
-        if (st.get('print_stats') or {}).get('state') in ('printing', 'paused'):
-            if not getattr(self, 'key_warned', False):
-                self.key_warned = True
-                self.flash('A print is running: use SHUT DOWN on this page', 10)
-            return
-        self.key_down = None
-        self.power_request('poweroff')
 
     def cal_accept(self):
         """ACCEPT the paper test. PROBE OFFSET then needs the accepted
@@ -2292,7 +2290,7 @@ class UI:
         for i, l in enumerate(wrap(d, f['msg'], font(20), PW - 60)[:9]):
             d.text((28, 212 + i * 28), l, font=font(20), fill=(240, 210, 210) if path else C_TXT)
         if not path:
-            d.text((20, 482), 'Not a filament problem: fix this, then %s again.' % mode.upper(),
+            d.text((20, 482), 'Not a filament fault: fix it, then %s.' % mode.upper(),
                    font=font(18), fill=C_DIM)
             self.button(d, (30, 516, PW - 30, 596), 'OK', ('screen', 'filament'), C_BTN, 30)
             return
@@ -2301,7 +2299,7 @@ class UI:
         label = f.get('label') or mode.capitalize()
         items = []
         if mode == 'load':
-            d.text((20, 482), 'Check the inlet. UNLOAD pulls the filament back.', font=font(18), fill=C_DIM)
+            d.text((20, 482), 'Check the inlet. UNLOAD pulls it back.', font=font(18), fill=C_DIM)
             items.append(('UNLOAD', ('confirm', 'Heat the nozzle and UNLOAD the filament?',
                                      ('gcode', unload, 'Unload ' + label.split(None, 1)[-1]
                                       if ' ' in label else 'Unload', 'fil')), C_BTN, 30))
@@ -2932,19 +2930,25 @@ class UI:
         if printing:
             d.text((20, y), 'A print is running!', font=font(22), fill=C_WARN)
         if IS_1X:
-            if self.key_down is not None and not printing:
-                left = max(0.0, KEY_OFF_1X - (time.time() - self.key_down))
-                d.text((20, y + 30), 'Keep holding: SHUT DOWN in %d s' % (int(left) + 1), font=font(22), fill=C_WARN)
-                d.text((20, y + 58), 'Let go to stay on this page.', font=font(18), fill=C_DIM)
+            armed = time.time() - getattr(self, 'key_armed', 0.0) < KEY_ARM_1X
+            if armed:
+                lines = [('Hold the power button again to shut down%s.'
+                          % (' (it asks first: a print is running)' if printing else ''), font(20), C_WARN)]
             else:
-                d.text((20, y + 30), 'Power button: hold 3 s for this page, keep', font=font(18), fill=C_DIM)
-                d.text((20, y + 54), 'holding 3 s more to shut down. After a reboot', font=font(18), fill=C_DIM)
-            d.text((20, y + 78), 'the printer runs Sindoh\'s firmware again.', font=font(18), fill=C_DIM)
-            y += 24
+                lines = [('Power button: hold it about 3 s to open this page, then hold it '
+                          'again to shut down.', font(18), C_DIM)]
+            lines.append(('A reboot starts Sindoh\'s firmware; Klipper has to be started '
+                          'again.', font(18), C_DIM))
+            yy = y + 30
+            for text, f, col in lines:
+                for l in wrap(d, text, f, PW - 40):
+                    d.text((20, yy), l, font=f, fill=col)
+                    yy += f.size + 6
+            y = max(y, yy - 54)
         else:
-            d.text((20, y + 30), 'Holding the button ~%d s cuts the power at once.' % HW_CUT,
+            d.text((20, y + 30), 'Holding the button ~%d s cuts the power.' % HW_CUT,
                    font=font(18), fill=C_DIM)
-            d.text((20, y + 54), 'Better: SHUT DOWN first, then hold the button.',
+            d.text((20, y + 54), 'Better: SHUT DOWN first, then hold it.',
                    font=font(18), fill=C_DIM)
         items = [
             ('SHUT DOWN', ('confirm', 'Shut down the printer?' + warn, ('power', 'poweroff')),
@@ -3345,7 +3349,6 @@ def main():
             ui.key_event(btn, now)
             if btn:
                 unblank()
-        ui.key_tick(now)
         if ui.screen.startswith('powering') and now - ui.power_at > 90:
             # still running: dp200-powerkey.sh didn't act (not started?)
             ui.screen = 'home'
@@ -3389,7 +3392,8 @@ def main():
         key = (time.strftime('%H:%M'), ui.busy, ui.msg and time.time() < ui.msg[1],
                bool(ui.dimmed()), ui.screen, ui.confirm is not None, view_key(ui), ui.err,
                ui.wf['rev'], ui.net['rev'], ui.shp['rev'], ui.bl['rev'], ui.con['rev'],
-               ui.cmds is None, ui.jog_key(), ui.lv['rev'],
+               ui.cmds is None, ui.jog_key(),
+               ui.screen == 'power' and time.time() - getattr(ui, 'key_armed', 0.0) < KEY_ARM_1X, ui.lv['rev'],
                ui.screen == 'bedlevel' and ui.lv['mode'] == 'running' and ui.st and
                ((ui.st.get('display_status') or {}).get('message'), round(ui.st['extruder']['temperature'])))
         if events or ui.press or ui.key_down is not None or key != last_key:

@@ -137,15 +137,18 @@ runs underneath:
   `reboot` reach the same helper through `dp200-power-request`
   (TODO 48). A reboot starts Sindoh's firmware:
   Klipper has to be started again. **The front power button** cannot work as on the DP200: Linux
-  never sees a tap, only "held about 3 s", for as long as the button
-  stays down (GPIO 116 low; sindoh `docs/1x.md`). So on the 1X: held
-  3 s = the POWER page opens (and the screen wakes); still held
-  `KEY_OFF_1X` (3 s) later = shut down, with a countdown on the page;
-  during a print it does not shut down but says to use the page's SHUT
-  DOWN, which asks. `x1_web.sh` freezes Sindoh's own `/app/powerkeyd`
-  (it would shut down at once) while our programs run and lets it go
-  on "stop"; its helper shuts down by itself if the line stays low
-  8 s and the screen app did not act.
+  never sees a tap. Once the button has been held about 3 s the power
+  circuit sends one pulse (GPIO 116 low for about 3 s), and holding on
+  sends nothing more (sindoh `docs/1x.md`). So on the 1X: the first
+  hold opens the POWER page (and wakes the screen); a second hold
+  while that page is open (within `KEY_ARM_1X`, 60 s) shuts down;
+  during a print the second hold only asks. `x1_web.sh` freezes
+  Sindoh's own `/app/powerkeyd` (it would shut down at once) while our
+  programs run and lets it go on "stop"; if the screen app is not
+  running, its helper shuts down on the first hold, as stock does.
+- **Text check:** `install/display/check_text_fit.py [--model 1x|dp200]`
+  renders every page off-screen and lists text that runs past the
+  panel's edges (on the printer, in the Klipper root).
 - **UPDATE:** Moonraker's updater for Mainsail, as on the DP200
   (`install/x1/x1_moonraker.conf`). Klipper and Moonraker are pinned to
   the commits on the card.

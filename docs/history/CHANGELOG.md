@@ -7,6 +7,17 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-23
 
+- **1X power button, second design** (owner tested the first: the
+  countdown stopped at 1 and nothing happened; the page's text ran off
+  the screen). The power circuit's signal is a single ~3 s pulse, not
+  "held": so the first hold opens the POWER page and a second hold on
+  that page shuts down (during a print it asks). The helper shuts down
+  on a hold when the screen app is not running. The POWER page's text
+  is wrapped. New `install/display/check_text_fit.py`: renders every
+  page and lists text past the panel's edges; it found three more
+  lines (a filament error hint, two on the DP200's POWER page), now
+  shortened; 0 left on either model. On the printer; no hold tried.
+
 - **1X: first complete print in the corrected X frame and first sliced
   print:** 3DBenchy, sliced by the owner in PrusaSlicer with
   `1X_Klipper_PrusaSlicer.ini` (first version, with skirt), started

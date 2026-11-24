@@ -455,19 +455,17 @@ stages 1-5 done on the dev printer):
       finished. Idea: a small module in the fork that switches an
       output at once on a web request; the config still says what the
       timeout covers. To decide with the owner.
-    - **1X power button: our own handling** (owner 11-23: as on the
-      DP200, a press for the power menu, a hold to shut down).
-      Measured 11-23 (sindoh `docs/1x.md`): Linux cannot see a tap or
-      a 1 s press; GPIO 116 goes low only once the button has been
-      held about 3 s and stays low until it is let go; the printer
-      does not switch off by itself during a 5 s hold. Sindoh's
-      `/app/powerkeyd` shuts down the moment the line goes low.
-      Built 11-23 (owner's choice): held 3 s = the POWER page, 3 s
-      more = shut down, not during a print; powerkeyd frozen while we
-      run; an 8 s fallback in the helper. On the printer since 11-23
-      evening. **Owner present:** a 3 s hold, a 6 s hold, and a hold
-      during a print. The shut down itself (GPIO 158) has still
-      never run.
+    - **1X power button** (owner 11-23). The power circuit sends one
+      pulse (GPIO 116 low about 3 s) after a hold of about 3 s, and
+      nothing more however long the button is held; a tap never
+      reaches Linux. The first design (keep holding 3 s more to shut
+      down) could not work: owner's test 11-23, the countdown stuck
+      at 1. Now: first hold = POWER page, a second hold while it is
+      open = shut down (a print: it asks). On the printer since
+      11-23 night. **Owner present:** one hold (page opens), a second
+      hold (first real power off, GPIO 158), and a hold during a
+      print. The screen log says "power button held (first/second
+      hold)" with the time.
     - **1X updater:** Mainsail lists the card's Klipper checkout as
       invalid (detached, untracked files). Do not use its "recover"
       there; the stage 7 install will have no checkout.
