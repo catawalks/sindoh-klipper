@@ -19,6 +19,9 @@ files in this folder; `git log` has the rest.
   (DP201 accepted again, unknown IDs still refused) and gives a new DP201
   `printer_dp201.cfg`. The screen app hides the bed when Klipper has none;
   the text check has a `--nobed` run (0 problems).
+- Model IDs of every firmware line read from the motion programs (sindoh
+  `docs/model_ids.md`): a 3DWOX 5X on the 7X line, OEM 2X IDs, and the
+  3DWOX 1's Trinamic board check (all offsets 99), noted in TODO.
 - **1X power button, one hold** (owner: no second press): the pulse shows
   "Powering off in 3 s" with CANCEL, then powers off; a running print or
   move gets the emergency stop at once, as the button is the e-stop on

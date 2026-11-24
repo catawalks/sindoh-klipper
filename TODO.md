@@ -339,6 +339,15 @@ stages 1-5 done on the dev printer):
       Needs a DP201 owner to test. **Dev printers:** a new
       `dp200_macros.cfg` needs `dp200_model.cfg` beside it (copy the
       DP200 one), or Klipper stops at start.
+    - **Model IDs of every line** (11-24, sindoh `docs/model_ids.md`):
+      the 1X installer can check for the 1X IDs (`3D1X..`, `3DP302`,
+      `RD1X0000-..`; the owner's 1X is `3D1XAH`). **3DWOX 1:** its stock
+      program reads a board-select pin and, on the TMC2224 ("Trinamic")
+      board, sets every motor offset to 99; Fredrik's +99 unit is such
+      a board, so `3dwox1_printer.cfg`'s current note (0.995 from +99)
+      needs a second look before anyone runs it. Also found: a 3DWOX 5X
+      on the 7X line, OEM 2X IDs (`B101500`, `RIZE2XCKH`), Stanley
+      `ST3000`.
     - **2X:** second carriage and nozzle (a 2X is on its way).
     - Paper work: the stepper engine clock against the timer (step
       batching is off on the 1X), the microstep pins of the drivers.
