@@ -413,8 +413,12 @@ stages 1-5 done on the dev printer):
     FORWARD, the lamp going off with the screen (`SCREEN_TIMEOUT` /
     `SCREEN_WAKE`, restart fix), step messages during load and
     unload, homing at 100 mm/s with a 2 mm Z back-off, the automatic
-    `LV_PROBE_CALIBRATE_SAVE`, and the remote reboot (item 48). Before
-    it can be built:
+    `LV_PROBE_CALIBRATE_SAVE`, the remote reboot (item 48), and since
+    11-24 the model check (DP200 / DP201 / DP203 model files, unknown
+    IDs refused), the sample prints moved to the stick, and the motor
+    current rule that lands on the stock counts. Its release notes must
+    state the model support (v0.1.0's notes were corrected 11-24: no
+    DP201). Before it can be built:
     - The DP200 firmware from the current fork (f97fa268) has never
       run on a DP200: test it on the dev printer first, or build the
       payload with the firmware of v0.1.0 and only new host files.

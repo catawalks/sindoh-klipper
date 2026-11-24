@@ -20,7 +20,11 @@ cut only when every line is checked on the **same payload** (md5).
       DP201, DP200Q conversions) on RODIN_200730_2, the only hardware we
       have tested. The installer refuses every other line by name
       (RODUP_ 3DWOX 1, the 6270 models). More models once we have data
-      from their owners (TODO 38).
+      from their owners (TODO 38). **Correction 2026-11-24:** the DP201
+      has no heated bed, so v0.1.0 does not support it (it would install,
+      then Klipper stops on the missing bed); the release notes on GitHub
+      say so now. From the next release the installer checks the model
+      ID (`dp200_model_dp201.cfg`).
 - [x] **Pre-packed `.she` files:** yes. The release is ready to copy to a
       flash drive as is; no PC tools needed.
 - [x] **License:** GPL-3.0-or-later for the port's own work, like Klipper,
