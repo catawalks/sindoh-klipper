@@ -44,7 +44,9 @@ the Sindoh system are not touched, so you can switch back.
   is a PLA-only model **without a heated bed**. From the next release the
   installer recognizes it by its model ID and sets it up without the bed
   (`dp200_model_dp201.cfg`); that setup has **not been tried on a DP201**
-  yet, so treat it as a test and watch the first homing.
+  yet, so treat it as a test and watch the first homing. The same goes
+  for the Korean **DP203** (`3DP203KQ`: the DP201's head and Z with the
+  DP200's heated bed, `dp200_model_dp203.cfg`).
 - A **USB stick**, FAT32, with **at least 400 MB free**. It holds the
   installer (about 85 MB) and receives a backup of the Sindoh app and Qt
   WebKit (in `dp200_stock_backup/`, one folder per printer).

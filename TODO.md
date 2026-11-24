@@ -351,7 +351,14 @@ stages 1-5 done on the dev printer):
       open: RODUP_ versions, NAND room, the TMC2224 set-up). **DP203**
       (`3DP203KQ`, Korea): the DP201's head and Z with the DP200's bed and
       leveling (sindoh `docs/dp200_family_models.md`); a model file would
-      be the DP200's bed plus Z 188, not built. Also found: a 3DWOX 5X
+      be the DP200's bed plus Z 188: built 11-24 as
+      `dp200_model_dp203.cfg`, installer `FAMILY=dp203` (untested).
+      **TMC2224 set-up** read from the stock programs (sindoh
+      `docs/tmc2224_setup.md`): needed by the 1X cold start and a
+      3DWOX 1 TMC board on NAND; a `tmc_setup` tool to write. **3DWOX 1
+      room:** the app archives differ little (sample prints 20.8 MB);
+      plan: move `examples_*` to the stick too, then a survey report.
+      Also found: a 3DWOX 5X
       on the 7X line, OEM 2X IDs (`B101500`, `RIZE2XCKH`), Stanley
       `ST3000`.
     - **2X:** second carriage and nozzle (a 2X is on its way).

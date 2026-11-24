@@ -25,6 +25,10 @@ files in this folder; `git log` has the rest.
 - [3dwox1_install_plan.md](../3dwox1_install_plan.md): what installing on
   the 3DWOX 1 line takes (plan only). The DP203 read from the stock
   program: DP201 head and Z, DP200 bed and leveling.
+- DP203 model file `dp200_model_dp203.cfg` (Z 188, the DP200's bed;
+  untested), installer `FAMILY=dp203`. The stock TMC2224 set-up read from
+  the 3DWOX 1, 1X, 2X and 7X programs (sindoh `docs/tmc2224_setup.md`);
+  the 3DWOX 1 plan has the registers and the room on its NAND root.
 - **1X power button, one hold** (owner: no second press): the pulse shows
   "Powering off in 3 s" with CANCEL, then powers off; a running print or
   move gets the emergency stop at once, as the button is the e-stop on

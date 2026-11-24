@@ -131,6 +131,7 @@ cp -n "$HERE/rootfs/home/klipper/printer_data/config/moonraker.conf" "$KHOME/pri
 cp "$PORT/klipper/config/dp200_printer.cfg" "$PORT/klipper/config/dp200_macros.cfg" \
    "$PORT/klipper/config/dp200_adxl.cfg.off" "$KHOME/printer_data/config/"
 cp "$PORT/klipper/config/dp200_model_dp200.cfg" "$PORT/klipper/config/dp200_model_dp201.cfg" \
+   "$PORT/klipper/config/dp200_model_dp203.cfg" \
    "$PORT/klipper/config/printer_dp201.cfg" "$KHOME/printer_data/config/"
 # the model file: a DP200 here (the USB installer picks it by the model ID)
 cp -n "$PORT/klipper/config/dp200_model_dp200.cfg" "$KHOME/printer_data/config/dp200_model.cfg"

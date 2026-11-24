@@ -82,7 +82,7 @@ still in development.
 | `install/display/` | The touch screen app |
 | `install/printer/`, `install/rootfs/` | Boot hook and service scripts |
 | `install/slicer/` | Slicer profiles |
-| `klipper/config/` | `printer.cfg` (yours), `dp200_printer.cfg`, `dp200_macros.cfg` and the model files `dp200_model_dp200.cfg` / `dp200_model_dp201.cfg` (replaced on updates; the installer copies the right one to `dp200_model.cfg`); `printer_dp201.cfg` is the DP201's first `printer.cfg` |
+| `klipper/config/` | `printer.cfg` (yours), `dp200_printer.cfg`, `dp200_macros.cfg` and the model files `dp200_model_dp200.cfg` / `_dp201.cfg` / `_dp203.cfg` (replaced on updates; the installer copies the right one to `dp200_model.cfg`); `printer_dp201.cfg` is the DP201's first `printer.cfg` |
 | `klipper/FORK` | The Klipper fork commit the printers build |
 | `common/`, `host/upctool.c` | The UPC register map, and the Linux tool that loads and bridges the UPC firmware |
 | `upc_fw/probe/` | A passive hardware probe firmware |
