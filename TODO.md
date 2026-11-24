@@ -251,12 +251,10 @@ stages 1-5 done on the dev printer):
     and the broken-root prompt on hardware.
 36. **Stage 8:** the work printer.
 37. **Stage 9:** release checklist (PROJECTS #10).
-39. **Repo split follow-ups** (11-20): the fork's
-    `config/sindoh-dp200/README.md` still points at
-    catawalks/sindoh `klipper_port/klipper/config/` (fix with the next
-    fork commit; now catawalks/sindoh-klipper `klipper/config/`). Optional:
-    move the kernel/NAND/U-Boot test scripts from `tools/` to
-    sindoh-kernel ([tools/README.md](tools/README.md) lists them).
+39. **Repo split follow-ups** (11-20): the fork README's link fixed
+    11-24 (fork `b3b8d837`). Left, optional: move the kernel/NAND/U-Boot
+    test scripts from `tools/` to sindoh-kernel
+    ([tools/README.md](tools/README.md) lists them).
 40. **v0.1.1: G-code storage on a card or stick, stick install** (owner
     11-20; PROJECTS 11). Built 11-20, tested on the PC with stand-in
     mount commands only: `install/printer/dp200-storage.sh` (opt-in by a

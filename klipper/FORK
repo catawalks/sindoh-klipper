@@ -2,4 +2,4 @@
 # Change COMMIT in the same commit as the port change that needs it.
 REPO=https://github.com/catawalks/klipper
 BRANCH=sindoh-dp200
-COMMIT=bb71f595b75f479a144e8736562a0e39d475c075
+COMMIT=b3b8d837008105a5dd45362b7335ca12fd7407a8
