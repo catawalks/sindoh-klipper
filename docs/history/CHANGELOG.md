@@ -7,6 +7,9 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-24
 
+- **DP201 is not a DP200** (owner): PLA only, no heated bed. Taken out
+  of the supported list (README, INSTALL); the installer refuses a
+  model ID containing "201". The DP102 is identical to the DP200.
 - **1X power button, one hold** (owner: no second press): the pulse shows
   "Powering off in 3 s" with CANCEL, then powers off; a running print or
   move gets the emergency stop at once, as the button is the e-stop on

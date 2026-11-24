@@ -319,6 +319,13 @@ stages 1-5 done on the dev printer):
       85). Use the 1X rule `(ceil(high * 255 / 200) + 0.25) / 255` in
       `unmistakable_klipper_install.sh` and `dp200_printer.cfg` with the
       next payload (TODO 49), and read back with `devmem` on a DP200.
+    - **DP201** (owner 11-24): not a DP200 twin. Same RODIN_ firmware,
+      but PLA only with **no heated bed**; the part-cooling fan moved to
+      the side of the head (same pins, no config change). The DP102 is
+      identical to the DP200. The installer now refuses a model ID with
+      "201" in it (the real ID is unknown). To support it: its model
+      ID and a survey report from an owner, then a config without
+      `heater_bed` and a PRINT_START without bed heating.
     - **2X:** second carriage and nozzle (a 2X is on its way).
     - Paper work: the stepper engine clock against the timer (step
       batching is off on the 1X), the microstep pins of the drivers.

@@ -205,14 +205,22 @@ show "Klipper installer" "target: $TARGET" ""
 # tested for this kernel build (Sindoh's 2020 firmware, RODIN_200730_2)
 KVER=3.2.0-g67a8e16
 [ "`uname -r`" = $KVER ] || fail "firmware too old/new" "use Sindoh 2020 fw"
-# Release 1 supports the DP200 family only (RODIN_: DP200, DP201, DP200Q
-# conversions). Each Sindoh firmware line may have its own mainboard
+# Release 1 supports the DP200 family only (RODIN_: DP200, DP102, DP200Q
+# conversions). The DP201 runs the same RODIN_ firmware but has no heated
+# bed (PLA only), which our config needs: refused by its model ID below.
+# Each Sindoh firmware line may have its own mainboard
 # (sindoh docs/other_models.md): a 3DWOX 1 (RODUP_) passes the checks above but is
 # untested by us, so refuse it and any other line by name.
 if [ "$FW" = unknown ]; then
     OTHER=`sed -n "s/.*['\"]\([A-Z0-9]*_[0-9][0-9A-Za-z_]*\)['\"].*/\1/p" /snapshot_version.sh 2>/dev/null | head -1`
     fail "not a DP200-family fw" "${OTHER:-no version found}"
 fi
+# The DP201's model ID is not known to us yet (no DP201 seen); any ID with
+# 201 in it is refused. Sindoh's list (sindoh docs/tli_list.txt) has none.
+TLI=`sqlite3 /app/nvram/karas.db 'select MachineTLI from INST_MACHINE' 2>/dev/null | head -1`
+case "$TLI" in
+*201*) fail "DP201 not supported yet" "no heated bed: $TLI" ;;
+esac
 GZ_MB=$(size_mb "$PAYLOAD")
 RAW_MB=$(( `cat "$PAYLOAD.size" 2>/dev/null || echo 3000000` / 1024 ))
 UPGRADE=0

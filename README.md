@@ -10,8 +10,8 @@ but it is young. Read the install guide fully before you start.
 
 | | |
 |---|---|
-| **Supported printers** | Sindoh 3DWOX **DP200**, **DP201**, and Stanley Model 1 / other brands converted to DP200Q, on Sindoh firmware `RODIN_200730_2` |
-| **Not yet** | 3DWOX 1, 2X, 1X, 7X (the installer refuses them by name; a 1X port is in progress, see [docs/1x_port_plan.md](docs/1x_port_plan.md)). Research on them: [catawalks/sindoh](https://github.com/catawalks/sindoh) |
+| **Supported printers** | Sindoh 3DWOX **DP200** (and the identical **DP102**), and Stanley Model 1 / other brands converted to DP200Q, on Sindoh firmware `RODIN_200730_2` |
+| **Not yet** | DP201 (same firmware, but PLA only with no heated bed), 3DWOX 1, 2X, 1X, 7X (the installer refuses them by name; a 1X port is in progress, see [docs/1x_port_plan.md](docs/1x_port_plan.md)). Research on them: [catawalks/sindoh](https://github.com/catawalks/sindoh) |
 | **Download** | [Releases](https://github.com/catawalks/sindoh-klipper/releases) |
 | **Install guide** | [docs/INSTALL.md](docs/INSTALL.md) |
 | **Slicer profiles** | [install/slicer/](install/slicer/) (PrusaSlicer, OrcaSlicer, Cura) |

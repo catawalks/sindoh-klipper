@@ -36,10 +36,12 @@ the Sindoh system are not touched, so you can switch back.
 
 ## You need
 
-- A printer of the **DP200 family** (DP200, DP201, or a printer converted
-  to DP200Q) on Sindoh firmware **RODIN_200730_2** (the 2020 update).
+- A **DP200** (or the identical DP102, or a printer converted to
+  DP200Q) on Sindoh firmware **RODIN_200730_2** (the 2020 update).
   Other versions and other Sindoh models (such as the 3DWOX 1) are not
   supported yet: the installer refuses them with a message.
+- **Not the DP201** yet: it runs the same firmware but is a PLA-only
+  model **without a heated bed**, and our configuration expects one.
 - A **USB stick**, FAT32, with **at least 400 MB free**. It holds the
   installer (about 85 MB) and receives a backup of the Sindoh app and Qt
   WebKit (in `dp200_stock_backup/`, one folder per printer).
