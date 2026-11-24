@@ -71,6 +71,11 @@ Either printer:
 - **Runout sensor** during a print; a held-back filament for the jam
   check.
 - **Cold start** without Sindoh's program (port plan, stage 7 item 4).
+- **Boot takeover by hand** (no writes): after a stock boot, run the
+  boot hook's script from the card instead of the two start commands
+  ([docs/1x_install_plan.md](docs/1x_install_plan.md), "Order of work"
+  1). Then the owner's OK for the first eMMC writes (root to
+  `/userdata/klipper/`, then `S99klipper`).
 - Z and the extruder at their limits (12 and 86 mm/s).
 
 ## Printer tuning
