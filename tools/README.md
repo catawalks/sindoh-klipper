@@ -19,6 +19,7 @@ console or the network); `.sh` files on the printer.
 | `klog.sh` | Mark and check the kernel log around every test |
 | `fb_grab.py` | Save the touch screen's framebuffer as a PNG |
 | `remote_shell/` | SSH on a stock printer from a USB stick (made for the 1X) |
+| `dev_ssh_setup.sh` | Dev DP200: turn on our own SSH (dropbear, port 2222, key login) in the Debian root ([docs/dev_printer_testing.md](../docs/dev_printer_testing.md)) |
 
 ## Building and switching Klipper on the dev printer
 

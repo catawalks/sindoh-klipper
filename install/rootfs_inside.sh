@@ -16,7 +16,7 @@ apt-get install -y -q -o Dpkg::Progress-Fancy=0 --no-install-recommends \
     libjpeg62-turbo-dev zlib1g-dev liblmdb-dev libsodium-dev \
     procps iproute2 iputils-ping less nano ca-certificates \
     gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi \
-    ustreamer v4l-utils \
+    ustreamer v4l-utils dropbear-bin \
     python3-pil fonts-dejavu-core mtd-utils bzip2 wget iw
 apt-get clean
 # time64 -> time32 V4L2 buffer ioctl shim for kernel 3.2 (see install/camera/)

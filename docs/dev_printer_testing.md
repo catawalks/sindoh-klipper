@@ -33,6 +33,30 @@ are fetched this way (`tools/serial_cmd.ps1 -cmd '...' -timeout N`).
 Config files and G-code go through Moonraker's upload
 (`/server/files/upload`, `root=config` or `root=gcodes`).
 
+## SSH into the dev printer (2026-11-24, not set up on it yet)
+
+`rc.dp200` starts dropbear on **port 2222** (key login only, no
+passwords) when `/root/.ssh/authorized_keys` exists in the Debian root;
+otherwise it does nothing, so a release install never runs it. It starts
+before the UPC cores, so a shell is there even when the Klipper side
+fails. The host key is made on the printer (`/etc/dp200/ssh_host_ecdsa_key`)
+and never shipped: `runtime.exclude` drops it and `/root`, and
+`make_payload.sh` refuses a payload that holds any SSH key.
+
+- One-time setup, over the serial console, in the root that runs the
+  stack (needs apt there, as on the SD card build root):
+  `wget -q -O /tmp/s.sh http://10.10.0.85:8099/deploy/usb/t/dev_ssh_setup.sh && sh /tmp/s.sh http://10.10.0.85:8099/deploy/usb/t`
+  (`tools/dev_ssh_setup.sh`: the new `rc.dp200`, the PC's public key
+  `dev_ssh.pub`, `dropbear-bin`, then starts it and prints the host key
+  fingerprint). New card builds get `dropbear-bin` from
+  `build_rootfs.sh` / `rootfs_inside.sh`.
+- Connect: `ssh -i D:/DP200/backup/keys/sindoh_dp200_ecdsa -p 2222 root@<address>`
+  (the key pair stays outside the repositories).
+- It needs the network up. The serial console stays the way in for boot
+  problems, kernel tests and anything before `rc.dp200 start`.
+- Undo: delete `/root/.ssh/authorized_keys` and kill
+  `$(cat /run/dp200/ssh.pid)`.
+
 ## Switching the Klipper build (host code + both firmware images)
 
 The host code (`klippy/`) and the two UPC firmware images must come from

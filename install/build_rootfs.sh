@@ -59,7 +59,7 @@ in_root apt-get install -y --no-install-recommends \
     libffi-dev libncurses-dev git sudo curl unzip nginx \
     libjpeg62-turbo-dev zlib1g-dev liblmdb-dev libsodium-dev \
     procps iproute2 iputils-ping less nano \
-    ustreamer v4l-utils python3-pil fonts-dejavu-core
+    ustreamer v4l-utils python3-pil fonts-dejavu-core dropbear-bin
 in_root apt-get clean
 # time64 -> time32 V4L2 shim for kernel 3.2 (see install/camera/)
 mkdir -p "$OUT/usr/src/dp200/camera"

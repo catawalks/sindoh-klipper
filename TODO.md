@@ -435,6 +435,12 @@ stages 1-5 done on the dev printer):
       down); Moonraker only, no shell, while the serial cable is on
       the 1X. Config and macro files can go there through Moonraker;
       the screen app and firmware cannot.
+50. **Dev DP200 SSH** (owner 11-24): built (`rc.dp200` start_ssh,
+    `dropbear-bin` in the root builds, `tools/dev_ssh_setup.sh`, key pair
+    in `D:\DP200\backup\keys\sindoh_dp200_ecdsa`), not run anywhere.
+    When the serial cable is back on the dev printer: run the setup
+    script, connect, check that `rc.dp200 restart` over SSH keeps the
+    session, and that a payload build still passes the no-keys check.
 48. **Reboot and power off from Mainsail, every model** (owner 11-23:
     people will want to restart their printer remotely). Moonraker runs
     `sudo reboot` / `sudo poweroff` inside the Klipper root, which

@@ -81,7 +81,8 @@ else
 fi
 
 EXCL="--exclude=./$PD --exclude=./$STAGE/runtime.exclude --exclude=./home/klipper/.cache
-      --exclude=./root/.cache --exclude=./var/cache/apt/archives/*.deb
+      --exclude=./root/.cache --exclude=./root/.ssh --exclude=./etc/dp200/ssh_host_*
+      --exclude=./etc/dropbear --exclude=./var/cache/apt/archives/*.deb
       --exclude=./var/lib/apt/lists/* --exclude=./var/log/*"
 [ "$MODE" = full ] || EXCL="$EXCL --exclude-from=/$STAGE/runtime.exclude"
 NAME=dp200_klipper_payload.tar.gz
@@ -93,6 +94,10 @@ $TAR -C / -czf - --numeric-owner --one-file-system $EXCL \
     $DIRS ./dp200/upctool $(cd $ROOT && ls ./dp200/*.sh ./dp200/*.py ./dp200/*.ko) \
     ./$STAGE/printer_data > "$OUT/$NAME"
 rm -rf $ROOT/$STAGE
+# no SSH keys of any kind may ship (a dev printer has them: rc.dp200 start_ssh)
+if $TAR -tzf - < "$OUT/$NAME" | grep -E '(^|/)(\.ssh/|authorized_keys|ssh_host_|dropbear_.*_host_key)'; then
+    echo "payload holds SSH keys (above): not shipped"; rm -f "$OUT/$NAME"; exit 1
+fi
 cd "$OUT"
 md5sum $NAME > $NAME.md5
 # unpacked size for the installer's space check (KiB)

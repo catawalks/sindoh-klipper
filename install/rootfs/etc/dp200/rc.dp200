@@ -33,6 +33,25 @@ start_upc() {
     sleep 1
 }
 
+# SSH (dev printers, 2026-11-24): dropbear on port 2222, key login only,
+# started ONLY when /root/.ssh/authorized_keys exists, so a release
+# install (no /root in the payload) never runs it. The host key is made
+# on the printer at the first start and never shipped (runtime.exclude,
+# make_payload.sh). Started first, so a shell is there even when the UPC
+# start fails.
+SSH_KEYS=/root/.ssh/authorized_keys
+SSH_HOSTKEY=/etc/dp200/ssh_host_ecdsa_key
+start_ssh() {
+    [ -s $SSH_KEYS ] && [ -x /usr/sbin/dropbear ] || return 0
+    [ -f $RUN/ssh.pid ] && kill -0 "$(cat $RUN/ssh.pid)" 2>/dev/null && return 0
+    chmod 700 /root/.ssh; chmod 600 $SSH_KEYS
+    [ -s $SSH_HOSTKEY ] || /usr/bin/dropbearkey -t ecdsa -s 256 -f $SSH_HOSTKEY >/dev/null 2>&1 \
+        || { echo "ssh: no host key"; return 0; }
+    # -s -g: no password logins at all; -R off (fixed key above)
+    /usr/sbin/dropbear -s -g -p 2222 -r $SSH_HOSTKEY -P $RUN/ssh.pid \
+        && echo "ssh: dropbear on port 2222 (key login)"
+}
+
 start_klipper() {
     $SSD --start --background --make-pidfile --pidfile $RUN/klipper.pid \
         --chuid $USER --chdir $HOME_DIR \
@@ -97,6 +116,7 @@ frame() {
 case "$1" in
 start)
     rm -rf /tmp/dp200-shutdown
+    start_ssh
     start_upc || exit 1
     start_klipper
     start_moonraker
@@ -123,6 +143,9 @@ stop)
     frame 4
     # Hold both UPC cores in reset and force heaters/fans/motors off
     /usr/local/bin/upctool --force stop
+    # SSH last (the listener only: a running session keeps going, so a
+    # "restart" typed over SSH finishes); "restart" starts it again
+    stop_pid ssh
     ;;
 restart)
     "$0" stop
@@ -181,7 +204,7 @@ restart-klipper)
     start_upc && start_klipper
     ;;
 status)
-    for s in bridge klipper moonraker webcam screen; do
+    for s in ssh bridge klipper moonraker webcam screen; do
         if [ -f $RUN/$s.pid ] && kill -0 "$(cat $RUN/$s.pid)" 2>/dev/null; then
             echo "$s: running"
         else

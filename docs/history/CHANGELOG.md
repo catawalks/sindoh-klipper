@@ -29,6 +29,10 @@ files in this folder; `git log` has the rest.
   untested), installer `FAMILY=dp203`. The stock TMC2224 set-up read from
   the 3DWOX 1, 1X, 2X and 7X programs (sindoh `docs/tmc2224_setup.md`);
   the 3DWOX 1 plan has the registers and the room on its NAND root.
+- **Dev DP200 SSH** (not run yet): `rc.dp200` starts dropbear on port
+  2222, key login only, only when `/root/.ssh/authorized_keys` exists;
+  `dropbear-bin` in both root builds; `tools/dev_ssh_setup.sh`; the
+  payload builder refuses any SSH key, `runtime.exclude` drops them.
 - GitHub release v0.1.0's notes corrected: the DP201 is not supported
   there (no heated bed; that installer checks the firmware, not the
   model). The next release's notes must list the model handling.
