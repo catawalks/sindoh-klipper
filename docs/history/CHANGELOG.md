@@ -32,6 +32,14 @@ files in this folder; `git log` has the rest.
 - Screen INFO: a "G-code" row (free space and where: stick or SD card)
   when G-code storage is on a stick or card; "Storage" says internal.
   The work printer's v0.1.1 test (11-24) showed only the internal flash there.
+- **1X speaker**: `sindoh_sound` in the fork (`bb71f595`: PLAY_TONE,
+  PLAY_TUNE, PLAY_SOUND) and `x1_web.sh`'s `soundd` (stock mplayer, the
+  amplifier on GPIO 180 only while playing). Ran on the 1X.
+- **Time zone**: SYSTEM -> TIME ZONE on the touch screen (region, city),
+  kept in `/etc/dp200/timezone`; the 1X and DP200 start scripts use it,
+  else stock's zone. Text check 0 problems on three models.
+- 1X: Moonraker's reboot request rebooted it again; BED FORWARD works
+  (owner). v0.1.1 is not released on its own: it goes into v0.1.2.
 - Fork: upstream Klipper v0.14.0 merged into `sindoh-dp200` (`e6beabb6`,
   tag `v0.14.0-sindoh-1`; upstream since 11-11 was docs and one removed
   include in `i2c_software.c`), pinned in `klipper/FORK`. Builds now

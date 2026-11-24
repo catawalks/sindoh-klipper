@@ -119,8 +119,9 @@ programs: no stock heating, no stock screen at boot. **The stock program
 also sets up the eight TMC2224 drivers** at start (sindoh
 `docs/tmc2224_setup.md`: GCONF, IHOLD_IRUN, PWMCONF, TPWMTHRS over
 `/dev/ttyS2`, select GPIOs 146, 147, 149, decoder 152); today Klipper
-runs on that set-up. A cold start has to write the same first (the
-`tmc_setup` tool, `docs/3dwox1_install_plan.md`). It also needs (1) the
+runs on that set-up. A cold start has to write the same first:
+`tools/x1_tmc.py setup --yes` does that (written 11-22, not run on a
+cold printer yet; `x1_stage4.sh` runs its read-only `check`). It also needs (1) the
 cold start without the motion program to work (prepared, not tried:
 [1x_port_plan.md](1x_port_plan.md), stage 7 item 4), and (2) a way to
 keep `/run.sh` from starting `UIManager`. Candidate (owner 11-24:

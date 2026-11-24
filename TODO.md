@@ -67,10 +67,10 @@ Either printer:
    `tools/x1_speed_test.py 197 2500 5` (passed at 2000).
 54. **SYSTEM -> POWER:** SHUT DOWN (never run), and REBOOT from the
    screen (the same helper rebooted fine from Mainsail's side 11-23).
-55. **Remote reboot** (item 48): with the console back, copy the three
-   files to the card's stage folder and restart the web side, then try
-   Mainsail's power menu. Installed 11-23 with the screen app and
-   macros of that day: try BED FORWARD on the MOVE page too.
+55. **Remote reboot** (item 48): through Moonraker's reboot request
+   (what Mainsail's power menu sends) it rebooted the 1X again 11-24
+   and the stack came back by hand. BED FORWARD works (owner 11-24).
+   Left: the menu click in Mainsail itself, and Shutdown.
 56. **Runout sensor** during a print; a held-back filament for the jam
    check.
 57. **Cold start** without Sindoh's program (port plan, stage 7 item 4).
@@ -263,7 +263,7 @@ stages 1-5 done on the dev printer):
     `dp200_storage` folder; mounted over the G-code folder at boot;
     released by `dp200-start.sh stop`), and the installer and remover
     refuse to delete `/klipper` while anything is mounted inside it.
-    **Not public until it has run on the work printer.** To check there
+    **Not released on its own (owner 11-24): it goes into v0.1.2.** To check there
     (stock 3.2): the stock mount points (`/mnt/sd`, `/mnt/sda1`) and that
     BusyBox `mount` takes `uid=,gid=,umask=`; upload, print and delete
     from a FAT32 stick; boot without it (falls back to internal); the
@@ -365,8 +365,9 @@ stages 1-5 done on the dev printer):
       be the DP200's bed plus Z 188: built 11-24 as
       `dp200_model_dp203.cfg`, installer `FAMILY=dp203` (untested).
       **TMC2224 set-up** read from the stock programs (sindoh
-      `docs/tmc2224_setup.md`): needed by the 1X cold start and a
-      3DWOX 1 TMC board on NAND; a `tmc_setup` tool to write. **3DWOX 1
+      `docs/tmc2224_setup.md`): needed by the 1X cold start (done by
+      `tools/x1_tmc.py setup`, untested cold) and a 3DWOX 1 TMC board on
+      NAND (adapt `x1_tmc.py`). **3DWOX 1
       room:** the app archives differ little (sample prints 20.8 MB);
       the installer now moves `examples_*` to the stick on both lines
       (11-24, owner's OK; not run on a printer yet). Survey v1.2
@@ -415,9 +416,13 @@ stages 1-5 done on the dev printer):
     screen at every start. Open: the DP200 and 3DWOX 1 (does their
     stock keep the same setting? the installer could carry it over),
     and what happens once stock is gone for good (stage 7 install):
-    then we need our own setting. Proposal: SYSTEM page, pick a region
-    then a city from the system's zone list (it has the daylight saving
-    rules), default = what stock had.
+    then we need our own setting. **Built 11-24:** SYSTEM -> TIME ZONE
+    on the touch screen (region, then city, from the root's zone list
+    with daylight saving rules) writes `/etc/dp200/timezone` and links
+    `/etc/localtime`; `x1_web.sh` and `dp200-start.sh` use it, else
+    stock's zone. On the 1X now (the owner to pick one: its stock zone
+    is "EST", a fixed offset without daylight saving). Open: the DP200
+    on our own kernel has no default but UTC until one is picked.
 49. **Next stick payload (v0.1.2)** (owner 11-23; 11-24: the work
     printer runs build `3940525` = v0.1.0, which lacks the screen and
     macro work since). It should carry: JOG, the MOVE page order with BED
@@ -481,8 +486,14 @@ stages 1-5 done on the dev printer):
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
     beeper): USB audio card 0 + amplifier enable GPIO 180, stock plays
     MP3s with mplayer ([sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md),
-    "The speaker"). To do: play a sound from the Debian root under
-    Klipper, then a `M300`-style macro or shell command for it.
+    "The speaker"). **Built and run 11-24:** the fork's
+    `klippy/extras/sindoh_sound.py` (`[sindoh_sound]` in
+    `x1_printer.cfg`: `PLAY_TONE`, `PLAY_TUNE`, `PLAY_SOUND TTS=` or
+    `FILE=`) leaves a request in `/run/dp200/sound/`; `x1_web.sh`'s
+    `soundd` plays it with stock's mplayer, amplifier on only while it
+    plays. A tune and a voice file played (exit 0); the owner to say how
+    it sounds. Open: use it (print done, errors, filament runout), the
+    volume, and the DP200 (beeper only, no speaker).
 38. **One installer for every model** (owner 11-20: no per-model
     releases; the installer reads the machine it is on and sets it up).
     Each firmware line (RODIN_, RODUP_, the 6270 models) is treated as its

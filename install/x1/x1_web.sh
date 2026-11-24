@@ -55,7 +55,15 @@ webcam_start() {
 # to its zone file at every boot (from its database); the Debian root gets
 # a copy of that file, so the touch screen's clock and the logs show the
 # same local time as stock did. No zone names involved.
+# Time zone: ours (the touch screen's SYSTEM -> TIME ZONE writes
+# etc/dp200/timezone) if set, else stock's (the 1X's stock setting is a
+# fixed offset such as "EST", without daylight saving)
 time_zone() {
+    z=$(cat $ROOT/etc/dp200/timezone 2>/dev/null)
+    if [ -n "$z" ] && [ -f $ROOT/usr/share/zoneinfo/$z ]; then
+        rm -f $ROOT/etc/localtime; ln -s /usr/share/zoneinfo/$z $ROOT/etc/localtime
+        return
+    fi
     [ -e /etc/localtime ] || return
     rm -f $ROOT/etc/localtime
     cp -L /etc/localtime $ROOT/etc/localtime
@@ -198,6 +206,46 @@ eth_retry() {
     ifconfig eth0 2>/dev/null | grep -q 'inet addr' && return
     (udhcpc -R -n -p /var/run/udhcpc.eth0.pid -i eth0 > /tmp/udhcpc_eth0.out 2>&1 &)
 }
+# The speaker (2026-11-24): a USB sound card with its own amplifier,
+# GPIO 180 (bank 5 pin 20, the registers stock's /app/audio_amp.sh
+# writes). Klipper's [sindoh_sound] (the fork, klippy/extras/
+# sindoh_sound.py) leaves one line in $RUN/sound/request: "wav NAME" (a
+# file it wrote there), "tts LANG/FILE" (Sindoh's voice files, /app/TTS)
+# or "file NAME" (printer_data/config/sounds). soundd plays it with
+# stock's mplayer, amplifier on only while it plays. Names are checked:
+# no paths outside those three folders.
+SND=$RUN/sound
+amp() {
+    devmem 0xD401951C 32 0x00100000                     # GPIO 180 an output
+    [ "$1" = on ] && devmem 0xD4019508 32 0x00100000 || devmem 0xD401950C 32 0x00100000
+}
+sound_play() {
+    case "$1" in
+    wav)  f=$SND/$2 ;;
+    tts)  f=/app/TTS/$2 ;;
+    file) f=$ROOT$K/printer_data/config/sounds/$2 ;;
+    *)    echo "x1_sound: unknown request '$1'"; return ;;
+    esac
+    case "$2" in *..*|/*|"") echo "x1_sound: bad name '$2'"; return ;; esac
+    [ -f "$f" ] || { echo "x1_sound: no file $f"; return; }
+    amp on
+    /bin/mplayer -really-quiet -noconsolecontrols -nolirc -vo null "$f" < /dev/null > /dev/null 2>&1
+    amp off
+}
+soundd_start() {
+    [ -x /bin/mplayer ] || return 0
+    [ -f /tmp/x1_soundd.pid ] && kill $(cat /tmp/x1_soundd.pid) 2>/dev/null
+    mkdir -p $SND; rm -f $SND/request
+    inroot chown klipper:klipper /run/dp200/sound
+    cp $ST/x1_web.sh /tmp/x1_sound.sh
+    setsid sh /tmp/x1_sound.sh soundd < /dev/null > /tmp/x1_sound.log 2>&1 &
+}
+soundd_stop() {
+    [ -f /tmp/x1_soundd.pid ] && kill $(cat /tmp/x1_soundd.pid) 2>/dev/null
+    rm -f /tmp/x1_soundd.pid
+    for p in $(pidof mplayer); do kill $p; done
+    amp off
+}
 screen_stop() {
     [ -f /tmp/x1_screen.pid ] && kill $(cat /tmp/x1_screen.pid) 2>/dev/null
     rm -f /tmp/x1_screen.pid
@@ -270,11 +318,12 @@ EOF
     webcam_start
     power_shims
     powerd_start
+    soundd_start
     screen_start
     echo "x1_web: started. Page on port $PORT, Moonraker on 7125 (give it about 30 s)"
     ;;
 status)
-    for p in moonraker.py "nginx: master" dp200_screen.py "x1_power.sh powerd"; do
+    for p in moonraker.py "nginx: master" dp200_screen.py "x1_power.sh powerd" "x1_sound.sh soundd"; do
         [ -n "$(pids "$p")" ] && echo "$p: running" || echo "$p: not running"
     done
     ;;
@@ -307,7 +356,22 @@ powerd)                             # the loop behind SHUT DOWN / REBOOT (starte
 power)
     case "$2" in poweroff|reboot) power_do $2 $3 ;; *) echo "usage: $0 power reboot|poweroff [dry]"; exit 1 ;; esac
     ;;
+soundd)                             # the speaker loop (started by "start")
+    cd /
+    echo $$ > /tmp/x1_soundd.pid
+    while :; do
+        if [ -f $SND/request ]; then
+            read what name < $SND/request
+            rm -f $SND/request
+            [ -n "$what" ] && sound_play "$what" "$name"
+        fi
+        usleep 200000
+    done
+    ;;
+sound)                              # by hand: x1_web.sh sound tts eng/NAME.mp3
+    sound_play "$2" "$3" ;;
 stop)
+    soundd_stop
     powerd_stop
     screen_stop
     inroot /usr/sbin/nginx -c $CONF -s quit 2>/dev/null
@@ -316,5 +380,5 @@ stop)
     sleep 2
     echo "x1_web: stopped"
     ;;
-*)  echo "usage: $0 start|status|stop|screen|power reboot|poweroff [dry]"; exit 1 ;;
+*)  echo "usage: $0 start|status|stop|screen|power reboot|poweroff [dry]|sound wav|tts|file NAME"; exit 1 ;;
 esac

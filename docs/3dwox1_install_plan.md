@@ -58,10 +58,9 @@ own (sindoh `docs/model_ids.md`).
      IHOLD_IRUN `0x1F1F`, PWMCONF `0xC80C0E24`, TPWMTHRS 38/38/47/75,
      over `/dev/ttyS2` at 115200 with a select decoder (bank 3 pins 23,
      29, 30, 31). A NAND boot skips the stock program, so our start
-     script does the same before Klipper: a small tool (`tmc_setup`:
-     sysfs GPIO for the select lines, the 8-byte datagrams, the echo
-     and an IFCNT read to confirm). The same tool serves the 1X's cold
-     start (eight drivers, `docs/1x_install_plan.md`).
+     script does the same before Klipper: adapt the 1X's
+     `tools/x1_tmc.py` (it already writes and checks the 1X's stock
+     set-up) to the 3DWOX 1's four drivers, select pins and values.
    - Read the board-select pin at boot and refuse to start Klipper if it
      does not match `dp200_machine.cfg` (a board swap).
 5. **Boot hook and Wi-Fi:** the DP200 hook as is; Fredrik found that a

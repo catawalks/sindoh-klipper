@@ -138,6 +138,15 @@ mkdir -p $ROOT/run/dp200
     echo "serial=`sqlite3 /app/nvram/karas.db 'select MachineSerialNo from INST_MACHINE' 2>/dev/null`"
     echo "kernel=`uname -r`"
 } > $ROOT/run/dp200/stock_info
+# Time zone: ours (the touch screen's SYSTEM -> TIME ZONE, etc/dp200/
+# timezone) if set, else the stock system's (its /etc/date_check.sh links
+# /etc/localtime from Sindoh's database at login)
+TZ_OWN=`cat $ROOT/etc/dp200/timezone 2>/dev/null`
+if [ -n "$TZ_OWN" ] && [ -f $ROOT/usr/share/zoneinfo/$TZ_OWN ]; then
+    ln -sf /usr/share/zoneinfo/$TZ_OWN $ROOT/etc/localtime
+elif [ -e /etc/localtime ]; then
+    rm -f $ROOT/etc/localtime; cp -L /etc/localtime $ROOT/etc/localtime
+fi
 if ! { [ -f /var/run/dp200-netd.pid ] && kill -0 $(cat /var/run/dp200-netd.pid) 2>/dev/null; }; then
     sh $ROOT/dp200/dp200-netd.sh $ROOT </dev/null >> $ROOT/var/log/dp200-netd.log 2>&1 &
     echo $! > /var/run/dp200-netd.pid

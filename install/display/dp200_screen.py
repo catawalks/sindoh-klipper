@@ -140,6 +140,58 @@ BIN_DROP = 70                         # EMPTY_BIN lowers the bed this far (bin_d
 MACROS_FILE = '/home/klipper/printer_data/config/dp200_screen_macros.json'
 MAC_PER_PAGE = 8                      # buttons per MACROS page
 MAC_EDIT_PER_PAGE = 10                # macros per EDIT page
+# Time zone (SYSTEM -> TIME ZONE, 2026-11-24): our own setting, kept in
+# TZ_FILE and applied as /etc/localtime in this root. Without it the start
+# scripts take the stock system's zone (x1_web.sh time_zone, dp200-start.sh),
+# which on the 1X is a fixed offset with no daylight saving ("EST").
+TZ_FILE = '/etc/dp200/timezone'
+TZ_DIR = '/usr/share/zoneinfo'
+TZ_REGIONS = ('Africa', 'America', 'Antarctica', 'Arctic', 'Asia', 'Atlantic', 'Australia',
+              'Europe', 'Indian', 'Pacific', 'UTC')
+TZ_PER_PAGE = 12
+
+
+def tz_current():
+    try:
+        with open(TZ_FILE) as f:
+            z = f.read().strip()
+            if z:
+                return z
+    except OSError:
+        pass
+    try:
+        l = os.readlink('/etc/localtime')
+        return l.split('zoneinfo/', 1)[1] if 'zoneinfo/' in l else 'stock setting'
+    except OSError:
+        return 'stock setting'
+
+
+def tz_cities(region):
+    out = []
+    base = os.path.join(TZ_DIR, region)
+    for root, dirs, files in os.walk(base):
+        for f in files:
+            out.append(os.path.relpath(os.path.join(root, f), base).replace(os.sep, '/'))
+    return sorted(out)
+
+
+def tz_apply(zone):
+    path = os.path.join(TZ_DIR, zone)
+    if '..' in zone or not os.path.isfile(path):
+        raise OSError('no zone %s' % zone)
+    os.makedirs(os.path.dirname(TZ_FILE), exist_ok=True)
+    with open(TZ_FILE + '.new', 'w') as f:
+        f.write(zone + '\n')
+    os.replace(TZ_FILE + '.new', TZ_FILE)
+    try:
+        os.remove('/etc/localtime')
+    except OSError:
+        pass
+    os.symlink(path, '/etc/localtime')
+    with open('/etc/timezone', 'w') as f:
+        f.write(zone + '\n')
+    os.environ.pop('TZ', None)
+    time.tzset()
 RESUME_Q = 'Resume the print? The head goes back to the part.'
 
 # Input shaping with a USB accelerometer (docs/input_shaping.md): the sensor
@@ -649,6 +701,7 @@ class UI:
         self.req = None                # the G-code request it waits on (see busy_tick)
         # custom macro buttons: the file's buttons (or its error), the printer's macros (EDIT)
         self.mac = {'buttons': [], 'error': None, 'all': None, 'page': 0, 'edit_page': 0}
+        self.tz = {'region': None, 'page': 0, 'cities': []}
         # the G-code commands this printer's Klipper knows (None: not read yet)
         self.cmds = None
         self.cmds_at = 0.0
@@ -724,6 +777,26 @@ class UI:
             self.mac['page'] += 1
         elif kind == 'mac_edit_more':
             self.mac['edit_page'] += 1
+        elif kind == 'tz_open':
+            self.tz.update(region=None, page=0, cities=[])
+            self.screen = 'timezone'
+        elif kind == 'tz_region':
+            if action[1] == 'UTC':
+                self.confirm = ('Set the time zone to UTC?', ('tz_set', 'UTC'))
+            else:
+                self.tz.update(region=action[1], page=0, cities=tz_cities(action[1]))
+        elif kind == 'tz_regions':
+            self.tz.update(region=None, page=0, cities=[])
+        elif kind == 'tz_more':
+            self.tz['page'] += 1
+        elif kind == 'tz_set':
+            try:
+                tz_apply(action[1])
+                log('time zone set: %s' % action[1])
+                self.flash('Time zone: %s' % action[1])
+                self.screen = 'system'
+            except OSError as e:
+                self.flash('Time zone not set: %s' % e)
         elif kind.startswith('wifi') or kind.startswith('kb'):
             self.wifi_action(action)
         elif kind.startswith('net') or kind.startswith('np'):
@@ -2028,7 +2101,7 @@ class UI:
               'pid': 'calibrate', 'objects': 'print',
               'network': 'system', 'ipcfg': 'network', 'wifi': 'network', 'wifi_list': 'wifi',
               'wifi_saved': 'wifi',
-              'display': 'system', 'timeout': 'display', 'power': 'home',
+              'display': 'system', 'timeout': 'display', 'timezone': 'system', 'power': 'home',
               'fil_error': 'filament', 'fil_run': 'filament', 'bin': 'move', 'macros': 'home', 'macros_edit': 'macros'}
     # pages that also work without Klipper (to fix the network from the waiting/error page)
     NO_KLIPPER = ('network', 'ipcfg', 'numpad', 'wifi', 'wifi_list', 'wifi_saved', 'wifi_kb', 'power')
@@ -2900,10 +2973,37 @@ class UI:
             ('DISPLAY', ('screen', 'display'), C_BTN, 28, 'screen'),
             ('INFO', ('info',), C_BTN, 28, 'versions, storage'),
             ('UPDATE', ('upd_open',), C_BTN, 28, 'web interface'),
-            # last, on its own: the same page as a short press of the front
-            # power button
+            ('TIME ZONE', ('tz_open',), C_BTN, 26, 'clock, logs'),
+            # last: the same page as a short press of the front power button
             ('POWER', ('screen', 'power'), C_RED, 28, 'shut down / reboot'),
         ], top=262, rows_h=88)
+
+    def page_timezone(self, d, st):
+        """SYSTEM -> TIME ZONE: a region, then a city (the system's zone
+        list, with its daylight saving rules)."""
+        tz = self.tz
+        d.text((20, 156), 'Time zone', font=font(28), fill=C_TXT)
+        d.text((20, 196), 'Now: %s, %s' % (tz_current(), time.strftime('%H:%M')),
+               font=font(18), fill=C_DIM)
+        if tz['region'] is None:
+            items = [(r, ('tz_region', r), C_BTN, 24) for r in TZ_REGIONS
+                     if r == 'UTC' or os.path.isdir(os.path.join(TZ_DIR, r))]
+            self.grid(d, items, top=236, rows_h=64)
+            return
+        cities = tz['cities']
+        n = TZ_PER_PAGE
+        pages = max(1, (len(cities) + n - 1) // n)
+        tz['page'] %= pages
+        items = []
+        for c in cities[tz['page'] * n:(tz['page'] + 1) * n]:
+            zone = tz['region'] + '/' + c
+            items.append((c.split('/')[-1].replace('_', ' '),
+                          ('confirm', 'Set the time zone to %s?' % zone, ('tz_set', zone)), C_BTN, 20))
+        items += [None] * (n - len(items))
+        items.append(('REGIONS', ('tz_regions',), C_BTN, 22, tz['region']))
+        if pages > 1:
+            items.append(('MORE', ('tz_more',), C_BTN, 22, '%d / %d' % (tz['page'] + 1, pages)))
+        self.grid(d, items, top=226, rows_h=56)
 
     def page_update(self, d, st):
         """SYSTEM -> UPDATE: Mainsail through Moonraker's updater (its

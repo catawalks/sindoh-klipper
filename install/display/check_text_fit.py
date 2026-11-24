@@ -50,8 +50,12 @@ CUR = ''
 for name in pages:
     if name in skip:
         continue
-    for estop in ((False, True) if name == 'key_off' else (False,)):
+    for estop in ((False, True) if name in ('key_off', 'timezone') else (False,)):
         CUR = name + (' (e-stop)' if estop else '')
+        if name == 'timezone':           # the region list, then America's cities
+            CUR = name + (' (America)' if estop else '')
+            ui.tz = {'region': 'America' if estop else None, 'page': 0,
+                     'cities': S.tz_cities('America') if estop else []}
         ui.screen = name
         ui.key_estop = estop
         ui.key_off_at = S.time.time() + S.KEY_CANCEL_1X if name == 'key_off' else 0.0
