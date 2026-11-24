@@ -29,8 +29,9 @@ becomes the full kernel-swap test machine.
 - **Repositories:** split on 2026-11-20 (this one, sindoh-kernel,
   sindoh); see the top README.
 - **A third machine, the owner's 3DWOX 1X:** see "1X" below.
-- **Fork pin:** `klipper/FORK` names the commit (f97fa268 since
-  11-22). The DP200 firmware built from the 1X-capable fork compiles
+- **Fork pin:** `klipper/FORK` names the commit (e6beabb6 since
+  11-24: f97fa268 of 11-22 merged with upstream Klipper v0.14.0, docs
+  and one unused include only; tag `v0.14.0-sindoh-1`). The DP200 firmware built from the 1X-capable fork compiles
   but has not been run on a DP200; both DP200s still run the builds
   named below.
 - The dev printer's serial cable is on the 1X; the dev printer is on the

@@ -32,6 +32,11 @@ files in this folder; `git log` has the rest.
 - Screen INFO: a "G-code" row (free space and where: stick or SD card)
   when G-code storage is on a stick or card; "Storage" says internal.
   The work printer's v0.1.1 test (11-24) showed only the internal flash there.
+- Fork: upstream Klipper v0.14.0 merged into `sindoh-dp200` (`e6beabb6`,
+  tag `v0.14.0-sindoh-1`; upstream since 11-11 was docs and one removed
+  include in `i2c_software.c`), pinned in `klipper/FORK`. Builds now
+  report `v0.14.0-sindoh-1-...`. `common/upc_hw.h` synced with the
+  fork's copy (its 11-21 1X offsets; the fork check had drifted).
 - **v0.1.1 storage on the work printer** (build `75734d4`, 11-24, owner):
   USB stick and SD card each work (upload, print, delete, emergency stop,
   firmware restart); with both in the card is used; with neither the

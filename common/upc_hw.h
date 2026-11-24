@@ -1,4 +1,4 @@
-// Sindoh DP200 / Marvell 88PA6170 "Gemstone" UPC hardware definitions.
+// Sindoh 3DWOX (DP200, 1X, 2X) / Marvell "Gemstone" UPC hardware definitions.
 //
 // Everything here was recovered from the stock firmware (upc.ko, the
 // fm/io UPC microcode and the main printer program). See
@@ -76,6 +76,24 @@
 #define SMOT_CFG            0x0c  // bit0 = 1: driver disabled; stock sets bit4
 #define SMOT_SETUP10        0x10  // stock 8 (power-on 1), meaning unknown
 #define SMOT_SETUP14        0x14  // stock 4 (power-on 0), meaning unknown
+#if defined(CONFIG_UPC_GPIO_BLOCK) && CONFIG_UPC_GPIO_BLOCK
+// 88PA6270 (3DWOX 1X, 2X): the block has four more table words and six
+// more sequence words in front, so the pattern moves by 0x10 and
+// everything from the control register on by 0x28. Read from the stock
+// 1X FM microcode's set-up and move code, and seen live (control, status
+// and edge counter) while the stock firmware jogged, 2026-11-21.
+#define SMOT_PATTERN        0x3c
+#define SMOT_CTRL           0x6c
+#define SMOT_ENABLE         0x78
+#define SMOT_RAMP_LEN       0x7c
+#define SMOT_PERIOD         0x80
+#define SMOT_CMD            0x84
+#define SMOT_START          0x88
+#define SMOT_STATUS         0x8c
+#define SMOT_EDGES          0xa0
+#define SMOT_DONE           0xb0
+#define SMOT_CLEAR          0xb4
+#else
 #define SMOT_PATTERN        0x2c  // stock 0xaaaaaaaa (power-on 0)
 #define SMOT_CTRL           0x44  // stock value 0x33224, bit4 = direction
 #define SMOT_ENABLE         0x50  // stock writes 1 before each move
@@ -87,6 +105,7 @@
 #define SMOT_EDGES          0x78  // COM_STP: output edges, 24-bit down-counter
 #define SMOT_DONE           0x88  // bit8 = move finished
 #define SMOT_CLEAR          0x8c  // write 0x100 to clear done
+#endif
 #define SMOT_CTRL_STOCK     0x33224u
 #define SMOT_CTRL_DIR       0x10u
 #define SMOT_MODE_CONST     0x1u
@@ -132,6 +151,18 @@
 #define ADC_CTRL_RUN        0x7770c006u   // io_2870(7,7,7,0,3,0,0,1,1)
 #define ADC_CFG1_VAL        0x00244d01u   // io_28fc(0,0x24,0x4d,1)
 #define ADC_MUX_WORD(sel)   (0x00010100u | (sel))
+
+// ---------------------------------------------------------------------
+// 88PA6270 (3DWOX 1X, 2X) SoC GPIO block: eight banks of 32 lines.
+// Linux GPIO number = bank * 32 + bit. Verified on a 1X against the
+// kernel's own view of each line (2026-11-21).
+// ---------------------------------------------------------------------
+#define GPIOBLK_BASE        0xd4019000u
+#define GPIOBLK_BANK(n)     (GPIOBLK_BASE + 0x100u * (n))
+#define GPIOBLK_LEVEL       0x00  // pin levels (read)
+#define GPIOBLK_SET         0x08  // write 1 bits: outputs high
+#define GPIOBLK_CLEAR       0x0c  // write 1 bits: outputs low
+#define GPIOBLK_BANKS       8
 
 #define DEC_SENSOR_BASE     0xf9301000u   // 2 encoder channels
 #define DEC_CONFIG_BASE     0xf9300000u
