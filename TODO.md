@@ -51,31 +51,34 @@ Either printer:
       unchecked, since the work printer's beeper is faulty.
     - Optional: tones (M300 S<Hz>) need the firmware to take the period
       from Klipper's cycle_time for this block.
-16. **Homing clearance:** a few mm of Z clearance before X homing, so the
-    nozzle doesn't drag across a failed print. Mind that Z homes upward.
+16. **Homing clearance:** built 11-24 (owner: 2 mm):
+    `_SINDOH_Z_CLEARANCE` lowers the bed 2 mm before X or Y homes (a
+    blind FORCE_MOVE when Z is not homed). To test on a DP200: G28 with
+    Z not homed and with Z homed, and with the bed at the bottom (the
+    motor stalls briefly). DP200 only; the 1X not yet.
 
-1X (get a fresh "bed empty" first; background in items 41 and 44):
-- **First layer over the whole bed** (`x1_xy_scale_150mm.gcode`, the
-  bed's bow) after the Z paper test. The Benchy of 11-23 completed in
-  the corrected X frame; its quality is the owner's to judge.
-- **Z zero:** paper test at the bed center, then a first layer print
-  (`x1_first_layer.gcode`).
-- **Speed test at the new acceleration:**
-  `tools/x1_speed_test.py 197 2500 5` (passed at 2000).
-- **SYSTEM -> POWER:** SHUT DOWN (never run), and REBOOT from the
-  screen (the same helper rebooted fine from Mainsail's side 11-23).
-- **Remote reboot** (item 48): with the console back, copy the three
-  files to the card's stage folder and restart the web side, then try
-  Mainsail's power menu. Installed 11-23 with the screen app and
-  macros of that day: try BED FORWARD on the MOVE page too.
-- **Runout sensor** during a print; a held-back filament for the jam
-  check.
-- **Cold start** without Sindoh's program (port plan, stage 7 item 4).
-- **Boot takeover by hand** (no writes): after a stock boot, run the
-  boot hook's script from the card instead of the two start commands
-  ([docs/1x_install_plan.md](docs/1x_install_plan.md), "Order of work"
-  1). Then the owner's OK for the first eMMC writes (root to
-  `/userdata/klipper/`, then `S99klipper`).
+1X, items 51 and up (get a fresh "bed empty" first; background in items 41 and 44):
+51. **First layer over the whole bed** (`x1_xy_scale_150mm.gcode`, the
+   bed's bow) after the Z paper test. The Benchy of 11-23 completed in
+   the corrected X frame; its quality is the owner's to judge.
+52. **Z zero:** paper test at the bed center, then a first layer print
+   (`x1_first_layer.gcode`).
+53. **Speed test at the new acceleration:**
+   `tools/x1_speed_test.py 197 2500 5` (passed at 2000).
+54. **SYSTEM -> POWER:** SHUT DOWN (never run), and REBOOT from the
+   screen (the same helper rebooted fine from Mainsail's side 11-23).
+55. **Remote reboot** (item 48): with the console back, copy the three
+   files to the card's stage folder and restart the web side, then try
+   Mainsail's power menu. Installed 11-23 with the screen app and
+   macros of that day: try BED FORWARD on the MOVE page too.
+56. **Runout sensor** during a print; a held-back filament for the jam
+   check.
+57. **Cold start** without Sindoh's program (port plan, stage 7 item 4).
+58. **Boot takeover by hand** (no writes): after a stock boot, run the
+   boot hook's script from the card instead of the two start commands
+   ([docs/1x_install_plan.md](docs/1x_install_plan.md), "Order of work"
+   1). Then the owner's OK for the first eMMC writes (root to
+   `/userdata/klipper/`, then `S99klipper`).
 - Z and the extruder at their limits (12 and 86 mm/s).
 
 ## Printer tuning
