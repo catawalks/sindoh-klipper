@@ -26,7 +26,8 @@ MODE=${3:-runtime}
 # Debian's tar needs Debian's libraries: run it inside the root, stream out
 TAR="chroot $ROOT /usr/bin/tar"
 for f in klipper/config/printer.cfg klipper/config/dp200_printer.cfg klipper/config/dp200_macros.cfg \
-         klipper/config/dp200_adxl.cfg.off \
+         klipper/config/dp200_adxl.cfg.off klipper/config/dp200_model_dp200.cfg \
+         klipper/config/dp200_model_dp201.cfg klipper/config/printer_dp201.cfg \
          install/rootfs/home/klipper/printer_data/config/moonraker.conf \
          install/rootfs/home/klipper/printer_data/config/dp200_moonraker.conf install/nand/runtime.exclude; do
     [ -f "$PORT/$f" ] || { echo "missing $PORT/$f"; exit 1; }
@@ -44,6 +45,8 @@ S=$ROOT/$STAGE/printer_data
 rm -rf $ROOT/$STAGE; mkdir -p $S/config $S/logs $S/database $S/gcodes $S/comms
 cp "$PORT"/klipper/config/printer.cfg "$PORT"/klipper/config/dp200_printer.cfg \
    "$PORT"/klipper/config/dp200_macros.cfg "$PORT"/klipper/config/dp200_adxl.cfg.off \
+   "$PORT"/klipper/config/dp200_model_dp200.cfg "$PORT"/klipper/config/dp200_model_dp201.cfg \
+   "$PORT"/klipper/config/printer_dp201.cfg \
    "$PORT"/install/rootfs/home/klipper/printer_data/config/moonraker.conf \
    "$PORT"/install/rootfs/home/klipper/printer_data/config/dp200_moonraker.conf $S/config/
 # Pin Klipper and Moonraker in Moonraker's updater to the commits shipped

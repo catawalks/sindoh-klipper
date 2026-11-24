@@ -11,7 +11,7 @@ but it is young. Read the install guide fully before you start.
 | | |
 |---|---|
 | **Supported printers** | Sindoh 3DWOX **DP200** (and the identical **DP102**), and Stanley Model 1 / other brands converted to DP200Q, on Sindoh firmware `RODIN_200730_2` |
-| **Not yet** | DP201 (same firmware, but PLA only with no heated bed), 3DWOX 1, 2X, 1X, 7X (the installer refuses them by name; a 1X port is in progress, see [docs/1x_port_plan.md](docs/1x_port_plan.md)). Research on them: [catawalks/sindoh](https://github.com/catawalks/sindoh) |
+| **Not yet** | DP201 (same firmware, but PLA only with no heated bed: its config is written, untested, for the next release), 3DWOX 1, 2X, 1X, 7X (the installer refuses them by name; a 1X port is in progress, see [docs/1x_port_plan.md](docs/1x_port_plan.md)). Research on them: [catawalks/sindoh](https://github.com/catawalks/sindoh) |
 | **Download** | [Releases](https://github.com/catawalks/sindoh-klipper/releases) |
 | **Install guide** | [docs/INSTALL.md](docs/INSTALL.md) |
 | **Slicer profiles** | [install/slicer/](install/slicer/) (PrusaSlicer, OrcaSlicer, Cura) |
@@ -82,7 +82,7 @@ still in development.
 | `install/display/` | The touch screen app |
 | `install/printer/`, `install/rootfs/` | Boot hook and service scripts |
 | `install/slicer/` | Slicer profiles |
-| `klipper/config/` | `printer.cfg` (yours), `dp200_printer.cfg` and `dp200_macros.cfg` (replaced on updates) |
+| `klipper/config/` | `printer.cfg` (yours), `dp200_printer.cfg`, `dp200_macros.cfg` and the model files `dp200_model_dp200.cfg` / `dp200_model_dp201.cfg` (replaced on updates; the installer copies the right one to `dp200_model.cfg`); `printer_dp201.cfg` is the DP201's first `printer.cfg` |
 | `klipper/FORK` | The Klipper fork commit the printers build |
 | `common/`, `host/upctool.c` | The UPC register map, and the Linux tool that loads and bridges the UPC firmware |
 | `upc_fw/probe/` | A passive hardware probe firmware |

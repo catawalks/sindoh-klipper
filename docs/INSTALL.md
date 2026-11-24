@@ -40,8 +40,11 @@ the Sindoh system are not touched, so you can switch back.
   DP200Q) on Sindoh firmware **RODIN_200730_2** (the 2020 update).
   Other versions and other Sindoh models (such as the 3DWOX 1) are not
   supported yet: the installer refuses them with a message.
-- **Not the DP201** yet: it runs the same firmware but is a PLA-only
-  model **without a heated bed**, and our configuration expects one.
+- **Not the DP201** in v0.1.0 and v0.1.1: it runs the same firmware but
+  is a PLA-only model **without a heated bed**. From the next release the
+  installer recognizes it by its model ID and sets it up without the bed
+  (`dp200_model_dp201.cfg`); that setup has **not been tried on a DP201**
+  yet, so treat it as a test and watch the first homing.
 - A **USB stick**, FAT32, with **at least 400 MB free**. It holds the
   installer (about 85 MB) and receives a backup of the Sindoh app and Qt
   WebKit (in `dp200_stock_backup/`, one folder per printer).
@@ -126,7 +129,8 @@ broadcast its name, use **HIDDEN**. If the printer can't reach Klipper, the
 - **Lamp:** `LAMP_ON`, `LAMP_OFF`, `LAMP_TOGGLE` (or `M355 S1/S0`).
 - **Purge bin:** empty it when the console asks, then run `BIN_EMPTIED`.
 - **Your settings** live in `printer.cfg` (Mainsail → Machine). Don't edit
-  `dp200_printer.cfg` or `dp200_macros.cfg`: they are replaced on updates.
+  `dp200_printer.cfg`, `dp200_macros.cfg` or `dp200_model*.cfg`: they are
+  replaced on updates.
 
 ## More room for G-code (from v0.1.1; not in v0.1.0)
 

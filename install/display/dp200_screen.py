@@ -392,10 +392,23 @@ class PowerKey:
 # ---------------------------------------------------------------------------
 # Moonraker
 # ---------------------------------------------------------------------------
+NO_BED = False                        # DP201: no heated bed (query() finds out)
+
 def query():
+    global NO_BED, MODEL
     q = '&'.join(urllib.parse.quote(o) for o in OBJECTS)
     with urllib.request.urlopen(API + '/printer/objects/query?' + q, timeout=3) as r:
-        return json.load(r)['result']['status']
+        st = json.load(r)['result']['status']
+    # The DP201 has no heated bed (klipper/config/dp200_model_dp201.cfg):
+    # Klipper then reports no heater_bed. A cold, idle stand-in keeps the
+    # pages simple; NO_BED hides the bed's buttons and readings.
+    if 'heater_bed' not in st and st.get('webhooks', {}).get('state') == 'ready':
+        NO_BED = True
+        if not IS_1X:
+            MODEL = 'DP201'
+    if 'heater_bed' not in st:
+        st['heater_bed'] = {'temperature': 0.0, 'target': 0.0, 'power': 0.0}
+    return st
 
 def err_text(e):
     """A query() failure as the waiting page shows it (not '[Errno 111] ...')."""
@@ -1964,7 +1977,10 @@ class UI:
         d.text((20, 78), 'Nozzle', font=font(18), fill=C_DIM)
         d.text((20, 102), '%.0f/%.0f°' % (e['temperature'], e['target']), font=font(32), fill=C_NOZ)
         d.text((200, 78), 'Bed', font=font(18), fill=C_DIM)
-        d.text((200, 102), '%.0f/%.0f°' % (b['temperature'], b['target']), font=font(32), fill=C_BED)
+        if NO_BED:
+            d.text((200, 108), 'not heated', font=font(22), fill=C_DIM)
+        else:
+            d.text((200, 102), '%.0f/%.0f°' % (b['temperature'], b['target']), font=font(32), fill=C_BED)
         # HOME: straight back to the home page from anywhere in the menus
         # (from the print page only while paused: a print shows that page)
         if self.screen != 'home' and (self.screen != 'print' or job_state(st) == 'paused'):
@@ -2217,7 +2233,8 @@ class UI:
                  ('UNLOAD', ('fil_mode', 'unload'), C_BTN, 32, 'choose filament')]
         items.append(('UNLOCK', ('confirm', 'Release the cartridge latch for 4 s? Unload the filament first.',
                                  ('gcode', 'CARTRIDGE_RELEASE', 'Cartridge release')), C_BTN, 28, 'cartridge'))
-        items.append(('DRYER', ('screen', 'dryer'), C_BTN, 28, 'spool on bed'))
+        items.append(('DRYER', None if NO_BED else ('screen', 'dryer'), C_BTN, 28,
+                      'no heated bed' if NO_BED else 'spool on bed'))
         self.grid(d, items, top=270, rows_h=96)
 
     def page_fil_mat(self, d, st):
@@ -2399,6 +2416,11 @@ class UI:
         d.text((20, 160), 'Preheat', font=font(28), fill=C_TXT)
         items = []
         for name, noz, bed in PRESETS:
+            if NO_BED:
+                items.append((name, ('confirm', 'Preheat %s: nozzle %d?' % (name, noz),
+                                     ('gcode', 'M104 S%d' % noz, 'Preheat ' + name)),
+                              C_BTN, 30, 'nozzle %d' % noz))
+                continue
             items.append((name, ('confirm', 'Preheat %s: nozzle %d, bed %d?' % (name, noz, bed),
                                  ('gcode', 'M104 S%d\nM140 S%d' % (noz, bed), 'Preheat ' + name)),
                           C_BTN, 30, '%d / %d' % (noz, bed)))
@@ -2569,13 +2591,14 @@ class UI:
             for i, l in enumerate(['Probes the bed (16 points), shows how',
                                    'far it is from level and which way to',
                                    'turn the two front screws.', '',
-                                   'Bed 60 C first gives the truest result.']):
+                                   '' if NO_BED else 'Bed 60 C first gives the truest result.']):
                 d.text((20, 210 + i * 30), l, font=font(20), fill=C_DIM)
             self.bl_view(d, 400, 200, True)
             self.button(d, (30, 620, 230, 705), 'PROBE', ('confirm', q, ('bl_probe', False)),
                         C_ON, 30, 'bed cold')
-            self.button(d, (250, 620, 450, 705), 'PROBE', ('confirm', q, ('bl_probe', True)),
-                        C_BTN, 30, 'heat bed 60 C')
+            if not NO_BED:
+                self.button(d, (250, 620, 450, 705), 'PROBE', ('confirm', q, ('bl_probe', True)),
+                            C_BTN, 30, 'heat bed 60 C')
             return
         if bl['mode'] == 'probing':
             n = len(bl['pts'])
@@ -2610,7 +2633,8 @@ class UI:
             d.text((64, y + 7), msg, font=font(21), fill=C_TXT)
             y += 44
         self.button(d, (30, 632, 230, 708), 'PROBE', ('confirm', q, ('bl_probe', False)), C_BTN, 30, 'again')
-        self.button(d, (250, 632, 450, 708), 'PROBE', ('confirm', q, ('bl_probe', True)), C_BTN, 30, 'bed 60 C')
+        if not NO_BED:
+            self.button(d, (250, 632, 450, 708), 'PROBE', ('confirm', q, ('bl_probe', True)), C_BTN, 30, 'bed 60 C')
 
     def page_dryer(self, d, st):
         dry = st.get('gcode_macro _DRY') or {}
@@ -2728,7 +2752,7 @@ class UI:
             d.text((20, 200 + i * 26), l, font=font(19), fill=C_DIM)
         printing = st['print_stats']['state'] in ('printing', 'paused')
         items = []
-        for name, heater, t in (('NOZZLE', 'extruder', 210), ('BED', 'heater_bed', 60)):
+        for name, heater, t in (('NOZZLE', 'extruder', 210),) + (() if NO_BED else (('BED', 'heater_bed', 60),)):
             act = ('confirm', 'Heat the %s to %d°C and tune it? About 5-10 minutes; stay nearby.'
                    % (name.lower(), t), ('pid_run', heater, t))
             items.append((name, None if printing else act, C_BTN, 30, '%d°C' % t))

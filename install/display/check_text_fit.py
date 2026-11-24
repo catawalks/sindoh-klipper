@@ -2,7 +2,7 @@
 runs past the panel's edges. Nothing is sent to the printer (POSTs are
 stubbed); it needs a running Moonraker for the status query, like the
 other tests here.
-    /usr/bin/python3 check_text_fit.py [--model dp200|1x]"""
+    /usr/bin/python3 check_text_fit.py [--model dp200|1x] [--nobed]"""
 import os, sys
 from PIL import ImageDraw
 
@@ -14,6 +14,8 @@ if '--model' in sys.argv:
     m = sys.argv[sys.argv.index('--model') + 1].lower()
     S.IS_1X = m in ('1x', 'x1')
     S.MODEL = '1X' if S.IS_1X else 'DP200'
+if '--nobed' in sys.argv:              # the DP201's pages (no heated bed)
+    S.NO_BED, S.MODEL = True, 'DP201'
 S.post = lambda *a, **k: {}
 
 bad = []

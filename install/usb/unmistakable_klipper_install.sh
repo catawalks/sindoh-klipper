@@ -217,16 +217,16 @@ if [ "$FW" = unknown ]; then
 fi
 # Model by its ID (TLI), with the stock program's own table (sindoh
 # docs/dp200_family_models.md, engine_getMachineModel in RODIN_200730_2):
-# "Rodin P" = DP200 family, supported; "Rodin E" = DP201 family (no heated
-# bed, 6 mm less Z), refused until it has its own config. The stock
-# program treats an unknown ID as Rodin E, so it is refused too.
+# "Rodin P" = DP200 family; "Rodin E" = DP201 family (no heated bed, 6 mm
+# less Z): its own model file, dp200_model_dp201.cfg (not tested on a
+# DP201 yet). The stock program treats an unknown ID as Rodin E; we refuse
+# it rather than guess.
 TLI=`sqlite3 /app/nvram/karas.db 'select MachineTLI from INST_MACHINE' 2>/dev/null | head -1`
 case "$TLI" in
 3DP200|3DP102|3DP200K|3DP200A|3DP200CM|3DP200J|3DP200Q|3DP102Q|3DP200KQ|3DP200AQ|\
 3DP200CMQ|3DP200JQ|3DP200H|3DP200CMH|3DP200JH|3DP200KH|3DP200C|3DP200CQ|\
-ST3DP1|ST3DP1Q|LEON3D|LEON3DQ) ;;
-3DP201*|3DP202*|ORAL3DQ|RDPL*|3DPL*)
-    fail "DP201 not supported yet" "no heated bed: $TLI" ;;
+ST3DP1|ST3DP1Q|LEON3D|LEON3DQ) FAMILY=dp200 ;;
+3DP201*|3DP202*|ORAL3DQ|RDPL*|3DPL*) FAMILY=dp201 ;;
 *)  fail "unknown model ID" "${TLI:-none}" ;;
 esac
 GZ_MB=$(size_mb "$PAYLOAD")
@@ -420,6 +420,14 @@ machine_cfg() {
 }
 rm -f $CFG/dp200_machine.cfg
 machine_cfg || true
+# The model's own sections (dp200_macros.cfg includes dp200_model.cfg):
+# DP200 the heated bed, DP201 no bed. A first install on a DP201 also gets
+# the DP201's printer.cfg (no [heater_bed]); an upgrade keeps the user's.
+cp $CFG/dp200_model_$FAMILY.cfg $CFG/dp200_model.cfg || fail "no model file" "dp200_model_$FAMILY.cfg"
+if [ $FAMILY = dp201 ] && [ ! -d /tmp/klipper_cfg_keep ]; then
+    cp $CFG/printer_dp201.cfg $CFG/printer.cfg || fail "no DP201 printer.cfg" "printer_dp201.cfg"
+fi
+echo "model: $TLI -> $FAMILY"
 # logs in RAM on NAND (dp200-start.sh)
 [ $TARGET = nand ] && touch $ROOT/etc/dp200/on_nand
 show "Saving to NAND" "please wait" "DO NOT POWER OFF"

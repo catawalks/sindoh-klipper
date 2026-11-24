@@ -328,10 +328,17 @@ stages 1-5 done on the dev printer):
       also gets `ifBedNotUsed = 1`, Z max 194.6 mm (DP200 200.6), its
       own leveling points and nozzle fan settings. The installer now
       takes only the Rodin P IDs and refuses Rodin E and unknown IDs.
-      Next: a DP201 config (no `heater_bed`, no bed heating in
-      PRINT_START and the screen, Z about 6 mm shorter, its leveling
-      points), chosen by the installer from the ID; then a DP201 owner
-      to test it.
+      Built 11-24 (untested, no DP201 here): the bed moved to a model
+      file (`dp200_model_dp200.cfg` / `dp200_model_dp201.cfg`, copied to
+      `dp200_model.cfg` by the installer from the model ID and included
+      at the end of `dp200_macros.cfg`); the DP201's has Z max 188,
+      M140/M190 stand-ins, no dryer, and its own `printer_dp201.cfg`
+      for a first install; the screen hides the bed when Klipper has
+      none. Not done: the stock leveling points (our port meshes with
+      the probe), the nozzle fan flag (owner: same fan, same pins).
+      Needs a DP201 owner to test. **Dev printers:** a new
+      `dp200_macros.cfg` needs `dp200_model.cfg` beside it (copy the
+      DP200 one), or Klipper stops at start.
     - **2X:** second carriage and nozzle (a 2X is on its way).
     - Paper work: the stepper engine clock against the timer (step
       batching is off on the 1X), the microstep pins of the drivers.

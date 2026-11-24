@@ -13,6 +13,12 @@ files in this folder; `git log` has the rest.
   Then from Sindoh's own model table (RODIN_200730_2 motion program,
   sindoh `docs/dp200_family_models.md`): the installer accepts only the
   DP200-family ("Rodin P") IDs and refuses DP201-family and unknown IDs.
+- **DP201 config** (untested): the heated bed moved from `dp200_printer.cfg`
+  to the model files `dp200_model_dp200.cfg` / `dp200_model_dp201.cfg`;
+  the installer copies the right one to `dp200_model.cfg` by the model ID
+  (DP201 accepted again, unknown IDs still refused) and gives a new DP201
+  `printer_dp201.cfg`. The screen app hides the bed when Klipper has none;
+  the text check has a `--nobed` run (0 problems).
 - **1X power button, one hold** (owner: no second press): the pulse shows
   "Powering off in 3 s" with CANCEL, then powers off; a running print or
   move gets the emergency stop at once, as the button is the e-stop on

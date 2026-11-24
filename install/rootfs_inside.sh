@@ -99,6 +99,10 @@ cp -n $PORT/install/rootfs/home/klipper/printer_data/config/moonraker.conf $KHOM
 # printer.cfg is the user's file (only created if missing)
 cp $PORT/klipper/config/dp200_printer.cfg $PORT/klipper/config/dp200_macros.cfg \
    $PORT/klipper/config/dp200_adxl.cfg.off $KHOME/printer_data/config/
+cp $PORT/klipper/config/dp200_model_dp200.cfg $PORT/klipper/config/dp200_model_dp201.cfg \
+   $PORT/klipper/config/printer_dp201.cfg $KHOME/printer_data/config/
+# the model file: a DP200 here (the USB installer picks it by the model ID)
+cp -n $PORT/klipper/config/dp200_model_dp200.cfg $KHOME/printer_data/config/dp200_model.cfg
 cp -n $PORT/klipper/config/printer.cfg $KHOME/printer_data/config/printer.cfg || true
 chown -R $KUSER:$KUSER $KHOME
 echo "dp200-klipper" > /etc/hostname
