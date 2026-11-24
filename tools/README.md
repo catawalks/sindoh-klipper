@@ -30,6 +30,7 @@ console or the network); `.sh` files on the printer.
 | `klippy_switch.sh`, `firmware_swap.sh`, `fm_rebuild.sh`, `kbuild_load.sh` | Switch between Klipper builds; swap or rebuild only the UPC firmware |
 | `klippy_build_chelper.sh`, `klippy_batch_check.sh`, `kbuild.py` | Build klippy's C helper; offline config check; build the firmware on Windows |
 | `payload_prep.sh`, `payload_verify.sh` | Prepare and verify the USB installer payload |
+| `payload_repack.py` | On the PC: a new payload from an audited one, with the host files of the committed port tree and a fork commit (root, firmware and `upctool` kept; `inspect` lists the changes only) |
 
 ## Config checks and generators
 

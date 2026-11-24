@@ -430,20 +430,26 @@ stages 1-5 done on the dev printer):
     IDs refused), the sample prints moved to the stick, and the motor
     current rule that lands on the stock counts. Its release notes must
     state the model support (v0.1.0's notes were corrected 11-24: no
-    DP201). Before it can be built:
-    - The DP200 firmware from the current fork (e6beabb6 = f97fa268 +
-      upstream v0.14.0, no code change for the UPC ports) has never
-      run on a DP200: test it on the dev printer first, or build the
-      payload with the firmware of v0.1.0 and only new host files.
+    DP201). **Test payload `cfc1205f` built 11-24 and on the USB
+    stick** (`_update_rodin_KlipperInstall`, remover in
+    `_KlipperRemove`; build `19f2541`; release folder and `SHA256SUMS`
+    in `kernel/out/release/v0.1.2` on the PC). Made on the PC with
+    `tools/payload_repack.py` from v0.1.1's audited payload
+    (`32ec81c0`, the dev printer has no shell now): the same Debian
+    root, firmware, `c_helper.so` and `upctool` as v0.1.0/v0.1.1 (fm
+    `d7e9e872`, io `2982dfc1`: the fork's firmware changes since are
+    1X-only), new host files from the port commit and fork `b3b8d837`
+    (klippy changes since v0.1.0 are new extras only). Not installed
+    anywhere yet. Still before a release:
     - `BED_FORWARD`, the new `LV_PROBE_CALIBRATE_SAVE`, the Z
       homing that first moves off a pressed switch, and the
       `PRINT_START` with its step list (11-23: the nozzle now heats
       over the bin before the purge), on a DP200 (owner
       present). The work printer's own edit (Z `position_min` -5) is
       the new shipped value.
-    - `docs/INSTALL.md` still tells users to type
-      `LV_PROBE_CALIBRATE_SAVE Z=<value>` (right for v0.1.0 and
-      v0.1.1): change it with the release that carries the new macro.
+    - Release notes (models, the firmware commit differing from the
+      host's) and the content audit of `cfc1205f`'s changed files
+      (all from the public repos).
     - The dev printer answers on WiFi, 10.10.0.21 (Ethernet .147 is
       down); Moonraker only, no shell, while the serial cable is on
       the 1X. Config and macro files can go there through Moonraker;
@@ -468,10 +474,8 @@ stages 1-5 done on the dev printer):
       on the screen's POWER page (same helper; power off uses GPIO
       158 and has never run).
     - DP200: the root builds install it (`build_rootfs.sh`,
-      `rootfs_inside.sh`), not run since. **The stick payload and its
-      installer do not carry it yet** (left alone on 11-23, the day of
-      the v0.1.1 work-printer test): add the three files to the
-      payload and the upgrade step.
+      `rootfs_inside.sh`), not run since. In the v0.1.2 test payload
+      (helper, the three links, the sudo rule); untried on a DP200.
     - On our own kernel Moonraker refuses with "inside a container"
       (confirmed on the dev printer 11-23: it reports "lxc", because
       process 1 is called `init.mainline`). `init.mainline` now

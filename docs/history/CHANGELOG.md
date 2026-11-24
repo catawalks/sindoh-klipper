@@ -7,6 +7,12 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-24
 
+- **v0.1.2 test payload `cfc1205f`** (build `19f2541`) on the USB stick
+  with its installer and remover; v0.1.1 (`32ec81c0`) kept on the PC in
+  `kernel/out/release/v0.1.1`. Repacked on the PC from v0.1.1
+  (`tools/payload_repack.py`): v0.1.0's firmware, new host files (fork
+  `b3b8d837`, screen app, configs and model files, start scripts, the
+  remote reboot helper and sudo rule). Not installed yet.
 - **DP200 motor currents on the stock counts**: the installer's
   `dp200_machine.cfg` and the `dp200_printer.cfg` defaults now use the
   1X rule (ceil(high·255/200)+0.25)/255 (checked for every offset
