@@ -7,6 +7,14 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-24
 
+- 1X boot hook written, not installed: `install/x1/S99klipper` (the one
+  file for `/etc/init.d`) and `install/x1/x1_boot.sh` (waits for stock's
+  motion program, then starts ours; skips on `BOOT_STOCK`, an
+  unfinished Sindoh update, a Sindoh update stick or a missing root).
+  Dry runs on the printer. `x1_stage4.sh` and `x1_web.sh` take the root
+  from `X1_ROOT` (default the SD card, so nothing changes today); the
+  power-off path unmounts the root only when it is a mount of its own.
+
 - **1X install plan** ([1x_install_plan.md](../1x_install_plan.md)), from
   the owner's 1X boot scripts (copied, read only): the boot chain
   (`/etc/profile` -> `/run.sh` -> `UIManager`), what asks for a recovery

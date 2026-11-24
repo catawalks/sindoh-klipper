@@ -17,7 +17,7 @@
 # SHUT DOWN and REBOOT, and writes what SYSTEM -> INFO shows about the
 # stock side. By hand: sh /tmp/sd/stage/x1_web.sh power reboot|poweroff [dry]
 # The same helper serves Mainsail's power menu (power_shims, below).
-ROOT=/tmp/sd
+ROOT=${X1_ROOT:-/tmp/sd}      # the Debian root: the SD card, or the installed copy
 ST=$ROOT/stage
 RUN=$ROOT/run/dp200                # the screen app's /run/dp200 (on the card)
 K=/home/klipper
@@ -113,11 +113,13 @@ power_do() {
     rm -f $RUN/power.ok $RUN/power
     sync
     for m in dev/pts dev/shm dev sys proc; do umount $ROOT/$m 2>/dev/null; done
-    umount $ROOT 2>/dev/null || { sleep 2; umount $ROOT 2>/dev/null; } || {
+    # the SD card is a mount of its own; an installed root is a folder on
+    # /userdata, which the system's own shutdown takes care of
+    grep -q " $ROOT " /proc/mounts && { umount $ROOT 2>/dev/null || { sleep 2; umount $ROOT 2>/dev/null; } || {
         # e.g. a console shell standing in a folder of the card
         mount -o remount,ro $ROOT 2>/dev/null
         grep -q " $ROOT ext4 ro" /proc/mounts && say "card busy: set read-only instead"             || say "card busy and still writable (synced; the $what remounts it)"
-    }
+    }; }
     sync
     frame done
     if [ -n "$dry" ]; then say "dry run: stopping before the $what"; return 0; fi
@@ -212,7 +214,7 @@ start)
     time_zone
     eth_retry
     stock_info
-    cp /tmp/sd/stage/x1_moonraker.conf $ROOT$K/printer_data/config/moonraker.conf
+    cp $ST/x1_moonraker.conf $ROOT$K/printer_data/config/moonraker.conf
     # Klipper (our fork) and Moonraker stay at the commits on the card:
     # Moonraker's updater only offers the web page (Mainsail)
     for r in klipper moonraker; do

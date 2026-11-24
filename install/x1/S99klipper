@@ -1,0 +1,15 @@
+#!/bin/sh
+# 3DWOX 1X: start Klipper at boot (docs/1x_install_plan.md). Installed by
+# the 1X installer as /etc/init.d/S99klipper; the only file of ours on the
+# stock system. Removing it (or a Sindoh firmware update, which replaces
+# the root) gives a stock printer again. The work is done in the
+# background by x1_boot.sh, so the stock boot is not held up.
+BOOT=/userdata/klipper/root/stage/x1_boot.sh
+case "$1" in
+start)
+    [ -f $BOOT ] && (sh $BOOT > /dev/null 2>&1 &)
+    ;;
+stop) ;;
+*)  echo "usage: $0 start|stop" ;;
+esac
+exit 0

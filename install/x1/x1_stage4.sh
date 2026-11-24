@@ -11,7 +11,7 @@
 # x1_macros.cfg next to it; klipper/config/x1/ in the repo).
 # "start" stops Sindoh's motion program (x1_stop.sh); only a reboot
 # brings the stock firmware back. Nothing is written to the eMMC.
-ROOT=/tmp/sd
+ROOT=${X1_ROOT:-/tmp/sd}      # the Debian root: the SD card, or the installed copy
 ST=$ROOT/stage
 U=$ST/bin/upctool
 K=/home/klipper

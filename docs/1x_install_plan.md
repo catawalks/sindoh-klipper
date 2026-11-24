@@ -96,12 +96,15 @@ the heaters, loads our firmware; `x1_web.sh start` brings up Moonraker,
 the screen app, the camera and the power button). Proven every day
 since 11-21. The hook:
 
-- **one new file, `/etc/init.d/S99klipper`**: rcS runs it last; it
+- **one new file, `/etc/init.d/S99klipper`** (`install/x1/S99klipper`,
+  written 2026-11-24, not installed): rcS runs it last; it
   starts a background waiter and returns. No Sindoh file is changed
   (uninstall = delete it). A Sindoh firmware update replaces the root
   and with it the hook: the printer is then stock again, with our files
   still in `/userdata`.
-- The waiter takes over once the motion program has started and
+- The waiter (`install/x1/x1_boot.sh`; dry runs on the printer
+  2026-11-24: refuses a missing root, honors `BOOT_STOCK`, waits for
+  the motion program) takes over once the motion program has started and
   finished its start-up (the "IO Ready" point), and **does nothing**
   when: `/userdata/klipper/BOOT_STOCK` exists, an update is unfinished
   (`/updating_usb`, `/updating_network`), or a stick with
@@ -162,9 +165,11 @@ the console login and stops it. To decide after step A works.
 
 ## Order of work
 
-1. Owner present, no writes: confirm the "IO Ready" point and how long
-   stock takes; try the takeover script by hand from the card (what
-   `S99klipper` would run).
+1. Owner present, no writes: after a stock boot, run
+   `X1_BASE=<a folder whose root/ is the card> sh x1_boot.sh` by hand
+   (what `S99klipper` would run) and check the takeover point. The
+   start scripts take the root's place from `X1_ROOT` since 2026-11-24
+   (default: the card).
 2. Owner's OK: copy the root to `/userdata/klipper/`, run from there
    by hand (the card out).
 3. Owner's OK: add `S99klipper`; power cycles: normal start, the
