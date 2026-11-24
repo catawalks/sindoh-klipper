@@ -56,8 +56,8 @@ Either printer:
 
 1X (get a fresh "bed empty" first; background in items 41 and 44):
 - **First layer over the whole bed** (`x1_xy_scale_150mm.gcode`, the
-  bed's bow) after the Z paper test; the Benchy of 11-23 printed fine
-  in the corrected X frame.
+  bed's bow) after the Z paper test. The Benchy of 11-23 completed in
+  the corrected X frame; its quality is the owner's to judge.
 - **Z zero:** paper test at the bed center, then a first layer print
   (`x1_first_layer.gcode`).
 - **Speed test at the new acceleration:**
