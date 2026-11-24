@@ -298,8 +298,14 @@ stages 1-5 done on the dev printer):
     - **Installer for the 1X:** write `x1_machine.cfg` from the
       database as for the DP200 (X from MOTOR_PWM_X2OFFSET, Y, Z, E,
       and C from MOTOR_PWM_COFFSET; outputs `motor_current_x/y/z/e/c`).
-    - **Stage 7:** install onto `/userdata` (every eMMC write needs
-      the owner's OK), after the cold start works.
+    - **Stage 7: install, boot, uninstall, update:** plan in
+      [docs/1x_install_plan.md](docs/1x_install_plan.md) (11-24 night:
+      Sindoh's boot and integrity checks read; a "warm takeover" hook
+      first, the cold start later). `install/x1/x1_machine_cfg.sh`
+      writes the motor currents from the database (tried read-only on
+      the printer: X 0, Y +40, Z +40, E +50, C +9). Its E value
+      (0.7525, by the rule in `x1_printer.cfg`) differs from the
+      config's 0.755 by one count of 200: decide which is right.
     - **2X:** second carriage and nozzle (a 2X is on its way).
     - Paper work: the stepper engine clock against the timer (step
       batching is off on the 1X), the microstep pins of the drivers.

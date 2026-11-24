@@ -519,7 +519,8 @@ jobs remotely; this is how Sindoh's slicer does it), plus its web page
 on port 80 and the camera on 8080. So, unlike the DP200, nothing has to
 be removed: our whole root is about 920 MB.
 
-Install plan (stage 7, each write to the eMMC needs the owner's OK):
+Install plan (stage 7, each write to the eMMC needs the owner's OK; worked out in
+[1x_install_plan.md](1x_install_plan.md) on 2026-11-24):
 
 1. Copy the card's root to a folder on `/userdata` (it is ext4, so the
    root can be used in place as a chroot, as the card is now).

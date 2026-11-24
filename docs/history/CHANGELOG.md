@@ -5,6 +5,23 @@ one. The detail for everything up to 2026-11-12 is in
 [TODO_archive_2026-11-12.md](TODO_archive_2026-11-12.md) and the other
 files in this folder; `git log` has the rest.
 
+## 2026-11-24
+
+- **1X install plan** ([1x_install_plan.md](../1x_install_plan.md)), from
+  the owner's 1X boot scripts (copied, read only): the boot chain
+  (`/etc/profile` -> `/run.sh` -> `UIManager`), what asks for a recovery
+  boot (root read-only 10 s, unreadable system files, fsck), that
+  Sindoh's updates borrow `/userdata` as scratch space, and that stock
+  homes nothing at boot. Plan: our root in `/userdata/klipper/`, a new
+  `/etc/init.d/S99klipper` that takes over after stock has started
+  (stock keeps running if ours is missing), escape flags, a stick
+  installer as on the DP200; the cold start later.
+- `x1_web.sh`: the power-off path freezes Sindoh's
+  `recovery_watchdog.sh` before remounting the root read-only (it
+  would ask for a recovery boot after 10 s if the power stayed on).
+- `install/x1/x1_machine_cfg.sh`: the 1X's motor currents from the
+  stock database, for the installer.
+
 ## 2026-11-23
 
 - **1X power button, second design** (owner tested the first: the

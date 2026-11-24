@@ -127,6 +127,12 @@ power_do() {
         return 0
     fi
     say "power off"
+    # Sindoh's /app/recovery_watchdog.sh asks for a RECOVERY BOOT (a full
+    # reinstall from the recovery partition) when / stays read-only for
+    # 10 s. The remount below makes it read-only; if the power did not go
+    # off after all, that must not happen: freeze the watchdog script
+    # first (a reboot brings it back).
+    for p in $(pids recovery_watchdog); do kill -STOP $p; done
     echo s > /proc/sysrq-trigger
     echo u > /proc/sysrq-trigger
     sleep 1
