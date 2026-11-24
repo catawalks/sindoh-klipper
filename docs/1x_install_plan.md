@@ -122,9 +122,9 @@ the console login and stops it. To decide after step A works.
 ## The way back to stock
 
 - **From our screen:** SYSTEM -> POWER -> "Next start: Sindoh" (to
-  build) writes `BOOT_STOCK` and reboots. Stock runs until the flag is
-  removed (from the same page under stock? not possible, Sindoh's
-  screen; so: a stick, or the console).
+  build) writes `BOOT_STOCK` and reboots. Stock then runs at every
+  start until the flag is removed. Sindoh's screen cannot remove it,
+  so that takes a stick (below) or the console.
 - **From a stick:** a `_update_rodin_1x` stick with only our
   `unmistakable_klipper_boot_stock.she` sets the flag (or removes it).
 - **Never** use the power button at power-on: U-Boot reads that line
