@@ -36,7 +36,11 @@ below is dropped: it erased the recovery set).
   `/app/SVN_GUI` (93 MB, Sindoh's touch-screen app; Klipper's screen replaces
   it), after copying it to the stick (`dp200_stock_backup/`, md5-checked).
   The rest of the stock system stays: auto_update.sh and its key, upc.ko,
-  Wi-Fi, BusyBox, the Qt browser libraries.
+  Wi-Fi, BusyBox, the Qt browser libraries. Since 2026-11-24 (owner's
+  OK) it also moves Sindoh's **sample prints** (`/examples`,
+  `/examples_P`, `_E`, `_EH`, `_Stanley`; `/examples_U` on a 3DWOX 1) to
+  the stick (`EXAMPLES.tar`): only the Sindoh app lists them. The space
+  check counts a third of their size (G-code text, compressed by UBIFS).
 - **Size (measured on the printer):** `runtime.exclude` now also drops perl,
   git, apt, iconv tables, pip/setuptools, compiler leftovers and this
   printer's `/var/backups` and `/root`. Runtime 235 MB, payload 84 MB gzip;
@@ -47,10 +51,13 @@ below is dropped: it erased the recovery set).
   `3.2.0-g67a8e16` (Sindoh 2020 firmware, the build upctool and cdc-acm.ko
   are tested on; DP200 and Stanley Model 1 alike), mtd6 = "filesystem" as
   the UBIFS root, space, room on the stick for the backup, payload md5.
-- **On failure** after the backup: `/klipper` is removed and SVN_GUI copied
-  back, so the stock firmware boots as before.
+- **On failure** after the backup: `/klipper` is removed and SVN_GUI,
+  WebKit and the sample prints are copied back, so the stock firmware
+  boots as before. The remover puts the sample prints back too (they are
+  optional: a missing or damaged `EXAMPLES.tar` only shows a message).
 - **Backups per printer and firmware:** `dp200_stock_backup/<eth0 MAC>/`
-  holds SVN_GUI.tar and WEBKIT.tar (+ .md5, files fingerprint) and
+  holds SVN_GUI.tar, WEBKIT.tar and EXAMPLES.tar (+ .md5, files
+  fingerprint for the first two) and
   `FIRMWARE` (Sindoh's version, e.g. RODIN_200730_2, read out of
   `/snapshot_version.sh` without running it). A backup that doesn't match
   the printer's app is the same printer on another firmware (a Sindoh
@@ -68,7 +75,7 @@ below is dropped: it erased the recovery set).
   _update_rodin_KlipperInstall/unmistakable_klipper_install.she
                                dp200_klipper_payload.tar.gz (+ .md5, .size)
   _update_rodin_KlipperRemove/unmistakable_klipper_remove.she
-  dp200_stock_backup/<MAC>/SVN_GUI.tar, WEBKIT.tar, FIRMWARE   written by the installer
+  dp200_stock_backup/<MAC>/SVN_GUI.tar, WEBKIT.tar, EXAMPLES.tar, FIRMWARE   written by the installer
   dp200_stock_backup/<MAC>_<firmware>/    an older backup, set aside
   ```
 

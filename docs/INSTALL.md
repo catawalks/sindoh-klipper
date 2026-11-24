@@ -48,8 +48,9 @@ the Sindoh system are not touched, so you can switch back.
   for the Korean **DP203** (`3DP203KQ`: the DP201's head and Z with the
   DP200's heated bed, `dp200_model_dp203.cfg`).
 - A **USB stick**, FAT32, with **at least 400 MB free**. It holds the
-  installer (about 85 MB) and receives a backup of the Sindoh app and Qt
-  WebKit (in `dp200_stock_backup/`, one folder per printer).
+  installer (about 85 MB) and receives a backup of the Sindoh app, Qt
+  WebKit and Sindoh's sample prints (in `dp200_stock_backup/`, one folder
+  per printer; the sample prints are new in the next release).
 - The printer on **WiFi or Ethernet**, so you can reach the web interface.
   Find its IP on the Sindoh screen before installing, or in your router.
 

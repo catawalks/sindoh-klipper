@@ -208,6 +208,17 @@ if [ $WK_SRC != 0 ]; then
     sync
 fi
 rm -rf /tmp/dp200-restore
+# Sindoh's sample prints (EXAMPLES.tar, saved by installers since
+# 2026-11-24): optional, so a missing or damaged copy only says so
+if [ -z "`cd / && ls -d examples examples_* 2>/dev/null`" ] && [ -f "$BACKUP/EXAMPLES.tar" ]; then
+    show "Restoring" "the sample prints" "DO NOT POWER OFF"
+    if [ "`cat "$BACKUP/EXAMPLES.tar.md5" 2>/dev/null`" = "`md5sum < "$BACKUP/EXAMPLES.tar"`" ] && \
+       tar -xf "$BACKUP/EXAMPLES.tar" -C /; then
+        sync
+    else
+        show "Sample prints" "not restored" "(the printer works)"; sleep 5
+    fi
+fi
 
 if [ $OEM = 1 ]; then
     # hand over to the OEM update.she on the same stick (it shows its own

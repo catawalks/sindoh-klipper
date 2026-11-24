@@ -91,14 +91,15 @@ about 27-40 MB. Comparing the two firmware updates' app archives
 The libraries and programs are the same size. So the 20 MB the 3DWOX 1
 lacks is not in the app archive: it is in the base image or in what the
 printer gathered since (logs, uploaded prints, the database). That is
-what the survey stick report shows (`df`, the largest folders).
+what the survey stick report shows (`df` and, since survey v1.2, the
+size of each folder at the top of the root and in `/app`).
 
 Plan in order:
 
-1. **Move the sample prints to the stick too** (both lines): the
-   installer already saves the Sindoh app there for the remover to put
-   back; `examples_*` is 20.8 MB on the 3DWOX 1 and 28 MB on the DP200.
-   With that the 3DWOX 1 should land near the DP200's margin.
+1. **Move the sample prints to the stick too** (both lines): done in the
+   installer 2026-11-24 (`EXAMPLES.tar`, the remover puts them back);
+   `examples_*` is 20.8 MB on the 3DWOX 1 and 28-56 MB on a DP200. With
+   that the 3DWOX 1 should land near the DP200's margin.
 2. If a survey shows less: clear stock logs and uploaded prints in the
    stock folders (after a copy to the stick), then measure again.
 3. If it still does not fit: **SD-card only** on that unit (the root on

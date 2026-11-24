@@ -357,7 +357,9 @@ stages 1-5 done on the dev printer):
       `docs/tmc2224_setup.md`): needed by the 1X cold start and a
       3DWOX 1 TMC board on NAND; a `tmc_setup` tool to write. **3DWOX 1
       room:** the app archives differ little (sample prints 20.8 MB);
-      plan: move `examples_*` to the stick too, then a survey report.
+      the installer now moves `examples_*` to the stick on both lines
+      (11-24, owner's OK; not run on a printer yet). Survey v1.2
+      (released 11-24) lists folder sizes: a 3DWOX 1 owner's report next.
       Also found: a 3DWOX 5X
       on the 7X line, OEM 2X IDs (`B101500`, `RIZE2XCKH`), Stanley
       `ST3000`.

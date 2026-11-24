@@ -29,6 +29,10 @@ files in this folder; `git log` has the rest.
   untested), installer `FAMILY=dp203`. The stock TMC2224 set-up read from
   the 3DWOX 1, 1X, 2X and 7X programs (sindoh `docs/tmc2224_setup.md`);
   the 3DWOX 1 plan has the registers and the room on its NAND root.
+- Installer: Sindoh's sample prints (`/examples*`) go to the stick with
+  the Sindoh app (`EXAMPLES.tar`) and are removed from the NAND; undo and
+  the remover put them back (owner's OK; tested on the PC, not on a
+  printer). Survey stick v1.2 released (folder sizes).
 - **1X power button, one hold** (owner: no second press): the pulse shows
   "Powering off in 3 s" with CANCEL, then powers off; a running print or
   move gets the emergency stop at once, as the button is the e-stop on

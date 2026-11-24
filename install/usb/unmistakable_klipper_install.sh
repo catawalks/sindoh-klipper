@@ -22,7 +22,8 @@
 # U-Boot blocks and the env are never touched. To make room, the Sindoh
 # touch-screen front end /app/SVN_GUI (93 MB of HTML, images and fonts for
 # its Qt browser; Klipper's screen replaces it) is first saved to the stick
-# (dp200_stock_backup/<MAC>/SVN_GUI.tar, md5-checked) and then deleted. The rest of the stock system stays
+# (dp200_stock_backup/<MAC>/SVN_GUI.tar, md5-checked) and then deleted, as are
+# Qt WebKit (WEBKIT.tar) and the sample prints (EXAMPLES.tar). The rest of the stock system stays
 # (auto_update.sh and its key, upc.ko, Wi-Fi, BusyBox). The remove stick puts
 # SVN_GUI back. Target SD: the Debian root goes to /mnt/sd (ext2/3/4 card).
 # Both: the boot hook (/etc/profile line, /etc/dp200-boot.sh, /DEBUG_MACHINE).
@@ -49,6 +50,11 @@ GUI=/app/SVN_GUI
 WK_FILE=/usr/lib/libQt5WebKit.so.5.0.2
 wk_list() { (cd / && ls -d usr/lib/libQt5WebKit.so* usr/lib/libQt5WebKitWidgets.so* 2>/dev/null); }
 wk_fingerprint() { (cd "$1" && find usr/lib -name 'libQt5WebKit*' -type f | sort | xargs md5sum | md5sum | cut -d' ' -f1); }
+# Sindoh's sample prints (/examples, /examples_P, _E, _EH, _Stanley on the
+# DP200 line, 28-56 MB; /examples_U on a 3DWOX 1): only the Sindoh app lists
+# them. Saved to the stick with it (EXAMPLES.tar) and removed; the remover
+# puts them back.
+ex_list() { (cd / && ls -d examples examples_* 2>/dev/null); }
 TARGET=nand
 [ -f "$STICK/target_sd" ] && TARGET=sd
 SPARE_MB=15                 # left free on the stock root after the install
@@ -85,6 +91,9 @@ undo() {
     fi
     if [ ! -f $WK_FILE ] && [ -f "$BACKUP/WEBKIT.tar" ]; then
         tar -xf "$BACKUP/WEBKIT.tar" -C /
+    fi
+    if [ -z "`ex_list`" ] && [ -f "$BACKUP/EXAMPLES.tar" ]; then
+        tar -xf "$BACKUP/EXAMPLES.tar" -C /
     fi
     sync
 }
@@ -249,6 +258,9 @@ if [ $TARGET = nand ]; then
     [ -d $GUI ] && HAVE_MB=$(( HAVE_MB + `du_mb $GUI` ))
     # WebKit: a library compresses to about half on UBIFS
     [ -f $WK_FILE ] && HAVE_MB=$(( HAVE_MB + `du_mb $WK_FILE` / 2 ))
+    # sample prints: G-code text, which UBIFS compresses; count a third
+    EX=`ex_list`
+    [ -n "$EX" ] && HAVE_MB=$(( HAVE_MB + `(cd / && du -sk $EX) | awk '{s += $1} END {print int(s / 3072)}'` ))
     [ $HAVE_MB -ge $NEED_MB ] || fail "not enough NAND space" "need $NEED_MB, have $HAVE_MB MB"
     if [ -d $GUI ] && [ ! -f "$BACKUP/SVN_GUI.tar" ]; then
         [ "$(mb_free "$STICK")" -ge $(( `du_mb $GUI` + 10 )) ] || fail "USB stick too full" "backup needs 100 MB"
@@ -363,6 +375,24 @@ if [ $DRY_RUN = 0 ] && [ $TARGET = nand ]; then
         fi
         UNDO=1
         (cd / && rm -f `wk_list`)
+    fi
+    EX=`ex_list`
+    if [ -n "$EX" ]; then
+        if [ ! -f "$BACKUP/EXAMPLES.tar" ]; then
+            show "Saving sample prints" "to the USB stick" "DO NOT POWER OFF"
+            mkdir -p "$BACKUP"
+            EX_MB=`(cd / && du -sk $EX) | awk '{s += $1} END {print int(s / 1024)}'`
+            [ "$(mb_free "$STICK")" -ge $(( EX_MB + 10 )) ] || fail "USB stick too full" "samples need $EX_MB MB"
+            tar -cf "$BACKUP/EXAMPLES.tmp" -C / $EX && sync && \
+                [ "`tar -cf - -C / $EX | md5sum`" = "`md5sum < "$BACKUP/EXAMPLES.tmp"`" ] \
+                || fail "backup failed" "(sample prints)"
+            mv "$BACKUP/EXAMPLES.tmp" "$BACKUP/EXAMPLES.tar"
+            md5sum < "$BACKUP/EXAMPLES.tar" > "$BACKUP/EXAMPLES.tar.md5"
+            [ -f "$BACKUP/FIRMWARE" ] || echo "$FW" > "$BACKUP/FIRMWARE"
+            sync
+        fi
+        UNDO=1
+        (cd / && rm -rf $EX)
     fi
     UNDO=1
     stick_still_in
