@@ -487,8 +487,15 @@ stages 1-5 done on the dev printer):
       sudo rule). **Dev DP200 11-24 (our kernel): `reboot` over SSH and
       Moonraker's reboot request (Mainsail's menu) both rebooted it**;
       `init.mainline` now names itself `init`, and Moonraker no longer
-      reports a container. Left: Shutdown (power off), the menu click in
-      Mainsail itself, and the stick install on stock 3.2.
+      reports a container. **Shutdown (Moonraker's request) halted it,
+      then the kernel's hang watchdog reset the board ~30 s later** (no
+      one touched it; serial log 11-24): the debug `hang_wdt` in the
+      dev printer's mtd0 kernel, whose own comment says so. Stock 3.2
+      (the stick release) has no such watchdog. For the end-goal kernel:
+      switch the hang watchdog off on power-off/halt (a sys-off handler
+      in `timer-mv61x0.c`), or leave `hang_wdt` out of the release
+      kernel's bootargs (a new mtd0 write: owner OK). Left: Shutdown
+      on stock 3.2 (work printer), the menu click in Mainsail itself.
     - The planned 1X install that boots our system directly (stage 7)
       keeps this path: only the helper behind the request file changes.
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
