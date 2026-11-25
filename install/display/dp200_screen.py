@@ -505,6 +505,18 @@ def get(path):
     with urllib.request.urlopen(API + path, timeout=5) as r:
         return json.load(r)['result']
 
+# Worker threads wake the main loop's select() through this pipe when a
+# command ends, so its result is fetched and drawn at once.
+_WAKE_R, _WAKE_W = os.pipe()
+os.set_blocking(_WAKE_R, False)
+os.set_blocking(_WAKE_W, False)
+
+def wake():
+    try:
+        os.write(_WAKE_W, b'.')
+    except OSError:
+        pass
+
 def post(path, body=None):
     data = json.dumps(body or {}).encode()
     req = urllib.request.Request(API + path, data=data, method='POST',
@@ -904,6 +916,16 @@ class UI:
             req = {'script': action[1], 'label': label, 'after': after, 't0': time.time(),
                    'done': False, 'idle_since': None}
             self._bg(label, lambda: self.gcode_then(req), req)
+            if self.req is req and action[1].startswith('TESTZ Z=') and self.st:
+                # show the height just sent at once (owner 11-24: 1.5-2 s
+                # until the poll was too slow); Klipper's value replaces it
+                # with the next status poll
+                mp = self.st.get('manual_probe') or {}
+                if mp.get('is_active') and mp.get('z_position') is not None:
+                    try:
+                        mp['z_position'] = round(mp['z_position'] + float(action[1][8:]), 3)
+                    except ValueError:
+                        pass
             if after == 'fil' and self.req is req:     # started (not refused as busy)
                 self.fil_job = req
                 self.screen = 'fil_run'
@@ -1057,6 +1079,7 @@ class UI:
             finally:
                 if self.busy_tok is tok:               # not released and reused meanwhile
                     self.busy, self.busy_tok, self.req = None, None, None
+                wake()                                  # the main loop polls now
         threading.Thread(target=work, daemon=True).start()
 
     def gcode_then(self, req):
@@ -3618,7 +3641,12 @@ def main():
             last_key = key
         timeout = 0.05 if ui.press or ui.key_down is not None or ui.key_off_at else \
             max(0.0, min(next_poll - time.monotonic(), 0.1 if pkey.m is not None else 0.5))
-        select.select([touch.fd], [], [], timeout)
+        r, _, _ = select.select([touch.fd, _WAKE_R], [], [], timeout)
+        if _WAKE_R in r:
+            try:
+                os.read(_WAKE_R, 512)
+            except OSError:
+                pass
 
 if __name__ == '__main__':
     main()
