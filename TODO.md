@@ -431,9 +431,10 @@ stages 1-5 done on the dev printer):
     IDs refused), the sample prints moved to the stick, and the motor
     current rule that lands on the stock counts. Its release notes must
     state the model support (v0.1.0's notes were corrected 11-24: no
-    DP201). **Test payload `cfc1205f` built 11-24 and on the USB
+    DP201). **Test payload `42af930a` built 11-24 and on the USB
     stick** (`_update_rodin_KlipperInstall`, remover in
-    `_KlipperRemove`; build `19f2541`; release folder and `SHA256SUMS`
+    `_KlipperRemove`; build `7d3a6b9`, with the screen fixes of the
+    dev DP200 tests; first `cfc1205f`, build `19f2541`; release folder and `SHA256SUMS`
     in `kernel/out/release/v0.1.2` on the PC). Made on the PC with
     `tools/payload_repack.py` from v0.1.1's audited payload
     (`32ec81c0`, the dev printer has no shell now): the same Debian
