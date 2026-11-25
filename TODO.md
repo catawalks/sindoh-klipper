@@ -518,8 +518,18 @@ stages 1-5 done on the dev printer):
       framebuffer (box stays without a repaint, gone with one), then the
       real panel: the new app installed (old one kept as
       `dp200_screen.py.before_repaint`), a box drawn on `/dev/fb0` was
-      gone after 49.6 s (the 60 s repaint). **Left:** a real cancel on
-      the work printer (clears within ~5 s in the app's first minute).
+      gone after 49.6 s (the 60 s repaint). **Work printer 11-25
+      (`0be1aace`): a cancel returned to the screen app, but the
+      "Cancelled" box flashed back every few seconds** until the
+      installer ended tinydebug at 20 s (it redraws its window). **Fixed
+      in `6239434`:** the screen app writes `/run/dp200/screen.drawn`
+      after its first frame; installer and remover end tinydebug as soon
+      as it is there (20 s at most) and request a full repaint
+      (`/run/dp200/screen.repaint`). Dev DP200: marker 6 s after the
+      restart, a foreign box gone 0.62 s after the request. Payload
+      `9b781a1f` (build `6239434`) and new `.she` files in the release
+      folder; `0be1aace` and its `.she` files kept in `old_0be1aace/`.
+      **Left:** a cancel on the work printer with them.
     - The dev printer answers on WiFi, 10.10.0.21 (Ethernet .147 is
       down), with SSH since 11-24 (item 50).
 50. **Dev DP200 SSH** (owner 11-24): built (`rc.dp200` start_ssh,

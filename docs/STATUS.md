@@ -26,10 +26,10 @@ becomes the full kernel-swap test machine.
   pre-release** (payload `0ee46f50`, fork 9b174ab). v0.1.1 (SD/USB
   G-code storage) passed on the work printer on 11-24 but is not
   released on its own (owner): it goes into **v0.1.2**, whose test
-  payload is now `0be1aace` (build `0e557d4`, 11-25: the screen's full
-  repaints; installer and remover that free `/klipper` themselves) in the
-  release folder on the PC; the stick at the work site still has
-  `e5a4dd83` (build `8c4245c`). Not installed yet. Draft notes: `kernel/out/release/v0.1.2/release_notes_DRAFT.md`
+  payload is now `9b781a1f` (build `6239434`, 11-25: the screen's full
+  repaints and the cancel hand-over; installer and remover that free
+  `/klipper` themselves) in the release folder on the PC. The work
+  printer runs the one before, `0be1aace` (build `0e557d4`). Draft notes: `kernel/out/release/v0.1.2/release_notes_DRAFT.md`
   on the PC (TODO 49).
 - **Repositories:** split on 2026-11-20 (this one, sindoh-kernel,
   sindoh); see the top README.

@@ -7,6 +7,11 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-25
 
+- **"Cancelled" box flashing after a cancel** (work printer): the stock
+  message window redraws itself until it is ended. The screen app now
+  marks its first frame, and the installer and remover end the message
+  then and request a full repaint (`6239434`; payload `9b781a1f`).
+
 - **Work printer upgraded to the v0.1.2 test payload `0be1aace`** (build
   `0e557d4`) with the SD storage card in: the new release step stopped
   `dp200-powerkey.sh`, the only thing holding `/klipper` (its log is in

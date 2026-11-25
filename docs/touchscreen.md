@@ -38,7 +38,10 @@ the choice was made (KlipperScreen and the other options) is in
 - A redraw writes only the pixels that changed. So that whatever another
   program drew on the panel goes away (the installer's messages), the
   whole screen is written again at every touch, every 5 s in the app's
-  first minute and every 60 s after that (2026-11-25).
+  first minute and every 60 s after that (2026-11-25). After a cancelled
+  stick install the app writes `/run/dp200/screen.drawn` once it has
+  drawn; the installer then ends its own message window and writes
+  `/run/dp200/screen.repaint`, and the app repaints at once.
 - Before a print it asks whether the bed is empty (Z homes upward).
 - After the timeout without a touch the image goes black, and the first
   tap only wakes it. The backlight itself cannot be switched off.
