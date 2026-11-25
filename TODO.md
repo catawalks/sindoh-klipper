@@ -510,9 +510,12 @@ stages 1-5 done on the dev printer):
       Klipper home page.** The screen app writes only the pixels that
       changed since its own last frame. **Fixed in `0e557d4`:** full
       repaints at every touch, every 5 s in the app's first minute,
-      every 60 s after that. Checked: syntax only (no PIL on the PC,
-      both printers off). **Left:** see a cancel clear within ~5 s on
-      a printer.
+      every 60 s after that. **Tested 11-25 on the dev DP200:** a fake
+      framebuffer (box stays without a repaint, gone with one), then the
+      real panel: the new app installed (old one kept as
+      `dp200_screen.py.before_repaint`), a box drawn on `/dev/fb0` was
+      gone after 49.6 s (the 60 s repaint). **Left:** a real cancel on
+      the work printer (clears within ~5 s in the app's first minute).
     - The dev printer answers on WiFi, 10.10.0.21 (Ethernet .147 is
       down), with SSH since 11-24 (item 50).
 50. **Dev DP200 SSH** (owner 11-24): built (`rc.dp200` start_ssh,
