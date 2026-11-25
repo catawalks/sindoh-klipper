@@ -431,10 +431,11 @@ stages 1-5 done on the dev printer):
     IDs refused), the sample prints moved to the stick, and the motor
     current rule that lands on the stock counts. Its release notes must
     state the model support (v0.1.0's notes were corrected 11-24: no
-    DP201). **Test payload `42af930a` built 11-24 and on the USB
+    DP201). **Test payload `e5a4dd83` built 11-24 and on the USB
     stick** (`_update_rodin_KlipperInstall`, remover in
-    `_KlipperRemove`; build `7d3a6b9`, with the screen fixes of the
-    dev DP200 tests; first `cfc1205f`, build `19f2541`; release folder and `SHA256SUMS`
+    `_KlipperRemove`; build `8c4245c`, with the screen fixes of the
+    dev DP200 tests incl. the STOP hold; before: `42af930a` / `7d3a6b9`,
+    `cfc1205f` / `19f2541`; release folder and `SHA256SUMS`
     in `kernel/out/release/v0.1.2` on the PC). Made on the PC with
     `tools/payload_repack.py` from v0.1.1's audited payload
     (`32ec81c0`, the dev printer has no shell now): the same Debian
@@ -451,8 +452,11 @@ stages 1-5 done on the dev printer):
       with this printer's 2.53-2.63; a first run gave 0.85 with
       filament stuck under the nozzle), `PROBE_ACCURACY` range 0.042
       mm. The screen's paper test fixed on the way (double presses,
-      late Z). Left: the Z homing off a pressed switch, and
-      `PRINT_START` with its step list (the nozzle heats over the bin
+      late Z). Z homing with the switch pressed (bed at Z 1.0): moved
+      off and homed. STOP held during a CANCEL did not fire (fixed in
+      `8c4245c`, simulated only: the owner to hold STOP once on a
+      printer). Left: `PRINT_START` with its step list (11-24: cancelled
+      at the bed heat, step 2, for the late hour) (the nozzle heats over the bin
       before the purge). The work printer's own edit (Z `position_min`
       -5) is the new shipped value. The new firmware can replace
       v0.1.0's in the payload after a print on it.
