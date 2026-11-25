@@ -37,8 +37,8 @@ Dev printer:
    time; the screen log shows "EMERGENCY STOP (screen)".
    **Work printer 11-25 (`0be1aace`): a real hold during a CANCEL
    ("Running: ...") stopped it** (owner), the exact case that failed on
-   the dev printer on 11-24. Left: a hold while idle (low risk: the
-   simple case).
+   the dev printer on 11-24, and a hold while idle. **Done**: move to
+   the changelog at the next cleanup.
 10. **PRINT_START to the end and a short print** on the new firmware
    (`pause_test_box_20mm.gcode`; 11-24 cancelled at the bed heat for the
    late hour). Then the new firmware can go into the payload (item 49).
