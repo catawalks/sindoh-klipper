@@ -665,6 +665,7 @@ class UI:
         self.key_estop = False         # 1X: that pulse sent the emergency stop
         self.power_at = 0.0            # when a reboot/power-off was requested
         self.last_touch = time.time()
+        self.last_down = 0.0
         self.ip = my_ip()
         self.settings = load_settings()          # e.g. {'timeout': 600}
         # network pages: port info (refreshed in the background), IP settings draft
@@ -1859,11 +1860,17 @@ class UI:
         self.last_touch = time.time()
         if kind == 'down':
             self.press = (u, v, time.time())
+            self.last_down = time.time()
         elif kind == 'up' and self.press:
             a0 = self.hit(self.press[0], self.press[1])
             a1 = self.hit(u, v)
             self.press = None
             if a0 is not None and a0 == a1 and a0[0] != 'estop':
+                if a0[0] == 'gcode':
+                    # (dev DP200 11-24: three TESTZ reached Klipper for what
+                    # looked like two presses; this shows each press)
+                    log('button: %s (held %.2f s)' % (a0[1].replace('\n', ' | ')[:60],
+                                                       time.time() - self.last_down))
                 if self.confirm and a0[0] not in ('cancel',):
                     self.confirm = None
                 self.run(a0)
@@ -2836,10 +2843,12 @@ class UI:
         s = 'Z %.3f' % z if z is not None else 'Z ?'
         f = font(46)
         d.text(((PW - d.textlength(s, font=f)) // 2, 278), s, font=f, fill=C_NOZ)
-        steps = [('-0.5', 'closer'), ('-0.1', 'closer'), ('-0.025', 'closer'),
-                 ('+0.025', 'further'), ('+0.1', 'further'), ('+0.5', 'further')]
-        self.grid(d, [(v, ('gcode', 'TESTZ Z=%s' % v, 'Bed ' + v), C_BTN, 26, sub) for v, sub in steps],
-                  top=346, rows_h=72, cols=3)
+        # (owner 11-24) the same step up and down sit above each other:
+        # further on top, closer below, biggest step on the left
+        steps = [('+1.0', 'further'), ('+0.5', 'further'), ('+0.1', 'further'), ('+0.025', 'further'),
+                 ('-1.0', 'closer'), ('-0.5', 'closer'), ('-0.1', 'closer'), ('-0.025', 'closer')]
+        self.grid(d, [(v, ('gcode', 'TESTZ Z=%s' % v, 'Bed ' + v), C_BTN, 24, sub) for v, sub in steps],
+                  top=346, rows_h=72, cols=4)
         self.button(d, (30, 530, 230, 610), 'ACCEPT', ('cal_accept',), C_ON, 28)
         self.button(d, (250, 530, PW - 30, 610), 'ABORT', ('cal_abort',), C_RED, 28)
 
@@ -3516,6 +3525,7 @@ def main():
     last_key = None
     key_was = False
     wall_was = time.time()
+    was_busy = None
     while True:
         now = time.time()
         if now < wall_was - 2:
@@ -3543,6 +3553,9 @@ def main():
             ui.screen = 'home'
             ui.flash('Power-off/reboot did not happen (dp200-powerkey not running?)', 15)
             shutil.rmtree(SHUT_DIR, ignore_errors=True)   # else a later rc.dp200 stop shows them
+        if was_busy and not ui.busy:
+            next_poll = 0.0             # a command just finished: show its result now
+        was_busy = ui.busy
         polled = time.monotonic() >= next_poll
         if polled:
             try:
