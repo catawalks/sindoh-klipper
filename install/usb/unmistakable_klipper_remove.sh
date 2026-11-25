@@ -91,7 +91,12 @@ cancelled() {
     if [ -n "$SCREEN_ROOT" ]; then
         # feedback at once: the screen app takes several seconds to start
         show "Cancelled" "Starting the" "Klipper screen..."
-        ( sleep 20; killall tinydebug ) >/dev/null 2>&1 &
+        # the same hand-over as in unmistakable_klipper_install.sh
+        R=$SCREEN_ROOT/run/dp200
+        rm -f $R/screen.drawn
+        ( i=0
+          while [ ! -f $R/screen.drawn ] && [ $i -lt 20 ]; do sleep 1; i=$((i + 1)); done
+          killall tinydebug; sleep 1; : > $R/screen.repaint ) >/dev/null 2>&1 &
         chroot $SCREEN_ROOT /usr/bin/env -i \
             PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/root \
             /etc/dp200/rc.dp200 restart-screen

@@ -178,7 +178,15 @@ screen_back() {
     if [ -n "$SCREEN_ROOT" ]; then
         # feedback at once: the screen app takes several seconds to start
         show "Cancelled" "Starting the" "Klipper screen..."
-        ( sleep 20; killall tinydebug ) >/dev/null 2>&1 &
+        # End this message (tinydebug keeps redrawing it over the Klipper
+        # screen) as soon as the screen app has drawn its first frame, then
+        # ask it for a full repaint (dp200_screen.py DRAWN / REPAINT_REQ;
+        # an app without them: after 20 s, as before). 2026-11-25.
+        R=$SCREEN_ROOT/run/dp200
+        rm -f $R/screen.drawn
+        ( i=0
+          while [ ! -f $R/screen.drawn ] && [ $i -lt 20 ]; do sleep 1; i=$((i + 1)); done
+          killall tinydebug; sleep 1; : > $R/screen.repaint ) >/dev/null 2>&1 &
         chroot $SCREEN_ROOT /usr/bin/env -i \
             PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/root \
             /etc/dp200/rc.dp200 restart-screen

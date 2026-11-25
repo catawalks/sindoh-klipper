@@ -108,6 +108,14 @@ HW_CUT = 2.0                          # measured roughly: "2 s hold" switched it
 HOLD_WARN = 0.4                       # s held before the warning appears
 LONG_POWER = 5.0
 POWER_REQ = '/run/dp200/power'        # "reboot" / "poweroff" for dp200-powerkey.sh
+# Hand-over with the stick installer/remover after a cancel: their message
+# window (the stock tinydebug) keeps redrawing itself over this app until
+# it is ended. This app writes DRAWN after its first frame; the installer
+# then ends tinydebug and writes REPAINT_REQ, and this app writes the whole
+# frame again at once (2026-11-25, work printer: the "Cancelled" box
+# flashed back every few seconds for 20 s).
+DRAWN = '/run/dp200/screen.drawn'
+REPAINT_REQ = '/run/dp200/screen.repaint'
 # Shutdown/reboot progress: the stop scripts end this app first, so it draws
 # one frame per step beforehand (raw fb data, in RAM). rc.dp200 stop and the
 # init (dp200-powerkey.sh on stock) copy each frame to the panel as its step
@@ -3599,6 +3607,12 @@ def main():
     # then removes it), every 60 s after that, and at every touch.
     started = time.monotonic()
     next_full = started + 5
+    drawn = False
+    for p in (DRAWN, REPAINT_REQ):
+        try:
+            os.remove(p)
+        except OSError:
+            pass
     last_key = None
     key_was = False
     wall_was = time.time()
@@ -3676,12 +3690,25 @@ def main():
                ui.screen == 'bedlevel' and ui.lv['mode'] == 'running' and ui.st and
                ((ui.st.get('display_status') or {}).get('message'), round(ui.st['extruder']['temperature'])))
         full = time.monotonic() >= next_full or any(e[0] == 'down' for e in events)
+        if os.path.exists(REPAINT_REQ):
+            try:
+                os.remove(REPAINT_REQ)
+            except OSError:
+                pass
+            full = True
         if full:
             panel.repaint()
             next_full = time.monotonic() + (5 if time.monotonic() - started < 60 else 60)
         if full or events or ui.press or ui.key_down is not None or key != last_key:
             panel.show(ui.render())
             last_key = key
+            if not drawn:
+                drawn = True
+                try:
+                    with open(DRAWN, 'w') as f:
+                        f.write('%d\n' % os.getpid())
+                except OSError:
+                    pass
         timeout = 0.05 if ui.press or ui.key_down is not None or ui.key_off_at else \
             max(0.0, min(next_poll - time.monotonic(), 0.1 if pkey.m is not None else 0.5))
         r, _, _ = select.select([touch.fd, _WAKE_R], [], [], timeout)
