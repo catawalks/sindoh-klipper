@@ -7,6 +7,9 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-25
 
+- **STOP held during a CANCEL works on hardware** (work printer, owner,
+  `0be1aace`): the case that failed on the dev printer on 11-24.
+
 - **"Cancelled" box flashing after a cancel** (work printer): the stock
   message window redraws itself until it is ended. The screen app now
   marks its first frame, and the installer and remover end the message
