@@ -35,6 +35,9 @@ Dev printer:
    simulated only): once while idle (then FIRMWARE RESTART), once during
    a move or a CANCEL ("Running: ..."). It should fire after 1 s every
    time; the screen log shows "EMERGENCY STOP (screen)".
+   **Work printer 11-25 (`0be1aace`): a real hold stopped it** (owner).
+   Left: the hold during a CANCEL ("Running: ..."), the case that
+   failed on 11-24, if that was not the one tried.
 10. **PRINT_START to the end and a short print** on the new firmware
    (`pause_test_box_20mm.gcode`; 11-24 cancelled at the bed heat for the
    late hour). Then the new firmware can go into the payload (item 49).

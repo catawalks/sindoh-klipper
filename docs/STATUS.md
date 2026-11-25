@@ -123,8 +123,9 @@ power save is on** (the new default with our kernel, TODO 26) and X uses
   storage card in and mounted). The screen's INFO page shows the build;
   the G-code row shows the card's capacity and Mainsail lists the card's
   files. 56 MB free on the stock root (39 before: the sample prints are
-  now on the stick). Not yet exercised on v0.1.2: a print, the screen
-  repaint after a cancel, the new STOP hold.
+  now on the stick). The STOP hold on the screen stopped it (owner,
+  11-25), and a first print on this build was running the same day.
+  The cancel hand-over of `9b781a1f` is not on it yet.
 - v0.1.1 (11-24): G-code storage on a USB stick and on the SD card
   tested (upload, print, delete, emergency stop, firmware restart; both
   in: the card; neither: internal).
