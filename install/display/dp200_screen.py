@@ -666,6 +666,7 @@ class UI:
         self.power_at = 0.0            # when a reboot/power-off was requested
         self.last_touch = time.time()
         self.last_down = 0.0
+        self.last_up = None            # (u, v, time) of the last lift: bounce check
         self.ip = my_ip()
         self.settings = load_settings()          # e.g. {'timeout': 600}
         # network pages: port info (refreshed in the background), IP settings draft
@@ -1859,9 +1860,19 @@ class UI:
         kind, u, v = ev
         self.last_touch = time.time()
         if kind == 'down':
+            lu = self.last_up
+            if lu and time.time() - lu[2] < 0.1 and abs(u - lu[0]) < 40 and abs(v - lu[1]) < 40:
+                # a bounce: the panel sometimes reports one more instant
+                # touch at the same spot right after a lift, which ran the
+                # button twice (dev DP200 11-24, "held 0.00 s" in the log)
+                log('touch bounce ignored')
+                self.press = None
+                return
             self.press = (u, v, time.time())
             self.last_down = time.time()
-        elif kind == 'up' and self.press:
+        elif kind == 'up':
+            self.last_up = (u, v, time.time())
+        if kind == 'up' and self.press:
             a0 = self.hit(self.press[0], self.press[1])
             a1 = self.hit(u, v)
             self.press = None
@@ -3483,7 +3494,11 @@ def view_key(ui):
              round(st['extruder']['temperature'])) if ui.screen == 'fil_run' and ui.fil_job
             else None,
             (start_phase(st), (st.get('gcode_macro PRINT_START') or {}).get('step'))
-            if job_state(st) == 'starting' else None)
+            if job_state(st) == 'starting' else None,
+            # the paper test's height (dev DP200 11-24: without it the new Z
+            # showed only when something else changed, 6-30 s late)
+            (st.get('manual_probe') or {}).get('is_active'),
+            (st.get('manual_probe') or {}).get('z_position'))
 
 # ---------------------------------------------------------------------------
 def main():
