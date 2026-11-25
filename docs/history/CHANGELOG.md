@@ -7,6 +7,9 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-25
 
+- **First print on the v0.1.2 test build** (work printer, `0be1aace`):
+  finished successfully (owner).
+
 - **STOP held during a CANCEL works on hardware** (work printer, owner,
   `0be1aace`): the case that failed on the dev printer on 11-24. A hold
   while idle works too.
