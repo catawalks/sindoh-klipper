@@ -18,7 +18,8 @@ Dev printer:
    but have not seen an error yet. Also run `test_dp200_screen.py` on the
    printer.
 4. **Screen features never used on hardware:** the calibration wizards
-   (Z HEIGHT paper test, PROBE OFFSET, PID TUNE, SAVE Z OFFSET), WiFi ->
+   Z HEIGHT, PID TUNE and SAVE Z OFFSET (PROBE OFFSET works: 11-24, saved
+   2.618), WiFi ->
    SAVED (PREFER / FORGET). The custom MACROS page opens and lists the
    macros (owner, 11-16); adding an own macro and running one from it
    is not tried.
@@ -30,6 +31,17 @@ Dev printer:
 8. **Ethernet recovery after a switch outage:** `dp200-netd.sh` restarts
    udhcpc after 30 s without an address; never exercised (pull the cable
    or power the switch off).
+9. **STOP on the screen, held for real** (fixed 11-24 in `8c4245c`,
+   simulated only): once while idle (then FIRMWARE RESTART), once during
+   a move or a CANCEL ("Running: ..."). It should fire after 1 s every
+   time; the screen log shows "EMERGENCY STOP (screen)".
+10. **PRINT_START to the end and a short print** on the new firmware
+   (`pause_test_box_20mm.gcode`; 11-24 cancelled at the bed heat for the
+   late hour). Then the new firmware can go into the payload (item 49).
+11. **Phantom presses:** watch `/var/log/dp200_screen.log` for a
+   `button:` line with "held 0.00 s" that has no "touch bounce ignored"
+   next to it (11-24: one -0.5 the owner may or may not have pressed
+   twice). If one turns up, filter instant touches far from a lift too.
 
 Either printer:
 13. **Beeper:** mapped 11-18 from the stock app (docs/hardware_notes.md
@@ -460,9 +472,13 @@ stages 1-5 done on the dev printer):
       before the purge). The work printer's own edit (Z `position_min`
       -5) is the new shipped value. The new firmware can replace
       v0.1.0's in the payload after a print on it.
-    - Release notes (models, the firmware commit differing from the
-      host's) and the content audit of `cfc1205f`'s changed files
-      (all from the public repos).
+    - **Content audit of `e5a4dd83` against v0.1.1 done 11-24 night:**
+      24 members differ, all our public files; no networks, keys,
+      addresses or Sindoh/Marvell files (the two pattern hits are the
+      sudo rule's NOPASSWD and a `psk` variable in the screen's Wi-Fi
+      code). **Release notes drafted** (not published):
+      `kernel/out/release/v0.1.2/release_notes_DRAFT.md` on the PC; the
+      build, md5 and open issues are placeholders until the final build.
     - The dev printer answers on WiFi, 10.10.0.21 (Ethernet .147 is
       down), with SSH since 11-24 (item 50).
 50. **Dev DP200 SSH** (owner 11-24): built (`rc.dp200` start_ssh,
@@ -473,7 +489,9 @@ stages 1-5 done on the dev printer):
     no apt, so Debian 13's armel `dropbear-bin`, `libtomcrypt1` and
     `libtommath1` were copied in (checked against Debian's SHA256).
     `rc.dp200 restart` over SSH keeps the session; it starts again after
-    a reboot. Left: a payload build still passes the no-keys check.
+    a reboot. The payload repack (`tools/payload_repack.py`) refuses SSH
+    keys the same way as `make_payload.sh`; `e5a4dd83` passed. Left: a
+    `make_payload.sh` build on the card root, when one is next made.
 48. **Reboot and power off from Mainsail, every model** (owner 11-23:
     people will want to restart their printer remotely). Moonraker runs
     `sudo reboot` / `sudo poweroff` inside the Klipper root, which
@@ -500,6 +518,10 @@ stages 1-5 done on the dev printer):
       in `timer-mv61x0.c`), or leave `hang_wdt` out of the release
       kernel's bootargs (a new mtd0 write: owner OK). Left: Shutdown
       on stock 3.2 (work printer), the menu click in Mainsail itself.
+      The kernel fix is in sindoh-kernel `522c6c9` (a reboot notifier
+      stops the watchdog on halt and power-off): compiled only; build an
+      image on the build box, RAM-boot it and test Shutdown before any
+      mtd0 write (owner OK).
     - The planned 1X install that boots our system directly (stage 7)
       keeps this path: only the helper behind the request file changes.
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the

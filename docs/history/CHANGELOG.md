@@ -7,6 +7,12 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-24
 
+- **Night (owner asleep, no printer motion):** content audit of the
+  v0.1.2 test payload `e5a4dd83` (clean); release notes drafted on the PC
+  (not published); sindoh-kernel `522c6c9` stops the hang watchdog on
+  halt and power-off (compiled only); STATUS, touch screen and dev
+  testing docs brought up to date; 1X scripts set their own PATH
+  (`a626a73`); the 1X runs our stack again, started over SSH.
 - **STOP failed during a cancel** (dev DP200, owner; stopped with the
   power button): the panel reports short lifts during a long hold, and
   the new bounce check dropped each resumed hold, so the 1 s never
