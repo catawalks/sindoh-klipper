@@ -502,9 +502,13 @@ stages 1-5 done on the dev printer):
       refusal reported; card file kept); the stock BusyBox (1.20.2) has
       every applet used. New `.she` files in the release folder (payload
       unchanged): install 10,064 B, remove 4,272 B; the old ones in
-      `old_20261124/`. **Left:** copy them onto the stick and run the
-      upgrade again with the card in; afterwards check the log's
-      `busy:` lines (what held the mount).
+      `old_20261124/`. **Confirmed 11-25 on the work printer:** the
+      upgrade to `0be1aace` ran with the SD storage card in and mounted;
+      the log's one `busy:` line was `dp200-powerkey.sh` (stock side,
+      its output goes to `/klipper/var/log`), stopped with TERM; then
+      the install went through, and the card's G-code is in use again
+      after the reboot. That was the morning's "Storage card busy".
+      Still to try: the remover with storage in.
     - **Work printer 11-25: after a cancelled install (stick pulled),
       the installer's "Cancelled" box and a black block stayed over the
       Klipper home page.** The screen app writes only the pixels that

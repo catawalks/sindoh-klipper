@@ -7,6 +7,12 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-25
 
+- **Work printer upgraded to the v0.1.2 test payload `0be1aace`** (build
+  `0e557d4`) with the SD storage card in: the new release step stopped
+  `dp200-powerkey.sh`, the only thing holding `/klipper` (its log is in
+  `/klipper/var/log`), and the install finished; the card's G-code shows
+  in Mainsail and on the screen.
+
 - **Upgrade refused with a storage card in** (work printer, v0.1.2 test
   stick: "Storage card busy", nothing changed). The installer and remover
   now free the Klipper root themselves: stop what still uses it, unmount

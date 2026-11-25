@@ -116,13 +116,18 @@ power save is on** (the new default with our kernel, TODO 26) and X uses
 - **Not yet:** Wi-Fi cold boots (part D);
   the end-goal installer (stages 6-9).
 
-## Work printer, as of 2026-11-24
+## Work printer, as of 2026-11-25
 
-- Runs **v0.1.1, build `75734d4`** (the owner installed it from the stick
-  on 11-24, over v0.1.0 `3940525`): G-code storage on a USB stick and on
-  the SD card tested (upload, print, delete, emergency stop, firmware
-  restart; both in: the card; neither: internal). Next: the v0.1.2
-  test payload now on the stick (TODO 49).
+- Runs the **v0.1.2 test payload `0be1aace`, build `0e557d4`** (the owner
+  upgraded from the stick on 11-25, over v0.1.1 `75734d4`, with the SD
+  storage card in and mounted). The screen's INFO page shows the build;
+  the G-code row shows the card's capacity and Mainsail lists the card's
+  files. 56 MB free on the stock root (39 before: the sample prints are
+  now on the stick). Not yet exercised on v0.1.2: a print, the screen
+  repaint after a cancel, the new STOP hold.
+- v0.1.1 (11-24): G-code storage on a USB stick and on the SD card
+  tested (upload, print, delete, emergency stop, firmware restart; both
+  in: the card; neither: internal).
 
 ## Work printer, 2026-11-16 (older)
 
