@@ -7,6 +7,17 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-24
 
+- **Screen stuck on "waiting for Klipper"** (dev DP200, owner): Klipper
+  was ready, but the time sync set the clock back 95 min after the
+  screen started and its poll timer ran on the wall clock. Now on the
+  monotonic clock; a backward jump also resets the other timers.
+- **Dev DP200 back on the bench** (11-24 evening): SSH set up (Debian
+  13's dropbear-bin and its two libraries copied in: the NAND root has
+  no apt), `rc.dp200 restart` over SSH keeps the session. Firmware from
+  fork `b3b8d837` built in WSL (fm `76a5dc0b`, io `86e3328e`) runs:
+  Klipper ready, temperatures and end stops read. v0.1.2's configs,
+  macros and the reboot helper installed (backups in `/root/pre_v012`).
+  The SD card's "invalid bus width" flood was a card not fully seated.
 - **v0.1.2 test payload `cfc1205f`** (build `19f2541`) on the USB stick
   with its installer and remover; v0.1.1 (`32ec81c0`) kept on the PC in
   `kernel/out/release/v0.1.1`. Repacked on the PC from v0.1.1

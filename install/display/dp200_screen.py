@@ -3508,11 +3508,26 @@ def main():
     panel, touch, pkey = Panel(), Touch(), PowerKey()
     unblank()
     unblanked = time.time()
+    # The poll timer runs on the monotonic clock: the wall clock can jump
+    # (dev DP200 11-24: the time sync set it back 95 min after the screen
+    # started, and with a wall-clock timer it showed "waiting for Klipper"
+    # until the clock caught up).
     next_poll = 0.0
     last_key = None
     key_was = False
+    wall_was = time.time()
     while True:
         now = time.time()
+        if now < wall_was - 2:
+            # the wall clock went back: restart the timers kept in it
+            log('clock went back %.0f s' % (wall_was - now))
+            ui.last_touch = now
+            unblanked = now
+            for d in (ui.wf, ui.net, ui.shp, ui.bl, ui.con, ui.stk):
+                if isinstance(d.get('checked'), float):
+                    d['checked'] = 0.0
+            ui.cmds_at = 0.0
+        wall_was = now
         btn = pkey.pressed()
         if btn != key_was:
             key_was = btn
@@ -3528,7 +3543,7 @@ def main():
             ui.screen = 'home'
             ui.flash('Power-off/reboot did not happen (dp200-powerkey not running?)', 15)
             shutil.rmtree(SHUT_DIR, ignore_errors=True)   # else a later rc.dp200 stop shows them
-        polled = now >= next_poll
+        polled = time.monotonic() >= next_poll
         if polled:
             try:
                 ui.st, ui.err = query(), None
@@ -3537,7 +3552,7 @@ def main():
                 ui.st, ui.err = None, err_text(e)
             busy = ui.st and (ui.st['print_stats']['state'] in ('printing', 'paused')
                               or ui.st['extruder']['target'] or ui.st['heater_bed']['target'])
-            next_poll = now + (REFRESH_BUSY if busy or ui.busy else
+            next_poll = time.monotonic() + (REFRESH_BUSY if busy or ui.busy else
                                5.0 if ui.dimmed() else REFRESH_IDLE)
         events = touch.poll()
         woke = ui.dimmed() and any(e[0] == 'down' for e in events)
@@ -3574,7 +3589,7 @@ def main():
             panel.show(ui.render())
             last_key = key
         timeout = 0.05 if ui.press or ui.key_down is not None or ui.key_off_at else \
-            max(0.0, min(next_poll - time.time(), 0.1 if pkey.m is not None else 0.5))
+            max(0.0, min(next_poll - time.monotonic(), 0.1 if pkey.m is not None else 0.5))
         select.select([touch.fd], [], [], timeout)
 
 if __name__ == '__main__':
