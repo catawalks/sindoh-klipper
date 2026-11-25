@@ -341,6 +341,13 @@ class Panel:
         self.prev = None
         self.pages = fb_pages(path)
 
+    def repaint(self):
+        """Write the whole frame at the next show(). show() writes only what
+        changed since its own last frame, so pixels another program drew
+        stay (work printer 2026-11-25: the installer's "Cancelled" box and
+        a black block stayed over the home page after a cancelled install)."""
+        self.prev = None
+
     def show(self, im):
         if self.prev is None:
             box = (0, 0, PW, PH)
@@ -3587,6 +3594,11 @@ def main():
     # started, and with a wall-clock timer it showed "waiting for Klipper"
     # until the clock caught up).
     next_poll = 0.0
+    # Full repaints (Panel.repaint): every 5 s in the first minute (the
+    # installer's cancel shows its message for 20 s while this app starts,
+    # then removes it), every 60 s after that, and at every touch.
+    started = time.monotonic()
+    next_full = started + 5
     last_key = None
     key_was = False
     wall_was = time.time()
@@ -3663,7 +3675,11 @@ def main():
                ui.screen == 'key_off' and math.ceil(ui.key_off_at - time.time()), ui.lv['rev'],
                ui.screen == 'bedlevel' and ui.lv['mode'] == 'running' and ui.st and
                ((ui.st.get('display_status') or {}).get('message'), round(ui.st['extruder']['temperature'])))
-        if events or ui.press or ui.key_down is not None or key != last_key:
+        full = time.monotonic() >= next_full or any(e[0] == 'down' for e in events)
+        if full:
+            panel.repaint()
+            next_full = time.monotonic() + (5 if time.monotonic() - started < 60 else 60)
+        if full or events or ui.press or ui.key_down is not None or key != last_key:
             panel.show(ui.render())
             last_key = key
         timeout = 0.05 if ui.press or ui.key_down is not None or ui.key_off_at else \

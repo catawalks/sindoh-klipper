@@ -35,6 +35,10 @@ the choice was made (KlipperScreen and the other options) is in
   it was held.
 - The status is fetched again as soon as a command ends, and the paper
   test's height is part of what triggers a redraw.
+- A redraw writes only the pixels that changed. So that whatever another
+  program drew on the panel goes away (the installer's messages), the
+  whole screen is written again at every touch, every 5 s in the app's
+  first minute and every 60 s after that (2026-11-25).
 - Before a print it asks whether the bed is empty (Z homes upward).
 - After the timeout without a touch the image goes black, and the first
   tap only wakes it. The backlight itself cannot be switched off.
