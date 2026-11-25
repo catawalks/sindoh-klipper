@@ -24,7 +24,17 @@ the choice was made (KlipperScreen and the other options) is in
 
 - Anything that moves or heats asks for confirmation first.
 - **STOP** is at the bottom right of every page: an emergency stop,
-  held for 1 second.
+  held for 1 second. It works in every state, also while another
+  command runs ("Running: ..."); the request goes out from its own
+  thread. The panel can report a short lift during a long hold: a
+  finger back on STOP within 0.3 s continues the same hold (2026-11-24:
+  without this, STOP never fired during a CANCEL).
+- A touch that starts within 0.1 s of a lift, at the same spot, is a
+  panel bounce and is ignored (it ran buttons twice). Every G-code
+  button press is written to `/var/log/dp200_screen.log` with how long
+  it was held.
+- The status is fetched again as soon as a command ends, and the paper
+  test's height is part of what triggers a redraw.
 - Before a print it asks whether the bed is empty (Z homes upward).
 - After the timeout without a touch the image goes black, and the first
   tap only wakes it. The backlight itself cannot be switched off.
@@ -45,7 +55,7 @@ the choice was made (KlipperScreen and the other options) is in
 | Preheat | Material presets and COOL DOWN. |
 | Move | HOME, JOG (X, Y, Z by 0.1 / 1 / 10 / 50 mm; the config macro `JOG`), LOWER BED, BED FORWARD, CLEAN (nozzle), EMPTY BIN, BED LEVEL, CALIBRATE (Z HEIGHT and PROBE OFFSET paper tests, PID TUNE, INPUT SHAPING), MOTORS OFF. |
 | Bed level | PROBE the bed and show how far to turn each screw, in eighths of a turn. |
-| Calibrate | Z HEIGHT and PROBE OFFSET (the paper test, with SAVE / DISCARD), PID TUNE (nozzle or bed), INPUT SHAPING (with a USB accelerometer: [input_shaping.md](input_shaping.md)), SAVE Z OFFSET. |
+| Calibrate | Z HEIGHT and PROBE OFFSET (the paper test: +1.0 / +0.5 / +0.1 / +0.025 over -1.0 / -0.5 / -0.1 / -0.025, the new height shown as soon as it is sent; ACCEPT, then SAVE / DISCARD), PID TUNE (nozzle or bed), INPUT SHAPING (with a USB accelerometer: [input_shaping.md](input_shaping.md)), SAVE Z OFFSET. |
 | Dryer | Use the heated bed as a filament dryer: START, STOP DRYING. |
 | System | KLIPPER (restart), NETWORK, DISPLAY, INFO, UPDATE, POWER. |
 | Network | Addresses of both ports, Wi-Fi scan and saved networks (PREFER, FORGET), an on-screen keyboard for the password, DHCP or STATIC with a number pad. |
@@ -144,7 +154,7 @@ runs underneath:
   button (`KEY_CANCEL_1X`), then powers off. If a print or a move is
   running, the pulse first sends the emergency stop, so the button
   stays the e-stop it is on stock; CANCEL then leaves Klipper stopped
-  (FIRMWARE RESTART). The on-screen STOP (top right, hold 1 s) is the
+  (FIRMWARE RESTART). The on-screen STOP (bottom right, hold 1 s) is the
   other e-stop. `x1_web.sh` freezes
   Sindoh's own `/app/powerkeyd` (it would shut down at once) while our
   programs run and lets it go on "stop"; if the screen app is not

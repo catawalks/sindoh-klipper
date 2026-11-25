@@ -33,7 +33,7 @@ are fetched this way (`tools/serial_cmd.ps1 -cmd '...' -timeout N`).
 Config files and G-code go through Moonraker's upload
 (`/server/files/upload`, `root=config` or `root=gcodes`).
 
-## SSH into the dev printer (2026-11-24, not set up on it yet)
+## SSH into the dev printer (running since 2026-11-24)
 
 `rc.dp200` starts dropbear on **port 2222** (key login only, no
 passwords) when `/root/.ssh/authorized_keys` exists in the Debian root;
@@ -50,8 +50,18 @@ and never shipped: `runtime.exclude` drops it and `/root`, and
   `dev_ssh.pub`, `dropbear-bin`, then starts it and prints the host key
   fingerprint). New card builds get `dropbear-bin` from
   `build_rootfs.sh` / `rootfs_inside.sh`.
-- Connect: `ssh -i D:/DP200/backup/keys/sindoh_dp200_ecdsa -p 2222 root@<address>`
-  (the key pair stays outside the repositories).
+- **A root without apt** (the dev printer's NAND root, 11-24): copy in
+  Debian's armel `dropbear-bin` (`/usr/sbin/dropbear`,
+  `/usr/bin/dropbearkey`) and its libraries `libtomcrypt1` and
+  `libtommath1` (`/usr/lib/arm-linux-gnueabi/`, with the `.so.1` links),
+  checked against the SHA256 on packages.debian.org, then run the setup
+  script with `wget` defined as `busybox wget` (the root has no wget).
+  `kernel/out/deploy/usb/t/dbsetup.sh` and `dblibs.sh` on the PC did it.
+- Connect: `ssh -i D:/DP200/backup/keys/sindoh_dp200_ecdsa -p 2222 -o UserKnownHostsFile=D:/DP200/backup/keys/known_hosts_dp200 root@10.10.0.21`
+  (the key pair stays outside the repositories). `rc.dp200 restart`
+  typed over SSH runs to the end: the stop leaves the running session.
+- With SSH, `tools/*.sh` jobs and file copies go over `ssh ... 'cat > FILE'`
+  instead of the serial console and the PC's HTTP server.
 - It needs the network up. The serial console stays the way in for boot
   problems, kernel tests and anything before `rc.dp200 start`.
 - Undo: delete `/root/.ssh/authorized_keys` and kill

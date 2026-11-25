@@ -1,4 +1,4 @@
-# Status (overwrite in place; last updated 2026-11-23)
+# Status (overwrite in place; last updated 2026-11-25)
 
 The project: Klipper on Sindoh 3DWOX printers, on the printer's own SoC.
 Two DP200 setups exist, and they are different on purpose; a third
@@ -12,7 +12,7 @@ machine, the owner's 1X, is being ported (its own section below).
 | Kernel | **Our mainline 6.18.59**, in mtd0, two CPUs | **Stock vendor 3.2** |
 | Root | Our Debian root, UBIFS in mtd6 (`ubi0:filesystem`) | Stock root + our runtime in `/klipper` (USB stick install) |
 | Installed by | Hand, over serial | The USB stick (`docs/usb_installer.md`) |
-| Reach | Serial COM3 on the dev PC; Ethernet 10.10.0.147; Moonraker :7125 | No link from the dev PC; the owner carries the stick and logs |
+| Reach | SSH port 2222 and Moonraker :7125 on Wi-Fi 10.10.0.21 (Ethernet .147 is down); serial only when it is at the desk | No link from the dev PC; the owner carries the stick and logs |
 
 **The USB stick carries userspace only** (Klipper, Moonraker, Mainsail, the
 screen app, macros, UPC firmware). It never carries a kernel. Kernel work
@@ -23,19 +23,40 @@ becomes the full kernel-swap test machine.
 ## Since 2026-11-18 (short)
 
 - **Release:** the stick install is public as **v0.1.0, a beta
-  pre-release** (payload `0ee46f50`, fork 9b174ab). A v0.1.1 test build
-  with the SD/USB storage option is on the work printer's stick, not
-  installed and not public; the owner tests it on the work printer.
+  pre-release** (payload `0ee46f50`, fork 9b174ab). v0.1.1 (SD/USB
+  G-code storage) passed on the work printer on 11-24 but is not
+  released on its own (owner): it goes into **v0.1.2**, whose test
+  payload `e5a4dd83` (build `8c4245c`) is on the USB stick, audited, not
+  installed yet. Draft notes: `kernel/out/release/v0.1.2/release_notes_DRAFT.md`
+  on the PC (TODO 49).
 - **Repositories:** split on 2026-11-20 (this one, sindoh-kernel,
   sindoh); see the top README.
 - **A third machine, the owner's 3DWOX 1X:** see "1X" below.
-- **Fork pin:** `klipper/FORK` names the commit (e6beabb6 since
-  11-24: f97fa268 of 11-22 merged with upstream Klipper v0.14.0, docs
-  and one unused include only; tag `v0.14.0-sindoh-1`). The DP200 firmware built from the 1X-capable fork compiles
-  but has not been run on a DP200; both DP200s still run the builds
-  named below.
-- The dev printer's serial cable is on the 1X; the dev printer is on the
-  network only.
+- **Fork pin:** `klipper/FORK` = `b3b8d837` (tag `v0.14.0-sindoh-1` +
+  `sindoh_sound` + a README link): upstream Klipper v0.14.0 merged. Its
+  DP200 firmware (fm `76a5dc0b`, io `86e3328e`, built in WSL with
+  `tools/wsl_fw_build.sh`) runs on the dev printer since 11-24; the
+  v0.1.2 payload still carries v0.1.0's firmware.
+- Only one printer fits at the owner's desk: the serial cable is on the
+  1X; the dev DP200 is reached over SSH.
+
+## Dev printer, 2026-11-24 evening (newest; the sections below are older)
+
+- **Software:** firmware from fork `b3b8d837` (above), v0.1.2's configs,
+  macros and model files (`dp200_model.cfg` = DP200), the screen app of
+  `8c4245c`, the reboot helper and sudo rule; old files in
+  `/root/pre_v012/` on the printer, the firmware before as
+  `/opt/dp200/{fm,io}.bin.before_b3b8`.
+- **SSH:** dropbear on port 2222, key login
+  (`D:\DP200\backup\keys\sindoh_dp200_ecdsa`), starts at every boot;
+  Debian 13's armel `dropbear-bin` with its two libraries copied in (the
+  NAND root has no apt).
+- **Calibration:** probe `z_offset` 2.618 (11-24; PROBE_ACCURACY range
+  0.042 mm).
+- **Tested 11-24 (owner present):** homing with the 2 mm drop and with
+  the Z switch pressed, BED FORWARD, the screen's probe offset, reboot
+  from Mainsail. Shutdown resets after 30 s (the debug `hang_wdt=30`
+  below; TODO 48). The 4 GB card had to be reseated (it read blank).
 
 ## Dev printer back on our system since 2026-11-17 night
 
@@ -93,7 +114,15 @@ power save is on** (the new default with our kernel, TODO 26) and X uses
 - **Not yet:** Wi-Fi cold boots (part D);
   the end-goal installer (stages 6-9).
 
-## Work printer, as of 2026-11-16
+## Work printer, as of 2026-11-24
+
+- Runs **v0.1.1, build `75734d4`** (the owner installed it from the stick
+  on 11-24, over v0.1.0 `3940525`): G-code storage on a USB stick and on
+  the SD card tested (upload, print, delete, emergency stop, firmware
+  restart; both in: the card; neither: internal). Next: the v0.1.2
+  test payload now on the stick (TODO 49).
+
+## Work printer, 2026-11-16 (older)
 
 - Runs the 11-15 payload on the stock 3.2 kernel (installed from the
   stick by the owner on 11-16):
@@ -114,13 +143,20 @@ power save is on** (the new default with our kernel, TODO 26) and X uses
 
 ## 1X (the owner's, stock firmware `ROD1X_200916_2`), as of 2026-11-22
 
+Since then (11-23/24): speed test passed at 197 mm/s and 2500 mm/s²
+(the config's `max_accel` now); the speaker plays (`sindoh_sound`); a
+time zone page; Moonraker's reboot request works; SSH from the PC
+through Sindoh's dropbear, started over serial (`D:\DP200\kernel\out\x1\rs.sh`,
+RAM only); the start scripts set their own PATH and run over SSH too.
+On 11-24 night it runs our stack (started over SSH), idle, not homed.
+
 - **How it runs:** everything of ours is on the SD card `1x-dev` and in
   RAM; nothing is written to the eMMC, and a reboot returns to stock.
   After a stock boot: mount the card, `x1_stage4.sh start printer.cfg`
   (stops Sindoh's motion program, loads our firmware on both cores),
   then `x1_web.sh start` (Moonraker, Mainsail on port 80, camera, our
   screen app, the power helper). Reach: serial console on the dev PC's
-  COM3, Ethernet 10.10.0.169.
+  COM3, Ethernet 10.10.0.169, SSH port 2222 once started.
 - **Port stage:** 6 of [1x_port_plan.md](1x_port_plan.md), nearly done.
   Works under Klipper: homing on all axes, both heaters (PID tuned),
   load, unload, nozzle wipe and bin routine copied from stock, bed
@@ -129,7 +165,7 @@ power save is on** (the new default with our kernel, TODO 26) and X uses
   including NETWORK (view), UPDATE and INFO.
 - **Config:** `klipper/config/x1/` (`printer.cfg`, `x1_printer.cfg`,
   `x1_macros.cfg`), the DP200's layout. Limits: 197 mm/s, `max_accel`
-  2500 (speed-tested at 2000), Z zero by paper test (`position_endstop`
+  2500 (speed-tested at 2500 on 11-24), Z zero by paper test (`position_endstop`
   2.100). X is the stock and slicer frame since 11-23 (0 at the bed's
   left edge, home on the left at negative X); before that it was
   mirrored.
