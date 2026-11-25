@@ -7,6 +7,13 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-24
 
+- **Dev DP200 tests (owner present)** on fork `b3b8d837`'s firmware and
+  v0.1.2's configs: G28 with the 2 mm drop, `BED_FORWARD`, probe offset
+  2.618 from the screen (a run with filament under the nozzle gave 0.85),
+  `PROBE_ACCURACY` range 0.042 mm, and reboot through our `reboot` and
+  through Moonraker's API; `init` naming fixed Moonraker's "container"
+  refusal. Screen paper test: ± pairs with 1.0, the height shown at once,
+  touch bounces ignored (they ran buttons twice).
 - **Screen stuck on "waiting for Klipper"** (dev DP200, owner): Klipper
   was ready, but the time sync set the clock back 95 min after the
   screen started and its poll timer ran on the wall clock. Now on the

@@ -53,9 +53,10 @@ Either printer:
       from Klipper's cycle_time for this block.
 16. **Homing clearance:** built 11-24 (owner: 2 mm):
     `_SINDOH_Z_CLEARANCE` lowers the bed 2 mm before X or Y homes (a
-    blind FORCE_MOVE when Z is not homed). To test on a DP200: G28 with
-    Z not homed and with Z homed, and with the bed at the bottom (the
-    motor stalls briefly). DP200 only; the 1X not yet.
+    blind FORCE_MOVE when Z is not homed). **Dev DP200 11-24 (owner):
+    the bed drops 2 mm before X homes** (G28 with Z not homed). Left:
+    G28 with Z homed and with the bed at the bottom (the motor stalls
+    briefly). DP200 only; the 1X not yet.
 
 1X, items 51 and up (get a fresh "bed empty" first; background in items 41 and 44):
 51. **First layer over the whole bed** (`x1_xy_scale_150mm.gcode`, the
@@ -441,25 +442,33 @@ stages 1-5 done on the dev printer):
     1X-only), new host files from the port commit and fork `b3b8d837`
     (klippy changes since v0.1.0 are new extras only). Not installed
     anywhere yet. Still before a release:
-    - `BED_FORWARD`, the new `LV_PROBE_CALIBRATE_SAVE`, the Z
-      homing that first moves off a pressed switch, and the
-      `PRINT_START` with its step list (11-23: the nozzle now heats
-      over the bin before the purge), on a DP200 (owner
-      present). The work printer's own edit (Z `position_min` -5) is
-      the new shipped value.
+    - **Dev DP200 11-24 (owner present), firmware from fork
+      `b3b8d837` (fm `76a5dc0b`, io `86e3328e`) and v0.1.2's configs:**
+      Klipper ready, temperatures and end stops read; G28 (bed-empty
+      question first) with the 2 mm drop; `BED_FORWARD`; the screen's
+      PROBE OFFSET and `LV_PROBE_CALIBRATE_SAVE` saved 2.618 (in line
+      with this printer's 2.53-2.63; a first run gave 0.85 with
+      filament stuck under the nozzle), `PROBE_ACCURACY` range 0.042
+      mm. The screen's paper test fixed on the way (double presses,
+      late Z). Left: the Z homing off a pressed switch, and
+      `PRINT_START` with its step list (the nozzle heats over the bin
+      before the purge). The work printer's own edit (Z `position_min`
+      -5) is the new shipped value. The new firmware can replace
+      v0.1.0's in the payload after a print on it.
     - Release notes (models, the firmware commit differing from the
       host's) and the content audit of `cfc1205f`'s changed files
       (all from the public repos).
     - The dev printer answers on WiFi, 10.10.0.21 (Ethernet .147 is
-      down); Moonraker only, no shell, while the serial cable is on
-      the 1X. Config and macro files can go there through Moonraker;
-      the screen app and firmware cannot.
+      down), with SSH since 11-24 (item 50).
 50. **Dev DP200 SSH** (owner 11-24): built (`rc.dp200` start_ssh,
     `dropbear-bin` in the root builds, `tools/dev_ssh_setup.sh`, key pair
-    in `D:\DP200\backup\keys\sindoh_dp200_ecdsa`), not run anywhere.
-    When the serial cable is back on the dev printer: run the setup
-    script, connect, check that `rc.dp200 restart` over SSH keeps the
-    session, and that a payload build still passes the no-keys check.
+    in `D:\DP200\backup\keys\sindoh_dp200_ecdsa`). **Running on the dev
+    DP200 since 11-24:** `ssh -i ...sindoh_dp200_ecdsa -p 2222
+    root@10.10.0.21` (known_hosts in the keys folder); its NAND root has
+    no apt, so Debian 13's armel `dropbear-bin`, `libtomcrypt1` and
+    `libtommath1` were copied in (checked against Debian's SHA256).
+    `rc.dp200 restart` over SSH keeps the session; it starts again after
+    a reboot. Left: a payload build still passes the no-keys check.
 48. **Reboot and power off from Mainsail, every model** (owner 11-23:
     people will want to restart their printer remotely). Moonraker runs
     `sudo reboot` / `sudo poweroff` inside the Klipper root, which
@@ -473,14 +482,12 @@ stages 1-5 done on the dev printer):
       (owner present): Shutdown from Mainsail and SHUT DOWN / REBOOT
       on the screen's POWER page (same helper; power off uses GPIO
       158 and has never run).
-    - DP200: the root builds install it (`build_rootfs.sh`,
-      `rootfs_inside.sh`), not run since. In the v0.1.2 test payload
-      (helper, the three links, the sudo rule); untried on a DP200.
-    - On our own kernel Moonraker refuses with "inside a container"
-      (confirmed on the dev printer 11-23: it reports "lxc", because
-      process 1 is called `init.mainline`). `init.mainline` now
-      renames itself to `init`; not on the printer yet (needs a
-      shell there: the serial cable is on the 1X).
+    - DP200: in the v0.1.2 test payload (helper, the three links, the
+      sudo rule). **Dev DP200 11-24 (our kernel): `reboot` over SSH and
+      Moonraker's reboot request (Mainsail's menu) both rebooted it**;
+      `init.mainline` now names itself `init`, and Moonraker no longer
+      reports a container. Left: Shutdown (power off), the menu click in
+      Mainsail itself, and the stick install on stock 3.2.
     - The planned 1X install that boots our system directly (stage 7)
       keeps this path: only the helper behind the request file changes.
 42. **1X speaker** (owner 11-21: use it for tones or tunes, not only the
