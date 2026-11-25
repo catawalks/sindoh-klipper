@@ -30,6 +30,50 @@ red() { case "$1" in "DO NOT POWER OFF") echo "<font color=\"#c00000\">$1</font>
 show() { /app/display.sh '<font color="#0040b0">== KLIPPER REMOVE ==</font>' "`red "$1"`" "`red "$2"`" "`red "$3"`"
          echo "[klipper-remove] $1 $2 $3"; }
 ME=$STICK/unmistakable_klipper_remove.she     # gone = the stick was pulled
+LOG=$STICK/dp200_klipper_remove.log
+# a line in the remove log only (details for a failure report)
+note() { echo "[klipper-remove] $*"; echo "$(date) $*" >> $LOG; }
+# ---- Free a Klipper root before it is deleted: the same functions as in
+# unmistakable_klipper_install.sh (see there why; 2026-11-25).
+mounts_in() { awk -v r="$1/" 'index($2, r) == 1 {print $2}' /proc/mounts | sort -r; }
+link_of() { readlink "$1" 2>/dev/null || ls -ld "$1" 2>/dev/null | sed -n 's/.* -> //p'; }
+holders_of() {
+    _m=`mounts_in $1`
+    for _d in /proc/[0-9]*; do
+        _p=${_d#/proc/}
+        [ "$_p" = $$ ] && continue
+        case "`link_of $_d/root`" in "$1"|"$1"/*) echo $_p; continue ;; esac
+        [ -n "$_m" ] || continue
+        for _f in $_d/cwd $_d/fd/*; do
+            _t=`link_of $_f`
+            [ -n "$_t" ] || continue
+            for _x in $_m; do
+                case "$_t" in "$_x"|"$_x"/*) echo $_p; continue 3 ;; esac
+            done
+        done
+    done
+}
+release_root() {
+    sync
+    for _sig in TERM TERM KILL KILL; do
+        _pids=`holders_of $1`
+        [ -n "$_pids" ] || break
+        for _p in $_pids; do
+            note "busy: pid $_p `tr '\0' ' ' < /proc/$_p/cmdline 2>/dev/null` (kill -$_sig)"
+        done
+        kill -$_sig $_pids 2>/dev/null
+        sleep 2
+    done
+    for _x in `mounts_in $1`; do
+        umount $_x 2>/dev/null && continue
+        umount -l $_x 2>/dev/null && note "lazy unmount: $_x" || note "unmount failed: $_x"
+    done
+    sync
+    _left=`mounts_in $1`
+    [ -z "$_left" ] && return 0
+    for _x in $_left; do note "still mounted: `grep " $_x " /proc/mounts`"; done
+    return 1
+}
 
 # The Klipper touch screen would keep reading touches under these
 # messages: stop it, and start it again if the removal is cancelled
@@ -122,15 +166,13 @@ confirm "Touch to restore" "$P2" "Pull stick to cancel"
 
 for r in /klipper /mnt/sd; do
     [ -x $r/dp200/dp200-start.sh ] && $r/dp200/dp200-start.sh stop
-    for m in home/klipper/printer_data/gcodes home/klipper/printer_data/logs var/log tmp run/wpa_supplicant run dev/shm dev/pts dev sys proc; do
-        grep -q " $r/$m " /proc/mounts && umount $r/$m
-    done
 done
+[ -d /mnt/sd/etc/dp200 ] && { release_root /mnt/sd || note "SD root: mounts left"; }
 # Nothing may be mounted inside /klipper when it is deleted: a storage card's
 # G-code folder is mounted there (dp200-storage.sh) and would be emptied.
 klipper_mounts() { grep -q " /klipper/" /proc/mounts; }
-if klipper_mounts; then
-    show "Storage card busy" "Power off, take the card" "or stick out, try again"
+if ! release_root /klipper || klipper_mounts; then
+    show "Klipper still busy" "nothing changed," "log on stick"
     exit 1
 fi
 # The app goes to RAM first (/tmp is tmpfs; the stack is stopped, so there

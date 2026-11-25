@@ -5,6 +5,15 @@ one. The detail for everything up to 2026-11-12 is in
 [TODO_archive_2026-11-12.md](TODO_archive_2026-11-12.md) and the other
 files in this folder; `git log` has the rest.
 
+## 2026-11-25
+
+- **Upgrade refused with a storage card in** (work printer, v0.1.2 test
+  stick: "Storage card busy", nothing changed). The installer and remover
+  now free the Klipper root themselves: stop what still uses it, unmount
+  everything inside it from `/proc/mounts` (lazily if refused) and log
+  each step to the stick. Tested in WSL; new `.she` files packed, payload
+  unchanged.
+
 ## 2026-11-24
 
 - **Night (owner asleep, no printer motion):** content audit of the

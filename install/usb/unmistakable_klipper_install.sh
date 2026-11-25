@@ -82,6 +82,61 @@ fi
 # Nothing may be mounted inside /klipper when it is deleted: a storage card's
 # G-code folder is mounted there (dp200-storage.sh) and would be emptied.
 klipper_mounts() { grep -q " /klipper/" /proc/mounts; }
+# a line in the install log only (details for a failure report)
+note() { echo "[klipper-install] $*"; echo "$(date) $*" >> $LOG; }
+# ---- Free a Klipper root before it is replaced or deleted. A fixed list of
+# unmounts with no retry was not enough: on 2026-11-25 the work printer, with
+# a storage card's G-code folder mounted inside /klipper, refused the
+# upgrade ("Storage card busy") and the card is behind several case panels.
+# So: stop whatever still uses the root, unmount everything /proc/mounts
+# lists inside it (deepest first), lazily if a plain unmount is refused, and
+# log each step. The same functions are in unmistakable_klipper_remove.sh.
+# Lazy is safe here: the processes are gone, and a detached G-code folder
+# keeps its files on the card; /klipper itself then holds none of them.
+# mount points inside root $1, deepest first
+mounts_in() { awk -v r="$1/" 'index($2, r) == 1 {print $2}' /proc/mounts | sort -r; }
+# target of a /proc link (the stock BusyBox may have no readlink)
+link_of() { readlink "$1" 2>/dev/null || ls -ld "$1" 2>/dev/null | sed -n 's/.* -> //p'; }
+# pids that keep root $1 busy: chrooted into it, or with their working
+# directory or an open file inside one of its mounts
+holders_of() {
+    _m=`mounts_in $1`
+    for _d in /proc/[0-9]*; do
+        _p=${_d#/proc/}
+        [ "$_p" = $$ ] && continue
+        case "`link_of $_d/root`" in "$1"|"$1"/*) echo $_p; continue ;; esac
+        [ -n "$_m" ] || continue
+        for _f in $_d/cwd $_d/fd/*; do
+            _t=`link_of $_f`
+            [ -n "$_t" ] || continue
+            for _x in $_m; do
+                case "$_t" in "$_x"|"$_x"/*) echo $_p; continue 3 ;; esac
+            done
+        done
+    done
+}
+# 0 = nothing is mounted inside root $1 any more
+release_root() {
+    sync
+    for _sig in TERM TERM KILL KILL; do
+        _pids=`holders_of $1`
+        [ -n "$_pids" ] || break
+        for _p in $_pids; do
+            note "busy: pid $_p `tr '\0' ' ' < /proc/$_p/cmdline 2>/dev/null` (kill -$_sig)"
+        done
+        kill -$_sig $_pids 2>/dev/null
+        sleep 2
+    done
+    for _x in `mounts_in $1`; do
+        umount $_x 2>/dev/null && continue
+        umount -l $_x 2>/dev/null && note "lazy unmount: $_x" || note "unmount failed: $_x"
+    done
+    sync
+    _left=`mounts_in $1`
+    [ -z "$_left" ] && return 0
+    for _x in $_left; do note "still mounted: `grep " $_x " /proc/mounts`"; done
+    return 1
+}
 UNDO=0
 undo() {
     show "Undoing the install" "(stock firmware back)" "DO NOT POWER OFF"
@@ -326,11 +381,11 @@ if [ $DRY_RUN = 0 ]; then
     stick_still_in
     for r in /klipper /mnt/sd; do
         [ -x $r/dp200/dp200-start.sh ] && $r/dp200/dp200-start.sh stop
-        for m in home/klipper/printer_data/gcodes home/klipper/printer_data/logs var/log tmp run/wpa_supplicant run dev/shm dev/pts dev sys proc; do
-            grep -q " $r/$m " /proc/mounts && umount $r/$m
-        done
     done
-    klipper_mounts && fail "Storage card busy" "power off, take it out"
+    # an SD install's root: freed the same way (it is unpacked over, not
+    # deleted, so a leftover mount there is only logged)
+    [ -d /mnt/sd/etc/dp200 ] && { release_root /mnt/sd || note "SD root: mounts left"; }
+    release_root /klipper || fail "Klipper still busy" "nothing changed, log on stick"
 fi
 
 # keep the user's printer config across an upgrade (RAM: /tmp is tmpfs)

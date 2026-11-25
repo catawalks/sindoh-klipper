@@ -271,7 +271,8 @@ stages 1-5 done on the dev printer):
     mount commands only: `install/printer/dp200-storage.sh` (opt-in by a
     `dp200_storage` folder; mounted over the G-code folder at boot;
     released by `dp200-start.sh stop`), and the installer and remover
-    refuse to delete `/klipper` while anything is mounted inside it.
+    refuse to delete `/klipper` while anything is mounted inside it
+    (11-25: they now free it themselves first, item 49).
     **Not released on its own (owner 11-24): it goes into v0.1.2.** To check there
     (stock 3.2): the stock mount points (`/mnt/sd`, `/mnt/sda1`) and that
     BusyBox `mount` takes `uid=,gid=,umask=`; upload, print and delete
@@ -479,6 +480,26 @@ stages 1-5 done on the dev printer):
       code). **Release notes drafted** (not published):
       `kernel/out/release/v0.1.2/release_notes_DRAFT.md` on the PC; the
       build, md5 and open issues are placeholders until the final build.
+    - **Work printer 11-25: the install refused with "Storage card
+      busy"** (SD card with `dp200_storage` inside; nothing was
+      changed). After the stop, something under `/klipper` was still
+      mounted, and the old installer had a fixed unmount list, no
+      retry and no log of what was left. Pulling the card is not an
+      option (several case panels). **Fixed 11-25:** installer and
+      remover now stop whatever still uses the root (chrooted, or a
+      working directory or an open file in one of its mounts: the
+      stock-side helpers write their log into `/klipper/var/log`),
+      unmount everything `/proc/mounts` lists inside it, deepest first,
+      lazily if refused, and log each step to the stick
+      (`dp200_klipper_install.log`, the remover's own
+      `dp200_klipper_remove.log`). Tested in WSL in a private mount
+      namespace (holders found and stopped, lazy fallback, a total
+      refusal reported; card file kept); the stock BusyBox (1.20.2) has
+      every applet used. New `.she` files in the release folder (payload
+      unchanged): install 10,064 B, remove 4,272 B; the old ones in
+      `old_20261124/`. **Left:** copy them onto the stick and run the
+      upgrade again with the card in; afterwards check the log's
+      `busy:` lines (what held the mount).
     - The dev printer answers on WiFi, 10.10.0.21 (Ethernet .147 is
       down), with SSH since 11-24 (item 50).
 50. **Dev DP200 SSH** (owner 11-24): built (`rc.dp200` start_ssh,
