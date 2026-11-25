@@ -17,6 +17,9 @@
 # SHUT DOWN and REBOOT, and writes what SYSTEM -> INFO shows about the
 # stock side. By hand: sh /tmp/sd/stage/x1_web.sh power reboot|poweroff [dry]
 # The same helper serves Mainsail's power menu (power_shims, below).
+# A shell over SSH (dropbear) has only /usr/bin:/bin: chroot, ip and
+# killall are in the sbin folders (1X 2026-11-24).
+export PATH=/usr/sbin:/sbin:/usr/bin:/bin:$PATH
 ROOT=${X1_ROOT:-/tmp/sd}      # the Debian root: the SD card, or the installed copy
 ST=$ROOT/stage
 RUN=$ROOT/run/dp200                # the screen app's /run/dp200 (on the card)

@@ -7,6 +7,9 @@
 # every PWM output as it is. So: stop the program, hold the cores, then
 # stop the three heater-type PWM blocks (5, 25, 28: period 1000) and check.
 # Only a reboot brings the stock firmware back.
+# A shell over SSH (dropbear) has only /usr/bin:/bin: chroot, ip and
+# killall are in the sbin folders (1X 2026-11-24).
+export PATH=/usr/sbin:/sbin:/usr/bin:/bin:$PATH
 UPCTOOL=${1:?usage: x1_stop.sh /path/to/upctool}
 ELF=marvell_lspsdk_3dp_granite2-debug_stripped.elf
 HEATERS="0xf9304500 0xf9305900 0xf9305c00"
