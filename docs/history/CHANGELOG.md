@@ -7,6 +7,13 @@ files in this folder; `git log` has the rest.
 
 ## 2026-11-24
 
+- **STOP failed during a cancel** (dev DP200, owner; stopped with the
+  power button): the panel reports short lifts during a long hold, and
+  the new bounce check dropped each resumed hold, so the 1 s never
+  completed. Now a finger back on STOP within 0.3 s continues the same
+  hold, and the emergency stop is sent from its own thread with retries.
+  Simulated holds (steady, lifts every 0.25 s and 0.4 s) stop at 1 s; a
+  tap or two short holds do not.
 - **Dev DP200 tests (owner present)** on fork `b3b8d837`'s firmware and
   v0.1.2's configs: G28 with the 2 mm drop, `BED_FORWARD`, probe offset
   2.618 from the screen (a run with filament under the nozzle gave 0.85),

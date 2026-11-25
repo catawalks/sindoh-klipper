@@ -679,6 +679,7 @@ class UI:
         self.last_touch = time.time()
         self.last_down = 0.0
         self.last_up = None            # (u, v, time) of the last lift: bounce check
+        self.stop_lift = None          # (hold start, lift time): a STOP hold may resume
         self.ip = my_ip()
         self.settings = load_settings()          # e.g. {'timeout': 600}
         # network pages: port info (refreshed in the background), IP settings draft
@@ -1364,11 +1365,26 @@ class UI:
         self.msg = (text, time.time() + secs)
 
     def emergency_stop(self):
-        try:
-            post('/printer/emergency_stop')
-            self.flash('EMERGENCY STOP sent')
-        except Exception as e:
-            self.flash('E-stop failed: %s' % e)
+        """Sent from its own thread: nothing in the main loop (or a busy
+        command) may hold it up. Never refused while busy."""
+        log('EMERGENCY STOP (screen)')
+        self.flash('EMERGENCY STOP...')
+
+        def send():
+            for _ in range(3):              # Moonraker restarting: try again
+                try:
+                    req = urllib.request.Request(API + '/printer/emergency_stop', data=b'{}', method='POST',
+                                                 headers={'Content-Type': 'application/json'})
+                    urllib.request.urlopen(req, timeout=5).read()
+                    self.flash('EMERGENCY STOP sent')
+                    return
+                except Exception as e:
+                    err = e
+                    time.sleep(0.3)
+            log('e-stop failed: %s' % err)
+            self.flash('E-stop failed: %s - hold the power button' % err)
+        threading.Thread(target=send, daemon=True).start()
+        wake()
 
     # ---- WiFi ------------------------------------------------------------
     def wifi_bg(self, label, fn):
@@ -1884,6 +1900,15 @@ class UI:
         self.last_touch = time.time()
         if kind == 'down':
             lu = self.last_up
+            sl = self.stop_lift
+            if sl and time.time() - sl[1] < 0.3 and self.hit(u, v) == ('estop',):
+                # STOP must stay reliable: the panel can report a short lift
+                # during a long hold. The finger back on STOP within 0.3 s
+                # continues the same hold (dev DP200 11-24: the bounce check
+                # below dropped every resumed hold, and STOP never fired)
+                self.press = (u, v, sl[0])
+                self.stop_lift = None
+                return
             if lu and time.time() - lu[2] < 0.1 and abs(u - lu[0]) < 40 and abs(v - lu[1]) < 40:
                 # a bounce: the panel sometimes reports one more instant
                 # touch at the same spot right after a lift, which ran the
@@ -1898,6 +1923,8 @@ class UI:
         if kind == 'up' and self.press:
             a0 = self.hit(self.press[0], self.press[1])
             a1 = self.hit(u, v)
+            if a0 == ('estop',):
+                self.stop_lift = (self.press[2], time.time())   # (hold start, lift)
             self.press = None
             if a0 is not None and a0 == a1 and a0[0] != 'estop':
                 if a0[0] == 'gcode':
