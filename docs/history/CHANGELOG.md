@@ -11,8 +11,13 @@ files in this folder; `git log` has the rest.
   stick: "Storage card busy", nothing changed). The installer and remover
   now free the Klipper root themselves: stop what still uses it, unmount
   everything inside it from `/proc/mounts` (lazily if refused) and log
-  each step to the stick. Tested in WSL; new `.she` files packed, payload
-  unchanged.
+  each step to the stick. Tested in WSL; new `.she` files packed
+  (`3c6f5cd`, which went out with the previous commit's message).
+- **Installer's message left on the panel after a cancel** (work
+  printer): the screen app redraws only what it changed itself. It now
+  repaints the whole panel at every touch, every 5 s in its first minute
+  and every 60 s after that (`0e557d4`). Test payload `0be1aace`; the
+  repack tool no longer writes replaced files twice.
 
 ## 2026-11-24
 

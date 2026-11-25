@@ -115,6 +115,10 @@ def add_missing_under(prefix):
 
 dirs = [m.name for m in members if m.isdir()]
 for m in members:
+    if m.name in done:
+        # already written right after its directory (below): writing it
+        # again made every replaced file appear twice (e5a4dd83, 11-25)
+        continue
     if m.name in new:
         put(m.name, *new[m.name]); done.add(m.name)
     elif m.name in links:

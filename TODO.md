@@ -444,7 +444,12 @@ stages 1-5 done on the dev printer):
     IDs refused), the sample prints moved to the stick, and the motor
     current rule that lands on the stock counts. Its release notes must
     state the model support (v0.1.0's notes were corrected 11-24: no
-    DP201). **Test payload `e5a4dd83` built 11-24 and on the USB
+    DP201). **Current test payload `0be1aace`** (11-25, build
+    `0e557d4`: `e5a4dd83` plus the screen's full repaints; only
+    `dp200_screen.py` and the build stamp differ; the repack tool also
+    stopped writing each replaced file twice, 14 doubles in `e5a4dd83`)
+    in the release folder, with the new installer and remover; the
+    stick at the work site still has `e5a4dd83`. **Test payload `e5a4dd83` built 11-24 and on the USB
     stick** (`_update_rodin_KlipperInstall`, remover in
     `_KlipperRemove`; build `8c4245c`, with the screen fixes of the
     dev DP200 tests incl. the STOP hold; before: `42af930a` / `7d3a6b9`,
@@ -500,6 +505,14 @@ stages 1-5 done on the dev printer):
       `old_20261124/`. **Left:** copy them onto the stick and run the
       upgrade again with the card in; afterwards check the log's
       `busy:` lines (what held the mount).
+    - **Work printer 11-25: after a cancelled install (stick pulled),
+      the installer's "Cancelled" box and a black block stayed over the
+      Klipper home page.** The screen app writes only the pixels that
+      changed since its own last frame. **Fixed in `0e557d4`:** full
+      repaints at every touch, every 5 s in the app's first minute,
+      every 60 s after that. Checked: syntax only (no PIL on the PC,
+      both printers off). **Left:** see a cancel clear within ~5 s on
+      a printer.
     - The dev printer answers on WiFi, 10.10.0.21 (Ethernet .147 is
       down), with SSH since 11-24 (item 50).
 50. **Dev DP200 SSH** (owner 11-24): built (`rc.dp200` start_ssh,
