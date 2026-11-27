@@ -39,7 +39,16 @@ else
         mkdir -p $W/root
         cp -a /root/. $W/root/ 2>/dev/null
         mkdir -p $W/root/.ssh
-        echo "$PUBKEY" > $W/root/.ssh/authorized_keys
+        # A forced command, so a session is never a LOGIN shell: on these
+        # printers /etc/profile ends with /run.sh, and a login shell
+        # would start Sindoh's programs a second time.
+        cat > $W/shell.sh <<'EOS'
+#!/bin/sh
+export PATH=/usr/sbin:/sbin:/usr/bin:/bin
+[ -n "$SSH_ORIGINAL_COMMAND" ] && exec /bin/sh -c "$SSH_ORIGINAL_COMMAND"
+exec /bin/sh -i
+EOS
+        echo "command=\"/bin/sh $W/shell.sh\" $PUBKEY" > $W/root/.ssh/authorized_keys
         chmod 700 $W/root $W/root/.ssh
         chmod 600 $W/root/.ssh/authorized_keys
         mount --bind $W/root /root && log "/root covered by a RAM copy"

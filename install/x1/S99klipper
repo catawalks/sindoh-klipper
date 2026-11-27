@@ -7,7 +7,9 @@
 BOOT=/userdata/klipper/boot.sh
 case "$1" in
 start)
-    [ -f $BOOT ] && (sh $BOOT > /dev/null 2>&1 &)
+    # "early" must finish before the console logs in (it may cover
+    # /run.sh for a cold start); the rest runs in the background
+    [ -f $BOOT ] && { sh $BOOT early > /dev/null 2>&1; (sh $BOOT > /dev/null 2>&1 &); }
     ;;
 stop) ;;
 *)  echo "usage: $0 start|stop" ;;

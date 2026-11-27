@@ -132,6 +132,18 @@ since 11-21. The hook:
 - Cost: for the first 30 to 60 s after power-on stock runs, heats a
   little and shows its own screen.
 
+**Step B test mode (written 2026-11-27, not installed):** `S99klipper`
+now runs `boot.sh early` before the console logs in. With
+`/userdata/klipper/BOOT_COLD_ONCE` (removed at once, so the next boot
+is a normal one) it covers `/run.sh` with a RAM copy holding only the
+hardware part of Sindoh's own script (up to the two clock registers);
+Sindoh's programs and recovery checks are not started. The hook then
+starts SSH, mounts the card and stops, for the driver set-up and the
+Klipper start by hand. Open for a cold start: WiFi (stock's programs
+bring it up from their database; the wired port comes up from the
+init scripts), the screen's backlight, and the unknowns in
+[1x_port_plan.md](1x_port_plan.md) stage 7 item 4.
+
 **Step B, "cold start" (later).** Ours starts instead of Sindoh's
 programs: no stock heating, no stock screen at boot. **The stock program
 also sets up the eight TMC2224 drivers** at start (sindoh

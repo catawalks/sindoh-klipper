@@ -18,6 +18,17 @@
 # It does nothing more when $BASE/BOOT_STOCK exists, when neither root
 # is there, or when x1_boot.sh finds a reason not to start (see there):
 # the printer stays a stock printer.
+#
+# Cold start (step B of the install plan, in test since 2026-11-27):
+# "sh boot.sh early" is run by S99klipper BEFORE the console logs in
+# (the login runs Sindoh's /run.sh, which starts its programs). With
+# $BASE/BOOT_COLD_ONCE (removed at once: the next boot is a normal one)
+# or $BASE/BOOT_COLD it covers /run.sh with a RAM copy (bind mount; no
+# Sindoh file changes) that holds only the hardware set-up from Sindoh's
+# own script: pins, upc_6270.ko, USB gadget, mdev, the two clocks.
+# UIManager, the motion program, the screen program and the recovery
+# checks are not started. The main part then stops after SSH and the
+# root, for the steps by hand, unless $BASE/COLD_AUTO exists.
 #   sh boot.sh [dry]       dry: x1_boot.sh only says what it would do
 # For tests: X1_BASE (default /userdata/klipper), X1_SSH_PORT (2222).
 export PATH=/usr/sbin:/sbin:/usr/bin:/bin:$PATH
@@ -28,9 +39,39 @@ LOG=/tmp/x1_hook.log
 CARD=/dev/mmcblk1p1
 say() { echo "x1_hook: $*"; echo "x1_hook: $*" >> $LOG; }
 
-: > $LOG
-say "$(date) uptime $(cut -d' ' -f1 /proc/uptime)"
-[ "$(cat /sys/kernel/board_name 2>/dev/null)" = 1X_r1 ] || { say "not a 1X_r1 board"; exit 0; }
+
+cold_early() {
+    [ -e $BASE/BOOT_STOCK ] && return
+    [ -e $BASE/BOOT_COLD_ONCE ] || [ -e $BASE/BOOT_COLD ] || return
+    for f in /updating_usb /updating_network; do [ -e $f ] && { say "Sindoh update unfinished ($f): no cold start"; return; }; done
+    if [ -e $BASE/BOOT_COLD_ONCE ]; then
+        rm -f $BASE/BOOT_COLD_ONCE; sync
+    else                            # every boot: only with a root to start
+        [ -x $BASE/root/usr/bin/python3 ] || [ -b $CARD ] || { say "no root: no cold start"; return; }
+    fi
+    R=/tmp/x1_run_cold.sh
+    {
+        echo '#!/bin/sh'
+        echo '# made at boot by x1_hook.sh from the hardware part of /run.sh'
+        echo '[ -e /tmp/x1_cold_ready ] && exit 0     # a second login: nothing to do'
+        sed -n '1,/^devmem 0xf9080148 /p' /run.sh
+        echo 'echo stop_progress_bar > /proc/fb_ctrl'
+        echo 'touch /tmp/x1_cold_ready'
+        echo 'echo "x1: cold start, Sindoh programs not started (SSH port 2222, log /tmp/x1_hook.log)"'
+    } > $R
+    grep -q '^insmod /app/upc_6270.ko' $R && grep -q '^devmem 0xf9080148 ' $R && ! grep -q UIManager $R ||
+        { say "/run.sh is not as expected: no cold start"; return; }
+    chmod 755 $R
+    mount --bind $R /run.sh || { say "could not cover /run.sh: no cold start"; return; }
+    touch /tmp/x1_cold
+    say "cold start: /run.sh covered, Sindoh's programs will not start"
+}
+if [ "$1" = early ]; then
+    : > $LOG
+    say "early $(date) uptime $(cut -d' ' -f1 /proc/uptime)"
+    [ "$(cat /sys/kernel/board_name 2>/dev/null)" = 1X_r1 ] && cold_early
+    exit 0
+fi
 
 ssh_start() {
     K=$BASE/ssh
@@ -67,6 +108,8 @@ EOS
         say "dropbear did not start"
     fi
 }
+say "$(date) uptime $(cut -d' ' -f1 /proc/uptime)"
+[ "$(cat /sys/kernel/board_name 2>/dev/null)" = 1X_r1 ] || { say "not a 1X_r1 board"; exit 0; }
 ssh_start
 
 [ -e $BASE/BOOT_STOCK ] && { say "$BASE/BOOT_STOCK is set: stock boot"; exit 0; }
@@ -85,5 +128,16 @@ else
 fi
 [ -f $ROOT/stage/x1_boot.sh ] || { say "no stage/x1_boot.sh in $ROOT: stock boot"; exit 0; }
 say "root: $ROOT"
+if [ -e /tmp/x1_cold ]; then
+    n=0
+    while [ ! -e /tmp/x1_cold_ready ]; do
+        n=$((n+1)); [ $n -gt 120 ] && { say "cold start: the covered /run.sh did not finish in 2 min"; exit 0; }
+        sleep 1
+    done
+    say "cold start: hardware set-up done after $n s"
+    [ -e $BASE/COLD_AUTO ] || { say "cold start: stopping here for the steps by hand (no $BASE/COLD_AUTO)"; exit 0; }
+    say "cold start: the automatic start is not written yet"
+    exit 0
+fi
 X1_BASE=$BASE X1_ROOT=$ROOT sh $ROOT/stage/x1_boot.sh $1 >> $LOG 2>&1
 say "x1_boot.sh ended ($?), its log: /tmp/x1_boot.log"
