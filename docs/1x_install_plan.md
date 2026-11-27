@@ -173,9 +173,17 @@ init scripts), the screen's backlight, and the unknowns in
 - The lines in `cold_pins` that were not in our config are named in
   `x1_stage4.sh` (from Sindoh's motion program and microcode); only
   GPIO 156 (set high once at start) has no known use.
-- Still open: WiFi on a cold start (so `BOOT_COLD`, every boot, is not
-  set yet), the reference blocks' second register, the estop route
-  (`X1_PC`) at boot, and the firmware setting pin directions itself. Better than the table:
+- **WiFi on a cold start (same day):** `install/x1/x1_wifi.sh`,
+  started by the hook. It copies the network selected on Sindoh's
+  screen from the database (read only) into
+  `/userdata/klipper/wifi/wpa_supplicant.conf` (key as a hash, root
+  only), starts `wpa_supplicant` as stock does and runs `ifup mlan0`,
+  so the address is the one set on Sindoh's screen. Connected 8 s
+  after its start; Moonraker answered on the WiFi address. Not tried
+  yet with the wired port unplugged. WEP networks are not handled.
+- Still open: `BOOT_COLD` (every boot) is not set yet, the reference
+  blocks' second register, the estop route (`X1_PC`) at boot, and the
+  firmware setting pin directions itself. Better than the table:
   the firmware setting the direction of the pins the config names
   (fork, `src/upc/gpio.c`).
 
