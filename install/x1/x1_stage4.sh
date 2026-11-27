@@ -39,6 +39,38 @@ mounts() {
     # root-only devices for upctool (UPC cores, DTCM through /dev/mem)
     for d in upc0 upc1 mem; do [ -e $ROOT/dev/$d ] || cp -a /dev/$d $ROOT/dev/; done
 }
+# Cold start only (no Sindoh program has run since power-on): the output
+# pins. Sindoh's motion program makes these SoC GPIOs outputs at its
+# start; our firmware only sets levels (src/upc/gpio.c), so without this
+# the motor drivers are never enabled and nothing moves (found on the
+# first cold start, 2026-11-27: "No trigger after full movement" with
+# the head standing still). The table is the difference between a cold
+# start and the normal takeover, both idle under Klipper with the same
+# config, read from the GPIO block on the owner's 1X that day: per bank,
+# the new outputs and their level. They are the driver enables (high =
+# off), step and direction lines, the microstep pins, the PSU fan enable
+# (127) and lines whose use is not known yet (53, 69, 96, 107, 112, 148,
+# 153, 156, 174, 177, 188, 191, 225). Level, direction, level again.
+#        bank  outputs     high        low
+COLD_PINS="1 0x073c71c0 0x05345140 0x02082080
+2 0x00000020 0x00000020 0x00000000
+3 0x80010831 0x80000021 0x00010810
+4 0x12100000 0x10000000 0x02100000
+5 0x90025c70 0x10001450 0x80024820
+6 0x000033de 0x00002294 0x0000114a
+7 0x00000002 0x00000002 0x00000000"
+cold_pins() {
+    echo "$COLD_PINS" | while read b out hi lo; do
+        base=$((0xd4019000 + b * 256))
+        reg() { printf "0x%x" $((base + $1)); }
+        devmem $(reg 0x08) 32 $hi; devmem $(reg 0x0c) 32 $lo
+        devmem $(reg 0x1c) 32 $out
+        devmem $(reg 0x08) 32 $hi; devmem $(reg 0x0c) 32 $lo
+        dir=$(devmem $(reg 0x04)); lvl=$(devmem $(reg 0x00))
+        [ $(( dir & out )) -eq $(( out )) ] && [ $(( lvl & out )) -eq $(( hi )) ] ||
+            echo "x1_stage4: bank $b pins not as set (direction $dir, levels $lvl)"
+    done
+}
 case "$1" in
 start)
     grep -q " $ROOT ext4 " /proc/mounts || { echo "mount the card at $ROOT first"; exit 1; }
@@ -60,11 +92,19 @@ start)
         [ -f $C/printer.cfg ] && grep -q "include x1_printer.cfg" $C/printer.cfg && cp $C/printer.cfg $C/printer.cfg.kept
         cp $ST/$CFG $C/printer.cfg
     fi
-    # Motor drivers: set up by the stock program at boot. Look only; on a
-    # start without it: chroot $ROOT /usr/bin/python3 /stage/x1_tmc.py setup --yes
+    # Motor drivers: set up by the stock program at boot (look only), or
+    # by us on a start without it.
     # (the stock system has no Python: the card's, with the UART node)
     [ -e $ROOT/dev/ttyS2 ] || cp -a /dev/ttyS2 $ROOT/dev/
-    [ -f $ST/x1_tmc.py ] && inroot /usr/bin/python3 /stage/x1_tmc.py check | tail -1
+    if [ -e /tmp/x1_cold ]; then        # cold start (x1_hook.sh): we write the set-up
+        cold_pins
+        inroot /usr/bin/python3 /stage/x1_tmc.py setup --yes > /tmp/x1_tmc.log 2>&1
+        rc=$?
+        cat /tmp/x1_tmc.log
+        [ $rc -eq 0 ] || { echo "x1_stage4: motor driver set-up failed, not starting"; exit 1; }
+    else
+        [ -f $ST/x1_tmc.py ] && inroot /usr/bin/python3 /stage/x1_tmc.py check | tail -1
+    fi
     cp $ST/x1_query.py $ST/x1_gcode.py $ST/x1_estopd.py $ROOT$K/
     inroot chown -R klipper:klipper $K/printer_data $K/x1_query.py $K/x1_gcode.py $K/x1_estopd.py
     $U --force --dtcm 0xf9880000 load $ST/fw/klipper_x1_io.bin $ST/fw/klipper_x1_fm.bin || exit 1

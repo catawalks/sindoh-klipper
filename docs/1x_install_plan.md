@@ -144,6 +144,28 @@ bring it up from their database; the wired port comes up from the
 init scripts), the screen's backlight, and the unknowns in
 [1x_port_plan.md](1x_port_plan.md) stage 7 item 4.
 
+**First cold starts, 2026-11-27 (owner present, steps by hand):**
+- The covered `/run.sh` works: no Sindoh program starts, the heater
+  PWM blocks read 0, the wired port and SSH are up 10 s after power-on.
+- The driver UART and its select GPIOs work without the stock program
+  (`x1_tmc.py setup` exports them).
+- **The SoC GPIO outputs are inputs until Sindoh's motion program
+  starts**, and our firmware only writes levels. First try: the drivers
+  were never enabled and homing ended in "No trigger after full
+  movement" with nothing moving; the microstep pins read 32 (4 on the
+  cartridge feed). `x1_stage4.sh` now sets the stock outputs and
+  levels on a cold start (`cold_pins`, table taken from the difference
+  between a cold start and the takeover); `x1_tmc.py setup` also
+  selects 16 microsteps by register if the pins do not give 16.
+- With that, Klipper started cold and **X, Y and Z homed** (bed empty,
+  owner's word), temperatures and filament sensors read as usual, the
+  PSU fan runs with the motors.
+- Still open: the automatic start (`COLD_AUTO`), WiFi, what the 13
+  unnamed lines in `cold_pins` are, the reference blocks' second
+  register, heat and a print from a cold start. Better than the table:
+  the firmware setting the direction of the pins the config names
+  (fork, `src/upc/gpio.c`).
+
 **Step B, "cold start" (later).** Ours starts instead of Sindoh's
 programs: no stock heating, no stock screen at boot. **The stock program
 also sets up the eight TMC2224 drivers** at start (sindoh

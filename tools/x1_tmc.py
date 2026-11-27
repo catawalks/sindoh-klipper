@@ -15,8 +15,9 @@ up at every boot; they forget it when powered off). It writes what
 engine_motor_config writes, in its order, then runs "check". Motor
 current is not part of it: that is the reference PWM, set by Klipper
 ([output_pin motor_current_*] in x1_printer.cfg). NOT RUN ON A COLD
-PRINTER YET (2026-11-22): whether the select GPIOs and the UART pins
-work without the stock program's start-up is still to be seen.
+PRINTER until 2026-11-27: the select GPIOs and the UART work without
+the stock program; the microstep pins do not (see "setup" below), so
+the cold set-up also selects 16 microsteps by register.
 
 The drivers share one single-wire UART (ttyS2, 115200) behind a 3-bit
 select: GPIO 149/147/146 carry the motor number (149 is the high bit),
@@ -44,7 +45,9 @@ TPWMTHRS = {0: 44, 2: 44, 3: 58, 4: 75, 6: 75}
 IHOLD_IRUN = 0x1f1f             # run and hold scale 31: current is all VREF
 PWMCONF = 0xc80c0e24
 GCONF = {0: 0x141, 2: 0x141, 3: 0x141, 4: 0x145, 6: 0x141}   # extruder: spreadCycle
-MSTEPS = 16                     # by the MS pins; CHOPCONF is never written
+MSTEPS = 16                     # stock: by the MS pins; CHOPCONF is never written
+MSTEP_REG = 0x80                # GCONF mstep_reg_select: microsteps from CHOPCONF
+MRES16 = 4                      # CHOPCONF MRES for 16 microsteps
 EXPORT = False                  # "setup" may export the select GPIOs itself
 
 
@@ -150,9 +153,12 @@ def main():
             if v is not None and name == 'CHOPCONF':
                 extra = '  ' + chop_info(v)
             if v is not None and name == 'IOIN':
-                # TMC222x pin layout (SEL_A, bit 8, reads 0 on them)
+                # TMC2224 pin layout (SEL_A, bit 8, reads 0): bit 1 PDN_UART,
+                # 2 SPREAD, 3 DIR, 4 ENN, 5 STEP, 6 MS1, 7 MS2. (Until
+                # 2026-11-27 this printed the TMC2208 bit numbers; the
+                # cold start showed MS1/MS2 did not fit CHOPCONF.)
                 extra = '  version %02x, ENN %d MS1 %d MS2 %d DIR %d' % (
-                    v >> 24, (v >> 3) & 1, (v >> 5) & 1, (v >> 6) & 1, (v >> 2) & 1)
+                    v >> 24, (v >> 4) & 1, (v >> 6) & 1, (v >> 7) & 1, (v >> 3) & 1)
             print('motor %d %-11s %s%s' % (n, name, '%08x' % v if v is not None
                                            else 'no answer (%s)' % raw.hex(), extra))
     elif args[0] == 'write' and '--yes' in sys.argv:
@@ -172,12 +178,23 @@ def main():
                 if c0 is None:
                     print('motor %d (%s): no answer, nothing written' % (n, name))
                     continue
-                for reg, val in ((0x13, TPWMTHRS[n]), (0x10, IHOLD_IRUN),
-                                 (0x70, PWMCONF), (0x00, GCONF[n])):
+                chop, _ = read_reg(fd, 0x6c)
+                writes = [(0x13, TPWMTHRS[n]), (0x10, IHOLD_IRUN),
+                          (0x70, PWMCONF), (0x00, GCONF[n])]
+                # Microsteps: stock leaves them to the MS pins, which its
+                # own microcode drives. Without it the pins read 32 (4 on
+                # the cartridge feed; cold start 2026-11-27), so take
+                # them from the register instead: mstep_reg_select, and
+                # MRES for 16 in the CHOPCONF the driver already has.
+                if chop is not None and (256 >> ((chop >> 24) & 0xf)) != MSTEPS:
+                    writes[3] = (0x00, GCONF[n] | MSTEP_REG)
+                    writes.append((0x6c, (chop & ~0x0f000000) | (MRES16 << 24)))
+                for reg, val in writes:
                     write_reg(fd, reg, val)
                 c1, _ = read_reg(fd, 0x02)
                 took = None if c1 is None else (c1 - c0) & 0xff
-                print('motor %d (%s): 4 writes sent, the driver counted %s' % (n, name, took))
+                print('motor %d (%s): %d writes sent, the driver counted %s'
+                      % (n, name, len(writes), took))
         bad = 0
         for n, name in MOTORS:
             motor_select(n)
@@ -188,7 +205,8 @@ def main():
                 print('motor %d (%s): NO ANSWER' % (n, name)); bad += 1; continue
             ms = 256 >> ((c >> 24) & 0xf)
             # bit 0 of GCONF... compare whole words: stock reads them back as written
-            ok = (g == GCONF[n] and p == PWMCONF and ms == MSTEPS)
+            # (GCONF with mstep_reg_select is our own cold-start set-up)
+            ok = (g & ~MSTEP_REG == GCONF[n] and p == PWMCONF and ms == MSTEPS)
             bad += not ok
             print('motor %d (%-14s) GCONF %03x (stock %03x)  PWMCONF %08x  microsteps %d  %s'
                   % (n, name, g, GCONF[n], p, ms, 'ok' if ok else 'DIFFERENT'))
