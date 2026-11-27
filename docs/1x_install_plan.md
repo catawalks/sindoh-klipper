@@ -254,7 +254,7 @@ integrity check reads, the mount is gone at the next boot, and
 |---|---|---|
 | Network (Ethernet, WiFi) | stock's `udhcpc` and `wpa_supplicant` | step A: still stock's; step B: ours (`dp200_wifi.py`, `dp200_net.py`, as on the DP200) |
 | Time zone | copy of stock's `/etc/localtime` | the same; our own setting later (TODO 47) |
-| Power button | ours (stock's `powerkeyd` frozen) | the same, started by the hook |
+| Power button | ours (stock's `powerkeyd` frozen) | the same, started by the hook. A hold switches off (tested 11-27); the POWER menu and Mainsail can only shut down and then show "It's now safe to turn off your printer", because the power board ignores GPIO 158 without a hold (sindoh `docs/1x_r4.md`) |
 | Watchdog | BusyBox `watchdog` (stock) | keep it |
 | Camera | ustreamer (ours) | the same |
 | Stock web page, port 9100 printing from Sindoh's slicer | stopped | stopped |

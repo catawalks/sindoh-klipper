@@ -112,6 +112,11 @@ HW_CUT = 2.0                          # measured roughly: "2 s hold" switched it
 HOLD_WARN = 0.4                       # s held before the warning appears
 LONG_POWER = 5.0
 POWER_REQ = '/run/dp200/power'        # "reboot" / "poweroff" for dp200-powerkey.sh
+# 1X: written before POWER_REQ when the power-off comes from a hold of the
+# front button. The power board cuts the power only after such a hold (it
+# ignores the processor's power-off output otherwise), so without this
+# file the helper shuts down, shows hold.fb and waits for the button.
+POWER_KEY = '/run/dp200/power.key'
 # Hand-over with the stick installer/remover after a cancel: their message
 # window (the stock tinydebug) keeps redrawing itself over this app until
 # it is ended. This app writes DRAWN after its first frame; the installer
@@ -296,7 +301,7 @@ def draw_shutdown(d, what, step):
     running, one more = finished."""
     d.rectangle((0, 0, PW, PH), fill=(0, 0, 0))
     n = len(SHUT_STEPS)
-    if step > n:
+    if step == 'hold' or step > n:
         if what == 'reboot':
             d.text((PW // 2, 360), 'Restarting...', font=font(36), fill=C_TXT, anchor='mm')
             # (the boot logo may be the owner's own: no 'Sindoh logo')
@@ -304,7 +309,11 @@ def draw_shutdown(d, what, step):
                    fill=C_DIM, anchor='mm')
         else:
             # the old Windows 95 screen, in its colours
-            if IS_1X:                           # the helper cuts the power itself
+            # 1X: after a hold of the button the helper answers the power
+            # board and the power goes; from the menu the board waits for
+            # that hold (step 'hold'), with the DP200's screen unchanged
+            # (owner 2026-11-27)
+            if IS_1X and step != 'hold':
                 d.text((PW // 2, 360), 'Switching off...', font=font(36), fill=C_TXT, anchor='mm')
                 return
             for i, l in enumerate(("It's now safe", 'to turn off', 'your printer.')):
@@ -343,6 +352,14 @@ def write_shutdown_frames(what, path=FB):
         draw_shutdown(ImageDraw.Draw(im), what, step)
         raw = rgb565(im.transpose(Image.Transpose.ROTATE_270)) * pages
         name = os.path.join(SHUT_DIR, str(step) if step <= len(SHUT_STEPS) else 'done')
+        with open(name + '.tmp', 'wb') as f:
+            f.write(raw)
+        os.replace(name + '.tmp', name + '.fb')
+    if IS_1X and what == 'poweroff':            # see POWER_KEY
+        im = Image.new('RGB', (PW, PH))
+        draw_shutdown(ImageDraw.Draw(im), what, 'hold')
+        raw = rgb565(im.transpose(Image.Transpose.ROTATE_270)) * pages
+        name = os.path.join(SHUT_DIR, 'hold')
         with open(name + '.tmp', 'wb') as f:
             f.write(raw)
         os.replace(name + '.tmp', name + '.fb')
@@ -986,7 +1003,7 @@ class UI:
             self.last_touch = 0.0              # black now (only while idle, see dimmed())
             self.screen = 'home'
 
-    def power_request(self, what):
+    def power_request(self, what, key=False):
         """Ask dp200-powerkey.sh (stock side) to reboot or power off. It stops
         this app first, so the progress frames are written before asking."""
         self.screen = 'powering_' + what
@@ -1009,6 +1026,11 @@ class UI:
                     log('power %s: heaters off through Klipper failed: %s' % (what, e))
             try:
                 os.makedirs(os.path.dirname(POWER_REQ), exist_ok=True)
+                if IS_1X:
+                    if key:
+                        open(POWER_KEY, 'w').close()
+                    elif os.path.exists(POWER_KEY):
+                        os.remove(POWER_KEY)
                 with open(POWER_REQ, 'w') as f:
                     f.write(what)
             except OSError as e:
@@ -3643,7 +3665,7 @@ def main():
         if ui.key_off_at and now >= ui.key_off_at:
             ui.key_off_at = 0.0
             if ui.screen == 'key_off':
-                ui.power_request('poweroff')
+                ui.power_request('poweroff', key=True)
         if ui.screen.startswith('powering') and now - ui.power_at > 90:
             # still running: dp200-powerkey.sh didn't act (not started?)
             ui.screen = 'home'

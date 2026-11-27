@@ -95,8 +95,8 @@ Either printer:
    1). Then the owner's OK for the first eMMC writes (root to
    `/userdata/klipper/`, then `S99klipper`).
 59. Z and the extruder at their limits (12 and 86 mm/s).
-60. **Power button** (item 44): a hold with CANCEL, a hold to the end
-   (the first real power off), and a hold during a print (emergency stop).
+60. **Power button** (item 44): a hold during a print (emergency stop).
+   Done 11-27: a hold with CANCEL, and a hold to the end (switched off).
 
 ## Printer tuning
 
@@ -557,9 +557,15 @@ stages 1-5 done on the dev printer):
     a sudo rule lets Moonraker's user run it; a root without sudo (the
     1X card) gets a stand-in. Open:
     - 1X: reboot through Moonraker's API worked 11-23. Still to try
-      (owner present): Shutdown from Mainsail and SHUT DOWN / REBOOT
-      on the screen's POWER page (same helper; power off uses GPIO
-      158 and has never run).
+      (owner present): Shutdown from Mainsail (same helper; does it
+      show the "safe to turn off" frame without the screen app's
+      frames?). The screen's POWER page: 11-27 the first power off
+      hung on "Switching off..." (halted, power on: the power board
+      ignores GPIO 158 without a button hold). Now it shuts down,
+      shows the DP200's "It's now safe to turn off your printer" and
+      answers the next hold; that switched off 11-27 (the frame then
+      still said 3 seconds; the identical DP200 frame is not yet on
+      the card).
     - DP200: in the v0.1.2 test payload (helper, the three links, the
       sudo rule). **Dev DP200 11-24 (our kernel): `reboot` over SSH and
       Moonraker's reboot request (Mainsail's menu) both rebooted it**;

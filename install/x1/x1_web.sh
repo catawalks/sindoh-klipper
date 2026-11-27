@@ -89,10 +89,19 @@ stock_info() {
 # unmounts the card and
 #   reboot:   runs "reboot", as Sindoh's own tools do. The printer starts
 #             Sindoh's firmware; Klipper has to be started again.
-#   poweroff: does what Sindoh's power key program (/app/powerkeyd) does
-#             on a button press: sync, remount read-only, 1 s, power
-#             control output (GPIO 158) to 1, power off. Read from that
-#             program 2026-11-22; NOT YET TRIED on a printer.
+#   poweroff: the power board cuts the power only after a hold of the
+#             front button: it then pulls GPIO 116 low for 3 s and waits
+#             for GPIO 158 at 1 as the answer (measured 2026-11-27: 158
+#             with no hold before it does nothing; an answer 1.5 s, 5 s
+#             and about 10 s after the pulse began each switched it off).
+#             After a hold ($RUN/power.key, or "key" as third word):
+#             sync, remount read-only, 1 s, GPIO 158 to 1, as Sindoh's
+#             /app/powerkeyd does. From the POWER menu or Mainsail: the
+#             same shutdown, then the frame "hold the power button" and
+#             a wait for that hold. Linux is not halted, so the usual
+#             3 s hold is enough (halted, as on 11-27, the power stays
+#             on until the button is held longer: owner, the hardware
+#             then cuts it by itself).
 # "dry" as third word stops before that last step (the stack stays down).
 POWER_GPIO=/sys/class/gpio/gpio158/value
 power_do() {
@@ -100,7 +109,9 @@ power_do() {
     cd /
     say() { echo "x1_power: $*"; echo "x1_power: $*" > /dev/console 2>/dev/null; }
     frame() { [ -f /tmp/x1_shut/$1.fb ] && cat /tmp/x1_shut/$1.fb > /dev/fb0 2>/dev/null; }
-    say "$what requested${dry:+ (dry run)}"
+    key=; [ "$dry" = key ] && { key=1; dry=; }
+    [ -f $RUN/power.key ] && key=1
+    say "$what requested${dry:+ (dry run)}${key:+ (button held)}"
     n=0                             # the screen app's frames (in the card's /tmp)
     while [ ! -f $ROOT/tmp/dp200-shutdown/done.fb ] && [ $n -lt 5 ]; do sleep 1; n=$((n+1)); done
     rm -rf /tmp/x1_shut; mkdir -p /tmp/x1_shut
@@ -122,7 +133,7 @@ power_do() {
     sh $ST/x1_stop.sh $ST/bin/upctool || say "HEATER CHECK FAILED - going on, the $what ends it"
     frame 5; say "saving files"
     net_stop
-    rm -f $RUN/power.ok $RUN/power
+    rm -f $RUN/power.ok $RUN/power $RUN/power.key
     sync
     for m in dev/pts dev/shm dev sys proc; do umount $ROOT/$m 2>/dev/null; done
     # the SD card is a mount of its own; an installed root is a folder on
@@ -150,9 +161,22 @@ power_do() {
     echo s > /proc/sysrq-trigger
     echo u > /proc/sysrq-trigger
     sleep 1
-    echo 1 > $POWER_GPIO
-    sleep 3
-    poweroff -f                     # still here: the output did not cut the power
+    if [ -n "$key" ]; then
+        echo 1 > $POWER_GPIO
+        sleep 5
+        echo 0 > $POWER_GPIO        # still here: the power board was not waiting (any more)
+    fi
+    # No hold of the button before this, or its answer came too late: stay
+    # up (everything is stopped and saved) and answer the next hold.
+    while :; do
+        frame hold; say "hold the power button about 3 s to switch off"
+        while [ "$(cat $KEY_GPIO 2>/dev/null)" != 0 ]; do usleep 100000; done
+        frame done; say "power button held: power off"
+        echo 1 > $POWER_GPIO
+        sleep 5
+        echo 0 > $POWER_GPIO
+        while [ "$(cat $KEY_GPIO 2>/dev/null)" = 0 ]; do usleep 100000; done
+    done
 }
 # Mainsail's power menu and "reboot" typed in the Debian root: Moonraker
 # runs "sudo reboot" / "sudo poweroff" there, which cannot restart the
@@ -401,7 +425,7 @@ powerd)                             # the loop behind SHUT DOWN / REBOOT (starte
         k=$(cat $KEY_GPIO 2>/dev/null)
         if [ "$k" = 0 ] && [ "$was" != 0 ] && [ -z "$(pids dp200_screen.py)" ]; then
             echo "x1_power: power button held and no screen app: shutting down, as stock does"
-            power_do poweroff; exit 0
+            power_do poweroff key; exit 0
         fi
         was=$k
         if [ -f $RUN/power ]; then
