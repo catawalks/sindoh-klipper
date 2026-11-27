@@ -14,7 +14,7 @@
 #   - the motion program does not come up within 3 minutes.
 #   sh x1_boot.sh [dry]      dry: only say what it would do
 BASE=${X1_BASE:-/userdata/klipper}
-ROOT=$BASE/root
+ROOT=${X1_ROOT:-$BASE/root}     # the SD card when x1_hook.sh found no installed root
 ST=$ROOT/stage
 ELF=marvell_lspsdk_3dp_granite2-debug_stripped.elf
 LOG=/tmp/x1_boot.log

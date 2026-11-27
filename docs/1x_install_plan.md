@@ -102,6 +102,16 @@ since 11-21. The hook:
   (uninstall = delete it). A Sindoh firmware update replaces the root
   and with it the hook: the printer is then stock again, with our files
   still in `/userdata`.
+- `S99klipper` runs `/userdata/klipper/boot.sh` (`install/x1/x1_hook.sh`,
+  written 2026-11-27; dry run in RAM on the printer the same day, SSH
+  login checked on a test port). It first starts **SSH** (stock
+  dropbear, port 2222, key only; host key and `authorized_keys` kept in
+  `/userdata/klipper/ssh/`, so the host key survives reboots), also when
+  `BOOT_STOCK` is set, so a printer away from the serial cable can
+  always be reached. Then it finds the root: `/userdata/klipper/root`
+  when installed, otherwise the SD card (mounted at `/tmp/sd`), and
+  runs that root's `stage/x1_boot.sh`. With the card as root the eMMC
+  holds only `S99klipper`, `boot.sh` and the two key files.
 - The waiter (`install/x1/x1_boot.sh`; dry runs on the printer
   2026-11-24: refuses a missing root, honors `BOOT_STOCK`, waits for
   the motion program) takes over once the motion program has started and
