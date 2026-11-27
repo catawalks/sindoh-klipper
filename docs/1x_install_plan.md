@@ -1,6 +1,6 @@
 # 1X: install, boot, uninstall and update (stage 7 plan)
 
-**Status (2026-11-24): plan, nothing installed.** Today everything of
+**Status (2026-11-27): the boot hook is installed (warm takeover, root on the SD card); the rest is a plan.** Today everything of
 ours runs from the SD card `1x-dev` and RAM, started by hand after a
 stock boot ([1x_port_plan.md](1x_port_plan.md), "Stage 6 as it
 stands"); a reboot returns to stock. This page is how that becomes an
@@ -112,6 +112,14 @@ since 11-21. The hook:
   when installed, otherwise the SD card (mounted at `/tmp/sd`), and
   runs that root's `stage/x1_boot.sh`. With the card as root the eMMC
   holds only `S99klipper`, `boot.sh` and the two key files.
+  **Installed on the owner's 1X 2026-11-27** (owner's OK), root on
+  the card: a reboot with `BOOT_STOCK` gave stock with SSH up 10 s
+  after power-on; a reboot without it had Klipper, Moonraker and the
+  screen up by themselves 90 s after power-on.
+- **Never a login shell over SSH:** `/etc/profile` ends with
+  `/run.sh`, so a login shell would start Sindoh's programs a second
+  time. The hook gives every key a forced command that runs a
+  non-login shell (interactive sessions checked 11-27).
 - The waiter (`install/x1/x1_boot.sh`; dry runs on the printer
   2026-11-24: refuses a missing root, honors `BOOT_STOCK`, waits for
   the motion program) takes over once the motion program has started and

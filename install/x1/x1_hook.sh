@@ -9,7 +9,8 @@
 #    $BASE/ssh/host_ecdsa, so it stays the same across boots; the public
 #    key allowed in is $BASE/ssh/authorized_keys (no file, no SSH).
 #    Root's home is covered by a RAM copy that holds the key; the real
-#    /root is not changed.
+#    /root is not changed. Sessions are never login shells (a login
+#    shell runs /etc/profile, and with it Sindoh's /run.sh, again).
 # 2. Our system: the Debian root is $BASE/root when installed there,
 #    otherwise the SD card (mounted at /tmp/sd). Its stage/x1_boot.sh
 #    then waits for stock's motion program and takes over.
@@ -44,7 +45,17 @@ ssh_start() {
         rm -rf $W/root; mkdir -p $W/root
         cp -a /root/. $W/root/ 2>/dev/null
         mkdir -p $W/root/.ssh
-        cp $K/authorized_keys $W/root/.ssh/authorized_keys
+        # Every key gets a forced command, so no SSH session is ever a
+        # LOGIN shell: /etc/profile ends with /run.sh, which would start
+        # Sindoh's programs a second time.
+        cat > $W/shell.sh <<'EOS'
+#!/bin/sh
+export PATH=/usr/sbin:/sbin:/usr/bin:/bin
+[ -n "$SSH_ORIGINAL_COMMAND" ] && exec /bin/sh -c "$SSH_ORIGINAL_COMMAND"
+exec /bin/sh -i
+EOS
+        grep -v '^#' $K/authorized_keys | grep . |
+            sed "s|^|command=\"/bin/sh $W/shell.sh\" |" > $W/root/.ssh/authorized_keys
         chmod 700 $W/root $W/root/.ssh; chmod 600 $W/root/.ssh/authorized_keys
         mount --bind $W/root /root || { say "could not cover /root"; return; }
     fi
