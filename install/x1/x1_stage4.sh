@@ -48,9 +48,16 @@ mounts() {
 # start and the normal takeover, both idle under Klipper with the same
 # config, read from the GPIO block on the owner's 1X that day: per bank,
 # the new outputs and their level. They are the driver enables (high =
-# off), step and direction lines, the microstep pins, the PSU fan enable
-# (127) and lines whose use is not known yet (53, 69, 96, 107, 112, 148,
-# 153, 156, 174, 177, 188, 191, 225). Level, direction, level again.
+# off), step and direction lines, the microstep pins, and (names from
+# Sindoh's motion program and microcode, sindoh docs/1x.md):
+#   127 PSU fan enable, 112 back left exhaust fan, 188 hot end fan,
+#   153 level sensor enable (all four are in x1_printer.cfg);
+#   69  "nozzle voltage on" (high whenever stock runs);
+#   148, 191 the press clutch;  107 the motion program's test pin;
+#   53, 96  driver enables of two motor slots a 1X does not have;
+#   225 the second hot end fan (2X);  174, 177 made outputs, never
+#   written;  156 set high once at start, use not known.
+# Level, direction, level again.
 #        bank  outputs     high        low
 COLD_PINS="1 0x073c71c0 0x05345140 0x02082080
 2 0x00000020 0x00000020 0x00000000

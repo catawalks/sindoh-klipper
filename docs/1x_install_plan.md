@@ -164,9 +164,18 @@ init scripts), the screen's backlight, and the unknowns in
   200 C in about 60 s, bed to 60 C, PSU and head fans on with the
   heaters; `x1_box_20mm.gcode` printed start to end (306 s, 350 mm of
   filament, as on 11-23), bed check answered through the macro.
-- Still open: the automatic start (`COLD_AUTO`), WiFi, what the 13
-  unnamed lines in `cold_pins` are, the reference blocks' second
-  register. Better than the table:
+- **Automatic (same day):** a cold boot now runs `x1_boot.sh` like a
+  normal boot, without the wait for Sindoh's program: Moonraker
+  answered "ready" about 35 s after power-on (takeover: about 90 s),
+  and X, Y and Z homed. `COLD_MANUAL` stops after SSH and the root; a
+  failed cold start leaves `COLD_FAILED`, and `BOOT_COLD` is ignored
+  until that file is removed.
+- The lines in `cold_pins` that were not in our config are named in
+  `x1_stage4.sh` (from Sindoh's motion program and microcode); only
+  GPIO 156 (set high once at start) has no known use.
+- Still open: WiFi on a cold start (so `BOOT_COLD`, every boot, is not
+  set yet), the reference blocks' second register, the estop route
+  (`X1_PC`) at boot, and the firmware setting pin directions itself. Better than the table:
   the firmware setting the direction of the pins the config names
   (fork, `src/upc/gpio.c`).
 

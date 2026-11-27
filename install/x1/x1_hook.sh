@@ -27,8 +27,11 @@
 # Sindoh file changes) that holds only the hardware set-up from Sindoh's
 # own script: pins, upc_6270.ko, USB gadget, mdev, the two clocks.
 # UIManager, the motion program, the screen program and the recovery
-# checks are not started. The main part then stops after SSH and the
-# root, for the steps by hand, unless $BASE/COLD_AUTO exists.
+# checks are not started. The main part then starts our system through
+# x1_boot.sh as on a normal boot, without the wait for Sindoh's program
+# ($BASE/COLD_MANUAL: stop after SSH and the root, for steps by hand).
+# A cold start that fails leaves $BASE/COLD_FAILED, and BOOT_COLD is
+# then ignored until that file is removed.
 #   sh boot.sh [dry]       dry: x1_boot.sh only says what it would do
 # For tests: X1_BASE (default /userdata/klipper), X1_SSH_PORT (2222).
 export PATH=/usr/sbin:/sbin:/usr/bin:/bin:$PATH
@@ -43,6 +46,8 @@ say() { echo "x1_hook: $*"; echo "x1_hook: $*" >> $LOG; }
 cold_early() {
     [ -e $BASE/BOOT_STOCK ] && return
     [ -e $BASE/BOOT_COLD_ONCE ] || [ -e $BASE/BOOT_COLD ] || return
+    [ -e $BASE/COLD_FAILED ] && [ ! -e $BASE/BOOT_COLD_ONCE ] &&
+        { say "$BASE/COLD_FAILED is set (the last cold start failed): normal boot"; return; }
     for f in /updating_usb /updating_network; do [ -e $f ] && { say "Sindoh update unfinished ($f): no cold start"; return; }; done
     if [ -e $BASE/BOOT_COLD_ONCE ]; then
         rm -f $BASE/BOOT_COLD_ONCE; sync
@@ -135,9 +140,7 @@ if [ -e /tmp/x1_cold ]; then
         sleep 1
     done
     say "cold start: hardware set-up done after $n s"
-    [ -e $BASE/COLD_AUTO ] || { say "cold start: stopping here for the steps by hand (no $BASE/COLD_AUTO)"; exit 0; }
-    say "cold start: the automatic start is not written yet"
-    exit 0
+    [ -e $BASE/COLD_MANUAL ] && { say "cold start: stopping here for the steps by hand ($BASE/COLD_MANUAL)"; exit 0; }
 fi
 X1_BASE=$BASE X1_ROOT=$ROOT sh $ROOT/stage/x1_boot.sh $1 >> $LOG 2>&1
 say "x1_boot.sh ended ($?), its log: /tmp/x1_boot.log"

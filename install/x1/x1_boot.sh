@@ -32,6 +32,12 @@ for f in x1_stage4.sh x1_web.sh x1_stop.sh bin/upctool; do
 done
 [ -x $ROOT/usr/bin/python3 ] || skip "no Debian root at $ROOT"
 
+if [ -e /tmp/x1_cold ]; then
+    # cold start (x1_hook.sh covered /run.sh): Sindoh's programs were
+    # never started, so there is nothing to wait for; x1_stage4.sh sets
+    # up the pins and the motor drivers itself
+    say "cold start"
+else
 # wait for stock's motion program and its start-up ("IO Ready" on the
 # console; the program then switches the heaters on): up to 3 min
 n=0
@@ -41,6 +47,7 @@ while [ -z "$(pidof $ELF)" ]; do
 done
 say "motion program up after $n s"
 sleep 20
+fi
 # a Sindoh update stick: stock's own programs handle it
 for m in /mnt/sda1 /mnt/sdb1 /mnt/sd; do
     [ -d $m/_update_rodin_1x ] && skip "Sindoh update stick in ($m)"
@@ -49,7 +56,11 @@ done
 
 export X1_ROOT=$ROOT
 say "starting Klipper"
-sh $ST/x1_stage4.sh start printer.cfg >> $LOG 2>&1 || skip "x1_stage4.sh failed (see above); stock's programs stay stopped: reboot for stock"
+if ! sh $ST/x1_stage4.sh start printer.cfg >> $LOG 2>&1; then
+    # a cold start that fails is not tried again at the next boot
+    [ -e /tmp/x1_cold ] && { touch $BASE/COLD_FAILED; sync; }
+    skip "x1_stage4.sh failed (see above); stock's programs are not running: reboot for stock"
+fi
 say "starting the web side"
 sh $ST/x1_web.sh start >> $LOG 2>&1
 say "done"
