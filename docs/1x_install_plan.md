@@ -173,19 +173,30 @@ init scripts), the screen's backlight, and the unknowns in
 - The lines in `cold_pins` that were not in our config are named in
   `x1_stage4.sh` (from Sindoh's motion program and microcode); only
   GPIO 156 (set high once at start) has no known use.
-- **WiFi on a cold start (same day):** `install/x1/x1_wifi.sh`,
-  started by the hook. It copies the network selected on Sindoh's
-  screen from the database (read only) into
-  `/userdata/klipper/wifi/wpa_supplicant.conf` (key as a hash, root
-  only), starts `wpa_supplicant` as stock does and runs `ifup mlan0`,
-  so the address is the one set on Sindoh's screen. Connected 8 s
-  after its start; Moonraker answered on the WiFi address. Not tried
-  yet with the wired port unplugged. WEP networks are not handled.
-- Still open: `BOOT_COLD` (every boot) is not set yet, the reference
-  blocks' second register, the estop route (`X1_PC`) at boot, and the
-  firmware setting pin directions itself. Better than the table:
-  the firmware setting the direction of the pins the config names
-  (fork, `src/upc/gpio.c`).
+- **WiFi and addresses on a cold start are ours, as on the DP200
+  (same day).** A first version copied the network from Sindoh's
+  database at every boot; the owner asked for the full replacement, so
+  that script is gone. `x1_web.sh` `net_start` now runs the DP200's own
+  scripts from `<root>/dp200/` (`dp200-wifi.sh`, `dp200-wifi-action.sh`,
+  `dp200-netd.sh`; the 1X has the same WiFi module, `wpa_supplicant` and
+  database tables): the first run imports the secured networks saved on
+  Sindoh's screen into `<root>/etc/dp200/wpa_supplicant.conf` and a fixed
+  WiFi address into `network.json`; from then on both are ours, and the
+  touch screen's WIFI and WIFI IP pages work (they are on once
+  `/run/dp200/net.ok` exists, so not on a takeover boot). Checked: joined
+  8 s after start, fixed address kept, Moonraker ready over WiFi 33 s
+  after power-on, a scan through `dp200_wifi.py` lists networks. Not
+  checked: the pages by touch, joining another network, and a boot with
+  the wired port unplugged. The stock 1X has no `mlanutl`, so a scan
+  uses `wpa_supplicant`'s own (the link drops for about 10 s).
+- **The cold start is the default since 2026-11-27** (owner):
+  `/userdata/klipper/BOOT_COLD`. The card also runs the screen app of
+  that day (it had the 11-24 one; the old file is
+  `/usr/local/bin/dp200_screen.py.prev` on the card).
+- Still open: the reference blocks' second register, the estop route
+  (`X1_PC`) at boot, the firmware setting pin directions itself, and
+  `build_root_1x.sh` putting the three network scripts into
+  `<root>/dp200/` (copied by hand so far).
 
 **Step B, "cold start" (later).** Ours starts instead of Sindoh's
 programs: no stock heating, no stock screen at boot. **The stock program

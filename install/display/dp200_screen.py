@@ -61,6 +61,10 @@ CAL_NEEDS = {'zend': ('Z_ENDSTOP_CALIBRATE',), 'probe': ('LV_PROBE_CALIBRATE',)}
 BRINGUP_OFF_SCREENS = ('wifi',)
 BRINGUP_OFF_KINDS = ('net_cfg',)
 POWER_OK = '/run/dp200/power.ok'
+# 1X/2X: left by x1_web.sh once OUR network side runs (a cold start: WiFi
+# and addresses are ours, as on the DP200). On a takeover boot Sindoh's
+# programs own them and the WiFi pages stay off.
+NET_OK = '/run/dp200/net.ok'
 WEB_PORT = ''
 EXT_CMD_RE = re.compile(r'^[A-Z_][A-Z0-9_]*$')
 FB_BYTES = int(_read('/sys/class/graphics/fb0/bits_per_pixel', '16') or 16) // 8
@@ -758,10 +762,11 @@ class UI:
             return False
         while action[0] == 'confirm':
             action = action[2]
-        if action[0] in BRINGUP_OFF_KINDS:
-            return True
-        if action[0] == 'screen' and action[1] in BRINGUP_OFF_SCREENS:
-            return True
+        if not os.path.exists(NET_OK):
+            if action[0] in BRINGUP_OFF_KINDS:
+                return True
+            if action[0] == 'screen' and action[1] in BRINGUP_OFF_SCREENS:
+                return True
         if action[0] == 'power' and not os.path.exists(POWER_OK):
             return True
         if self.cmds is None:

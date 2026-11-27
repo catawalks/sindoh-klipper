@@ -140,8 +140,7 @@ if [ -e /tmp/x1_cold ]; then
         sleep 1
     done
     say "cold start: hardware set-up done after $n s"
-    # WiFi: Sindoh's screen program brings it up on a normal boot
-    [ -f $ROOT/stage/x1_wifi.sh ] && (X1_BASE=$BASE sh $ROOT/stage/x1_wifi.sh start >> $LOG 2>&1 &)
+    # (WiFi and addresses: x1_web.sh net_start, the DP200's own scripts)
     [ -e $BASE/COLD_MANUAL ] && { say "cold start: stopping here for the steps by hand ($BASE/COLD_MANUAL)"; exit 0; }
 fi
 X1_BASE=$BASE X1_ROOT=$ROOT sh $ROOT/stage/x1_boot.sh $1 >> $LOG 2>&1

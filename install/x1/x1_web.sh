@@ -121,6 +121,7 @@ power_do() {
     frame 4; say "heaters and motors"
     sh $ST/x1_stop.sh $ST/bin/upctool || say "HEATER CHECK FAILED - going on, the $what ends it"
     frame 5; say "saving files"
+    net_stop
     rm -f $RUN/power.ok $RUN/power
     sync
     for m in dev/pts dev/shm dev sys proc; do umount $ROOT/$m 2>/dev/null; done
@@ -209,6 +210,61 @@ eth_retry() {
     ifconfig eth0 2>/dev/null | grep -q 'inet addr' && return
     (udhcpc -R -n -p /var/run/udhcpc.eth0.pid -i eth0 > /tmp/udhcpc_eth0.out 2>&1 &)
 }
+# Our own network side, on a cold start only (x1_hook.sh; on a takeover
+# boot Sindoh's screen program has joined the WiFi and set the addresses).
+# These are the DP200's scripts, used as they are: the 1X has the same
+# WiFi module, wpa_supplicant and settings database.
+#   dp200-wifi.sh   first run: copies the secured networks saved on
+#                   Sindoh's screen into <root>/etc/dp200/wpa_supplicant.conf
+#                   (from then on that file is ours: the touch screen's
+#                   WIFI page scans, joins and forgets); starts
+#                   wpa_supplicant and the DHCP-on-connect helper
+#   dp200-netd.sh   applies <root>/etc/dp200/network.json (DHCP or fixed
+#                   address per port, set on the screen)
+# First run only: a fixed WiFi address set on Sindoh's screen is taken
+# over into network.json, so the printer keeps its address (written
+# without spaces: dp200-wifi-action.sh looks for "mode":"static").
+net_seed() {
+    J=$ROOT/etc/dp200/network.json
+    [ -f $J ] && return
+    DNS=$(sed -n 's/^nameserver *//p' /etc/resolv.conf 2>/dev/null | head -n 1)
+    awk -v dns="$DNS" '
+        /^iface mlan0 inet static/ { f = 1; next }
+        /^iface|^auto/ { f = 0 }
+        f && $1 == "address" { a = $2 }
+        f && $1 == "netmask" { m = $2 }
+        f && $1 == "gateway" { g = $2 }
+        END { if (a != "" && m != "") {
+                  if (dns == "") dns = g
+                  printf "{\"mlan0\":{\"mode\":\"static\",\"ip\":\"%s\",\"mask\":\"%s\",\"gw\":\"%s\",\"dns\":\"%s\"}}\n", a, m, g, dns } }
+    ' /etc/network/interfaces > $J.new 2>/dev/null
+    [ -s $J.new ] && mv $J.new $J || rm -f $J.new
+}
+net_start() {
+    [ -e /tmp/x1_cold ] || return
+    D=$ROOT/dp200
+    [ -f $D/dp200-wifi.sh ] && [ -f $D/dp200-netd.sh ] && [ -f $D/dp200-wifi-action.sh ] ||
+        { echo "x1_web: the network scripts are not in $D: WiFi not started"; return; }
+    mkdir -p $ROOT/etc/dp200 $ROOT/run/wpa_supplicant /var/run/wpa_supplicant $RUN $ROOT/var/log
+    net_seed
+    DP200_WIFI_KEEP_REGION=1 sh $D/dp200-wifi.sh $ROOT
+    if ! { [ -f /var/run/dp200-netd.pid ] && kill -0 $(cat /var/run/dp200-netd.pid) 2>/dev/null; }; then
+        sh $D/dp200-netd.sh $ROOT < /dev/null >> $ROOT/var/log/dp200-netd.log 2>&1 &
+        echo $! > /var/run/dp200-netd.pid
+    fi
+    grep -q " $ROOT/run/wpa_supplicant " /proc/mounts ||
+        mount --bind /var/run/wpa_supplicant $ROOT/run/wpa_supplicant
+    cp /lib/modules/8782/mlanutl $ROOT/run/mlanutl 2>/dev/null
+    inroot /usr/bin/python3 /usr/local/bin/dp200_wifi.py apply
+    touch $RUN/net.ok
+}
+net_stop() {                        # before the card is unmounted
+    rm -f $RUN/net.ok
+    [ -f /var/run/dp200-netd.pid ] && kill $(cat /var/run/dp200-netd.pid) 2>/dev/null
+    rm -f /var/run/dp200-netd.pid
+    for p in $(pids "wpa_cli -B"); do kill $p; done
+    umount $ROOT/run/wpa_supplicant 2>/dev/null
+}
 # The speaker (2026-11-24): a USB sound card with its own amplifier,
 # GPIO 180 (bank 5 pin 20, the registers stock's /app/audio_amp.sh
 # writes). Klipper's [sindoh_sound] (the fork, klippy/extras/
@@ -264,6 +320,7 @@ start)
     mkdir -p $ROOT/var/log/nginx $ROOT/var/lib/nginx $ROOT/run
     time_zone
     eth_retry
+    net_start
     stock_info
     cp $ST/x1_moonraker.conf $ROOT$K/printer_data/config/moonraker.conf
     # Klipper (our fork) and Moonraker stay at the commits on the card:

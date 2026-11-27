@@ -64,7 +64,8 @@ if ! { pidof wpa_supplicant >/dev/null 2>&1 || ps | grep -q '[w]pa_supplicant'; 
         [ -e /sys/class/net/$IF ] && wpa_supplicant -Dnl80211 -P /var/run/wpa_supplicant.$IF.pid \
             -i$IF -c$CONF -B
     else
-        iwpriv $IF regioncode 48 2>/dev/null
+        # (DP200_WIFI_KEEP_REGION: the 1X, which runs with its own region)
+        [ -n "$DP200_WIFI_KEEP_REGION" ] || iwpriv $IF regioncode 48 2>/dev/null
         wpa_supplicant -Dwext -P /var/run/wpa_supplicant.$IF.pid -O /var/run/wpa_supplicant \
             -i$IF -c/etc/wpa_supplicant.conf -B
     fi
@@ -73,6 +74,8 @@ fi
 
 # Ethernet, if a cable is plugged in
 if [ "$(cat /sys/class/net/eth0/carrier 2>/dev/null)" = 1 ]; then
-    udhcpc -b -i eth0 -p /var/run/udhcpc.eth0.pid >/dev/null 2>&1
+    # (unless a client is already there: the 1X's stock boot starts one)
+    { [ -f /var/run/udhcpc.eth0.pid ] && kill -0 $(cat /var/run/udhcpc.eth0.pid) 2>/dev/null; } ||
+        udhcpc -b -i eth0 -p /var/run/udhcpc.eth0.pid >/dev/null 2>&1
 fi
 log "started on $IF"
