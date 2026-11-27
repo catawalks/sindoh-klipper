@@ -160,9 +160,13 @@ init scripts), the screen's backlight, and the unknowns in
 - With that, Klipper started cold and **X, Y and Z homed** (bed empty,
   owner's word), temperatures and filament sensors read as usual, the
   PSU fan runs with the motors.
+- **Heat and a print from that cold start (same day):** nozzle to
+  200 C in about 60 s, bed to 60 C, PSU and head fans on with the
+  heaters; `x1_box_20mm.gcode` printed start to end (306 s, 350 mm of
+  filament, as on 11-23), bed check answered through the macro.
 - Still open: the automatic start (`COLD_AUTO`), WiFi, what the 13
   unnamed lines in `cold_pins` are, the reference blocks' second
-  register, heat and a print from a cold start. Better than the table:
+  register. Better than the table:
   the firmware setting the direction of the pins the config names
   (fork, `src/upc/gpio.c`).
 
