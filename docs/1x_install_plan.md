@@ -196,6 +196,14 @@ init scripts), the screen's backlight, and the unknowns in
   `/userdata/klipper/BOOT_COLD`. The card also runs the screen app of
   that day (it had the 11-24 one; the old file is
   `/usr/local/bin/dp200_screen.py.prev` on the card).
+- **The system runs from internal storage since 2026-11-27:** the
+  card's root was copied to `/userdata/klipper/root` with the root's own
+  `tar` (our programs stopped; 1 GB, 29,537 files, checksums of all
+  files equal), and the hook starts that copy when it is there. Ready
+  31 s after power-on, the card in its slot but not mounted. The first
+  try failed: `x1_stage4.sh` insisted on a mounted card (fixed; it left
+  `COLD_FAILED`, as designed). `x1_web.sh` and `x1_stage4.sh` find the
+  installed root by themselves when `X1_ROOT` is not set.
 - Still open: the reference blocks' second register, the estop route
   (`X1_PC`) at boot, the firmware setting pin directions itself, and
   `build_root_1x.sh` putting the three network scripts into

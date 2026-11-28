@@ -14,7 +14,9 @@
 # A shell over SSH (dropbear) has only /usr/bin:/bin: chroot, ip and
 # killall are in the sbin folders (1X 2026-11-24).
 export PATH=/usr/sbin:/sbin:/usr/bin:/bin:$PATH
-ROOT=${X1_ROOT:-/tmp/sd}      # the Debian root: the SD card, or the installed copy
+# the Debian root: the installed copy when there is one, else the SD card
+ROOT=$X1_ROOT
+[ -n "$ROOT" ] || { ROOT=/tmp/sd; [ -x /userdata/klipper/root/usr/bin/python3 ] && ROOT=/userdata/klipper/root; }
 ST=$ROOT/stage
 U=$ST/bin/upctool
 K=/home/klipper
@@ -80,7 +82,8 @@ cold_pins() {
 }
 case "$1" in
 start)
-    grep -q " $ROOT ext4 " /proc/mounts || { echo "mount the card at $ROOT first"; exit 1; }
+    # (the card is a mount of its own; an installed root is a folder on /userdata)
+    [ -x $ROOT/usr/bin/python3 ] || { echo "no Debian root at $ROOT (card not mounted?)"; exit 1; }
     sh $ST/x1_stop.sh $U || exit 1
     mounts
     install -m 755 $U $ROOT/usr/local/bin/upctool
