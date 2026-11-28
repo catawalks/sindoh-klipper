@@ -98,14 +98,15 @@ Stock's X current setting on this printer is `MOTOR_PWM_XOFFSET` -15
 
 Done 2026-11-28 (rendered on the 1X from a side copy, not run on a
 2X): the app knows the board (`MODEL` 2X), reads the power button on
-GPIO 130 there, and its header shows both nozzles when Klipper has
-an `extruder1`.
+GPIO 130 there, its header shows both nozzles when Klipper has an
+`extruder1`, and PREHEAT then offers NOZZLE 1 / NOZZLE 2 / BOTH
+(`M104 T0`/`T1`).
 
 To do, once a 2X config exists (stock's pages show what is needed:
 the 1X's stock screen is the 2X's with these parts commented out):
 
-- nozzle 1 / nozzle 2 selector on PREHEAT, JOG (which head moves),
-  CLEAN and the Z offset page;
+- nozzle 1 / nozzle 2 selector on JOG (which head moves), CLEAN and
+  the Z offset page;
 - FILAMENT: pick the cartridge first (stock's "cartridge selection"
   page), then load or unload it; both cartridges on the print page;
 - calibration: nozzle XY (print stock's kind of pattern, enter the

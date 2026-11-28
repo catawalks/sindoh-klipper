@@ -872,6 +872,8 @@ class UI:
             self.net_action(action)
         elif kind == 'obj_more':
             self.obj_page = getattr(self, 'obj_page', 0) + 1
+        elif kind == 'preheat_tool':                   # PREHEAT with two nozzles: 0, 1 or 2 (both)
+            self.preheat_tool = action[1]
         elif kind == 'go_home':                        # the HOME button in the header
             if self.screen == 'papertest':
                 self.run(('cal_abort',))               # leaving ends the paper test
@@ -2688,6 +2690,9 @@ class UI:
 
     def page_preheat(self, d, st):
         d.text((20, 160), 'Preheat', font=font(28), fill=C_TXT)
+        if 'temperature' in (st.get('extruder1') or {}):
+            self.page_preheat2(d)
+            return
         items = []
         for name, noz, bed in PRESETS:
             if NO_BED:
@@ -2700,6 +2705,30 @@ class UI:
                           C_BTN, 30, '%d / %d' % (noz, bed)))
         items.append(('COOL DOWN', ('gcode', 'TURN_OFF_HEATERS', 'Cool down')))
         self.grid(d, items, top=210)
+
+    def page_preheat2(self, d):
+        # Two nozzles (2X): pick which one the presets heat. M104 takes
+        # the tool as T0/T1 (Klipper: extruder, extruder1); the bed is
+        # set with either.
+        tool = getattr(self, 'preheat_tool', 0)
+        w = (PW - 60 - 40) // 3
+        for i, name in enumerate(('NOZZLE 1', 'NOZZLE 2', 'BOTH')):
+            x = 30 + i * (w + 20)
+            self.button(d, (x, 204, x + w, 264), name, ('preheat_tool', i),
+                        C_ON if tool == i else C_BAR, 20)
+        which = ('nozzle 1', 'nozzle 2', 'both nozzles')[tool]
+        items = []
+        for name, noz, bed in PRESETS:
+            g = ''.join('M104 T%d S%d\n' % (t, noz) for t in ((0, 1) if tool == 2 else (tool,)))
+            if NO_BED:
+                items.append((name, ('confirm', 'Preheat %s: %s %d?' % (name, which, noz),
+                                     ('gcode', g.strip(), 'Preheat ' + name)), C_BTN, 30, '%d' % noz))
+            else:
+                items.append((name, ('confirm', 'Preheat %s: %s %d, bed %d?' % (name, which, noz, bed),
+                                     ('gcode', g + 'M140 S%d' % bed, 'Preheat ' + name)),
+                              C_BTN, 30, '%d / %d' % (noz, bed)))
+        items.append(('COOL DOWN', ('gcode', 'TURN_OFF_HEATERS', 'Cool down')))
+        self.grid(d, items, top=284)
 
     def page_move(self, d, st):
         th = st['toolhead']
