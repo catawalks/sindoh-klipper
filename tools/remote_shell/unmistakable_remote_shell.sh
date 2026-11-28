@@ -29,30 +29,46 @@ DB=`command -v dropbear || echo /usr/sbin/dropbear`
 DK=`command -v dropbearkey || echo /usr/bin/dropbearkey`
 if [ ! -x "$DB" ] || [ ! -x "$DK" ]; then
     log "no dropbear on this printer"
-elif [ -f $W/dropbear.pid ] && kill -0 "`cat $W/dropbear.pid`" 2>/dev/null; then
-    log "already running (pid `cat $W/dropbear.pid`)"
 else
+    # What is there before anything is touched (2X 2026-11-28: a running
+    # shell stopped taking our key after about 70 minutes; cause unknown).
+    # These lines go to the stick's report.
+    log "before: /root mount: `grep ' /root ' /proc/mounts | cut -d' ' -f1-3`"
+    for _f in /tmp $W $W/root $W/root/.ssh $W/root/.ssh/authorized_keys; do
+        log "before: `ls -ld $_f 2>&1`"
+    done
     [ -f $W/host_ecdsa ] || "$DK" -t ecdsa -s 256 -f $W/host_ecdsa >> $LOG 2>&1
-    # root's home, in RAM: a copy of /root plus our key
+    # root's home, in RAM: a copy of /root plus our key. Done at every
+    # run, so putting the stick in again repairs a shell that no longer
+    # takes the key (the key file, its permissions, the mount).
     if ! grep -q " /root " /proc/mounts; then
         rm -rf $W/root
         mkdir -p $W/root
         cp -a /root/. $W/root/ 2>/dev/null
-        mkdir -p $W/root/.ssh
-        # A forced command, so a session is never a LOGIN shell: on these
-        # printers /etc/profile ends with /run.sh, and a login shell
-        # would start Sindoh's programs a second time.
-        cat > $W/shell.sh <<'EOS'
+    fi
+    mkdir -p $W/root/.ssh
+    # A forced command, so a session is never a LOGIN shell: on these
+    # printers /etc/profile ends with /run.sh, and a login shell
+    # would start Sindoh's programs a second time.
+    cat > $W/shell.sh <<'EOS'
 #!/bin/sh
 export PATH=/usr/sbin:/sbin:/usr/bin:/bin
 [ -n "$SSH_ORIGINAL_COMMAND" ] && exec /bin/sh -c "$SSH_ORIGINAL_COMMAND"
 exec /bin/sh -i
 EOS
-        echo "command=\"/bin/sh $W/shell.sh\" $PUBKEY" > $W/root/.ssh/authorized_keys
-        chmod 700 $W/root $W/root/.ssh
-        chmod 600 $W/root/.ssh/authorized_keys
+    echo "command=\"/bin/sh $W/shell.sh\" $PUBKEY" > $W/root/.ssh/authorized_keys
+    chown -R 0:0 $W/root/.ssh 2>/dev/null
+    chmod 700 $W/root $W/root/.ssh
+    chmod 600 $W/root/.ssh/authorized_keys
+    if ! grep -q " /root " /proc/mounts; then
         mount --bind $W/root /root && log "/root covered by a RAM copy"
     fi
+fi
+if [ ! -x "$DB" ] || [ ! -x "$DK" ]; then
+    :
+elif [ -f $W/dropbear.pid ] && kill -0 "`cat $W/dropbear.pid`" 2>/dev/null; then
+    log "already running (pid `cat $W/dropbear.pid`); key and home set up again"
+else
     # its own session, so it outlives the stock update script
     SS=`command -v setsid`
     $SS "$DB" -r $W/host_ecdsa -p $PORT -s -P $W/dropbear.pid \

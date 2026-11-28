@@ -126,7 +126,16 @@ The Debian root is about 920 MB; the NAND root has 42 MB free.
    the way the remote shell starts today (warm takeover after stock
    is up, as on the 1X before 11-27). **No NAND write at all**, and
    pulling the stick gives a stock printer. Cost: a stick stays in.
-2. **Our card in the SD socket** in place of Sindoh's factory card.
+2. **Partition 4 of Sindoh's card, where it is** (owner's idea,
+   2026-11-28). The card's fourth partition is 6.6 GB with no file
+   system, and nothing of stock's uses it; the first three hold the
+   recovery boot and stay as they are. Our root (about 920 MB) fits
+   seven times. Cost: one `mkfs.ext4` on that partition, which is a
+   write to Sindoh's card (owner's OK; the card's used part is
+   backed up on the PC first). The printer need not be opened. It
+   still needs something to start us after each power-on: a stick
+   script, or the hook of 4.
+3. **Our card in the SD socket** in place of Sindoh's factory card.
    Needs the printer opened, and the factory card kept safe (it is
    stock's recovery image; a copy of such a card is already on the
    PC). Read 2026-11-28: in normal running stock does not mount
@@ -135,8 +144,8 @@ The Debian root is about 920 MB; the NAND root has 42 MB free.
    A card of ours would have to keep partition 3 free for that, and
    with it in the socket the printer has no card recovery (stock
    then says "Please Use USB Tool").
-3. **A boot hook in the NAND root** (`/etc/init.d/S99klipper`, one
-   small file, as on the 1X) so that 1 or 2 start without a stick
+4. **A boot hook in the NAND root** (`/etc/init.d/S99klipper`, one
+   small file, as on the 1X) so that 1, 2 or 3 start without a stick
    script. This is a NAND write: the owner's OK, and only after the
    warm takeover has proven itself.
 
@@ -146,9 +155,9 @@ environment.
 ## Order of work
 
 1. Serial boot capture (the cable is on the 1X; swap needed).
-2. Emulate the 2X's two motion-core programs on the PC
-   (`tools/x1_ucode_probe.py` needs the `unicorn` package, which is
-   not installed on this PC any more).
+2. Done 2026-11-28: the 2X's two motion-core programs emulated on the
+   PC. Their start-up is the 1X's, except that the FM program sets
+   up GPIO 134/135 where the 1X's sets up 120/121.
 3. A stick root and the warm takeover with a look-only config
    (stage 4 of the 1X plan): both cores up, sensors and thermistors
    read, nothing driven. The config is written
@@ -160,4 +169,4 @@ environment.
    heater 2 with low limits, the three new motors.
 6. Homing both heads, then the tool macros and offsets.
 7. Screen pages for the second head.
-8. Decide 2 or 3 above.
+8. Decide between the storage options above.
