@@ -232,10 +232,12 @@ integrity check reads, the mount is gone at the next boot, and
 
 ## The way back to stock
 
-- **From our screen:** SYSTEM -> POWER -> "Next start: Sindoh" (to
-  build) writes `BOOT_STOCK` and reboots. Stock then runs at every
-  start until the flag is removed. Sindoh's screen cannot remove it,
-  so that takes a stick (below) or the console.
+- **From our screen:** SYSTEM -> POWER -> SINDOH (after a cold start;
+  built and tried 2026-11-27) writes `BOOT_STOCK_ONCE` and reboots.
+  Sindoh's firmware runs for that one start (SSH still starts); the
+  hook removes the flag at once, so the start after it is ours again.
+  One start only on purpose: Sindoh's screen could not undo a permanent
+  switch. `BOOT_STOCK` (every start) stays for SSH and the stick.
 - **From a stick:** a `_update_rodin_1x` stick with only our
   `unmistakable_klipper_boot_stock.she` sets the flag (or removes it).
 - **Never** use the power button at power-on: U-Boot reads that line
