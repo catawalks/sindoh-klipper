@@ -124,6 +124,9 @@ POWER_KEY = '/run/dp200/power.key'
 # frame again at once (2026-11-25, work printer: the "Cancelled" box
 # flashed back every few seconds for 20 s).
 DRAWN = '/run/dp200/screen.drawn'
+# While this file exists, every touch (down/up, position, button) and every
+# pass of the main loop that takes over 150 ms goes to the log.
+TOUCH_DEBUG = '/run/dp200/touch.debug'
 REPAINT_REQ = '/run/dp200/screen.repaint'
 # Shutdown/reboot progress: the stop scripts end this app first, so it draws
 # one frame per step beforehand (raw fb data, in RAM). rc.dp200 stop and the
@@ -708,6 +711,7 @@ class UI:
         self.busy = None               # text of the running command
         self.msg = None                # (text, until)
         self.press = None              # (u, v, t0)
+        self.kb_cache = {}             # WiFi keyboard: (mode, shift) -> (image, keys)
         self.key_down = None           # time the power button went down
         self.key_off_at = 0.0          # 1X: power off at this time (CANCEL stops it)
         self.key_estop = False         # 1X: that pulse sent the emergency stop
@@ -1881,6 +1885,7 @@ class UI:
                        C_TXT if down else off_fg),
                       ('RESCAN', ('wifi_rescan',), C_BTN, 24)], top=590, rows_h=74, cols=3)
 
+    KB_TYPING = ('kb', 'kb_bs', 'kb_shift', 'kb_mode')
     KB_ROWS = {
         'abc': ['1234567890', 'qwertyuiop', 'asdfghjkl', 'zxcvbnm.-_'],
         'sym': ['1234567890', '!@#$%^&*()', '-_=+[]{}\\|', ';:\'",.<>/?'],
@@ -1902,27 +1907,48 @@ class UI:
         d.text((20, 200), shown + '|', font=f, fill=C_TXT)
         if not wf['text'] and wf['kb_for'] == 'psk' and wf['hidden']:
             d.text((44, 208), 'empty = open network', font=font(18), fill=C_DIM)
-        # keys
+        # keys: drawn once per layout and pasted (47 buttons took 60 of the
+        # page's 75 ms on the 1X); only a pressed key is drawn again
         kw, gap, top = 43, 4, 254
-        for r, row in enumerate(self.KB_ROWS[wf['mode']]):
-            x0 = 6 + (len(row) < 10) * (kw + gap) // 2
-            y = top + r * 62
-            for i, ch in enumerate(row):
-                label = ch.upper() if wf['shift'] and wf['mode'] == 'abc' else ch
-                x = x0 + i * (kw + gap)
-                self.button(d, (x, y, x + kw, y + 56), label, ('kb', ch), C_BTN, 26)
+        ck = (wf['mode'], wf['shift'])
+        area = (0, top - 2, PW, top + 4 * 62 + 60)
+        if ck not in self.kb_cache:
+            keys = []
+            for r, row in enumerate(self.KB_ROWS[wf['mode']]):
+                x0 = 6 + (len(row) < 10) * (kw + gap) // 2
+                y = top + r * 62
+                for i, ch in enumerate(row):
+                    label = ch.upper() if wf['shift'] and wf['mode'] == 'abc' else ch
+                    x = x0 + i * (kw + gap)
+                    keys.append(((x, y, x + kw, y + 56), label, ('kb', ch), C_BTN, 26))
+            y = top + 4 * 62
+            u = kw + gap                               # bottom row in key units
+            if wf['mode'] == 'abc':
+                keys.append(((6, y, 6 + 2 * u - gap, y + 56), '?123', ('kb_mode',), C_BAR, 22))
+                keys.append(((6 + 2 * u, y, 6 + 4 * u - gap, y + 56), 'SHIFT', ('kb_shift',),
+                             C_ON if wf['shift'] else C_BAR, 20))
+            else:
+                keys.append(((6, y, 6 + 2 * u - gap, y + 56), 'ABC', ('kb_mode',), C_BAR, 22))
+                keys.append(((6 + 2 * u, y, 6 + 3 * u - gap, y + 56), '`', ('kb', '`'), C_BTN, 26))
+                keys.append(((6 + 3 * u, y, 6 + 4 * u - gap, y + 56), '~', ('kb', '~'), C_BTN, 26))
+            keys.append(((6 + 4 * u, y, 6 + 8 * u - gap, y + 56), 'space', ('kb', ' '), C_BTN, 20))
+            keys.append(((6 + 8 * u, y, PW - 6, y + 56), 'DEL', ('kb_bs',), C_BAR, 20))
+            im2 = Image.new('RGB', (PW, PH), C_BG)
+            d2 = ImageDraw.Draw(im2)
+            buttons, press = self.buttons, self.press
+            self.buttons, self.press = [], None
+            for k in keys:
+                self.button(d2, *k)
+            self.buttons, self.press = buttons, press
+            self.kb_cache[ck] = (im2.crop(area), keys)
+        img, keys = self.kb_cache[ck]
+        self.im.paste(img, area[:2])
+        for k in keys:
+            if self.pressed(k[0]):
+                self.button(d, *k)
+            else:
+                self.buttons.append((k[0], k[2]))
         y = top + 4 * 62
-        u = kw + gap                                   # bottom row in key units
-        if wf['mode'] == 'abc':
-            self.button(d, (6, y, 6 + 2 * u - gap, y + 56), '?123', ('kb_mode',), C_BAR, 22)
-            self.button(d, (6 + 2 * u, y, 6 + 4 * u - gap, y + 56), 'SHIFT', ('kb_shift',),
-                        C_ON if wf['shift'] else C_BAR, 20)
-        else:
-            self.button(d, (6, y, 6 + 2 * u - gap, y + 56), 'ABC', ('kb_mode',), C_BAR, 22)
-            self.button(d, (6 + 2 * u, y, 6 + 3 * u - gap, y + 56), '`', ('kb', '`'), C_BTN, 26)
-            self.button(d, (6 + 3 * u, y, 6 + 4 * u - gap, y + 56), '~', ('kb', '~'), C_BTN, 26)
-        self.button(d, (6 + 4 * u, y, 6 + 8 * u - gap, y + 56), 'space', ('kb', ' '), C_BTN, 20)
-        self.button(d, (6 + 8 * u, y, PW - 6, y + 56), 'DEL', ('kb_bs',), C_BAR, 20)
         # actions
         y += 66
         ok = 'NEXT' if wf['kb_for'] == 'ssid' else 'CONNECT'
@@ -1940,6 +1966,15 @@ class UI:
     def on_touch(self, ev):
         kind, u, v = ev
         self.last_touch = time.time()
+        if kind != 'move' and os.path.exists(TOUCH_DEBUG):
+            log('touch %s %d,%d %s' % (kind, u, v, (self.hit(u, v) or ('-',))[0]))
+        if kind == 'move' and self.press and self.screen == 'wifi_kb':
+            # small keys: the lit key follows the finger, and the key under
+            # it at the lift is the one typed (see 'up' below). Not onto
+            # SHOW, CONNECT or BACK: those need the whole press on them.
+            if (self.hit(u, v) or ('kb',))[0] in self.KB_TYPING:
+                self.press = (u, v, self.press[2])
+            return
         if kind == 'down':
             lu = self.last_up
             sl = self.stop_lift
@@ -1965,6 +2000,13 @@ class UI:
         if kind == 'up' and self.press:
             a0 = self.hit(self.press[0], self.press[1])
             a1 = self.hit(u, v)
+            if self.screen == 'wifi_kb' and a1 is not None \
+                    and a1[0] in self.KB_TYPING:
+                # The keys are 43 px wide: the first two samples of a touch
+                # (the "down" position) often fall on the neighbour or in the
+                # gap, and the key lit up without typing (1X 2026-11-27). As
+                # on a phone, the key under the finger at the lift counts.
+                a0 = a1
             if a0 == ('estop',):
                 self.stop_lift = (self.press[2], time.time())   # (hold start, lift)
             self.press = None
@@ -2034,6 +2076,7 @@ class UI:
     def render(self):
         im = Image.new('RGB', (PW, PH), C_BG)
         d = ImageDraw.Draw(im)
+        self.im = im                    # for pages that paste a prepared image
         self.buttons = []
         st = self.st
         if self.screen.startswith('powering'):
@@ -3646,6 +3689,7 @@ def main():
     was_busy = None
     while True:
         now = time.time()
+        t_pass = time.monotonic()
         if now < wall_was - 2:
             # the wall clock went back: restart the timers kept in it
             log('clock went back %.0f s' % (wall_was - now))
@@ -3674,7 +3718,10 @@ def main():
         if was_busy and not ui.busy:
             next_poll = 0.0             # a command just finished: show its result now
         was_busy = ui.busy
-        polled = time.monotonic() >= next_poll
+        # not between key presses: the status poll takes 250 ms on the 1X,
+        # and a key pressed during it waited that long
+        typing = ui.screen in ('wifi_kb', 'numpad') and time.time() - ui.last_touch < 2
+        polled = time.monotonic() >= next_poll and not typing
         if polled:
             try:
                 ui.st, ui.err = query(), None
@@ -3726,7 +3773,9 @@ def main():
         if full:
             panel.repaint()
             next_full = time.monotonic() + (5 if time.monotonic() - started < 60 else 60)
-        if full or events or ui.press or ui.key_down is not None or key != last_key:
+        # (a held key on the WiFi keyboard changes nothing by itself)
+        if full or events or (ui.press and ui.screen != 'wifi_kb') or ui.key_down is not None \
+                or key != last_key:
             panel.show(ui.render())
             last_key = key
             if not drawn:
@@ -3736,6 +3785,9 @@ def main():
                         f.write('%d\n' % os.getpid())
                 except OSError:
                     pass
+        if time.monotonic() - t_pass > 0.15 and os.path.exists(TOUCH_DEBUG):
+            log('slow pass: %.0f ms%s%s' % ((time.monotonic() - t_pass) * 1000,
+                                            ', status poll' if polled else '', ', full repaint' if full else ''))
         timeout = 0.05 if ui.press or ui.key_down is not None or ui.key_off_at else \
             max(0.0, min(next_poll - time.monotonic(), 0.1 if pkey.m is not None else 0.5))
         r, _, _ = select.select([touch.fd, _WAKE_R], [], [], timeout)
