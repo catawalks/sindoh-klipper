@@ -65,12 +65,12 @@ each line needs its own test with the owner at the printer:
 | Nozzle 2 heater | PWM block 25 | period 1000 like 5 and 28; idle on the 1X, running at 11 % on the idle 2X next to block 5 |
 | Nozzle 2 thermistor | ADC select 4 | "open on the 1X" |
 | Head 2 fans | PWM blocks 14 and 22, GPIO 225 (`gp_En_NozzleFan[0]`) | did nothing on the 1X; configured and off on the idle 2X |
-| Driver enables | GPIO 56, 53, 96 | outputs on the 2X; unused slots on the 1X |
+| Driver enables | X1 GPIO 56, extruder 1 GPIO 53, cartridge feed 1 GPIO 96 | the engine's hold masks pair 56 with the axes, 53 with 96, and 44 with 50 (the 1X's pair) |
 | Motor current references | PWM blocks 13 and 23 | run on the 1X without a motor; both at 100 on the idle 2X |
 | TMC numbers | 1, 5, 7 | empty on the 1X |
 | X1 step engine, X1 home sensor | not known | |
 | Cartridge 1 feed, its sensors and encoder | GPIO 76 (`gp_cartFilaSensor[0]`), rest not known | |
-| How two extruders and two feed motors share the six stepper blocks | not known | six blocks, eight drivers |
+| Step generators | X1 its own (block 5, the one the 1X leaves unused); the two extruders share block 3 and the two feeds block 4, picked by the enable | six blocks, eight drivers; the engine always enables one head's extruder and feed together. To be shown by a test |
 
 Stock's X current setting on this printer is `MOTOR_PWM_XOFFSET` -15
 (X1) and `X2OFFSET` 0; Z is +30 (1X: +40).
