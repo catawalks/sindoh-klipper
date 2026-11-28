@@ -203,11 +203,15 @@ On 11-24 night it runs our stack (started over SSH), idle, not homed.
   stopped (`x1_stop.sh` does that on this board; only the freeze
   itself has been tried there).
 - The screen app knows the board and shows two nozzles; Klipper has
-  not run on it. Our system's home is made: an empty ext4 file
-  system (label `klipper2x`, 6.3 GB) on partition 4 of Sindoh's card
-  (2026-11-28, owner's OK; the rest of the card is untouched). Open:
-  putting the root there and what starts it at power-on, the serial
-  boot capture, the look-only takeover.
+  not run on it. Our system's home is made: an ext4 file system
+  (label `klipper2x`) on partition 4 of Sindoh's card (2026-11-28,
+  owner's OK; the rest of the card is untouched), holding a verified
+  copy of the 1X's root with the 1X configs renamed `*.1x`. Open:
+  a 2X config, what starts it at power-on, the serial boot capture,
+  the look-only takeover.
+- Stock's web status request (what its web page polls) wakes the
+  printer from power saving, and stock then warms nozzles and bed.
+  Check stock over SSH instead.
 
 ## Who owns what
 

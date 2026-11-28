@@ -152,8 +152,15 @@ The Debian root is about 920 MB; the NAND root has 42 MB free.
    partition's end), made with the printer's own `mke2fs 1.42.13`
    and `-E nodiscard`; 6.3 GB free. Afterwards the boot area and
    partitions 1 to 3 and the last 1 MiB had the md5s from before,
-   and stock ran on undisturbed. Mount it by label; nothing is on it
-   yet. It
+   and stock ran on undisturbed. Mount it by label. **It holds a
+   copy of the 1X's Klipper root** (`root/`, 2026-11-28, 1.0 GB,
+   every file's md5 equal to the archive pulled from the 1X; the
+   archive is on the owner's PC, `2x_files/root_from_1x/`). The 1X
+   printer configs in it are renamed `*.1x` (config folder and
+   `stage/`) so that nothing can load them on this board; a
+   `README.txt` at the top says so. Nothing starts it, and it is
+   left unmounted. Next: a 2X config and the board check, then the
+   look-only start. It
    still needs something to start us after each power-on: a stick
    script, or the hook of 4.
 3. **Our card in the SD socket** in place of Sindoh's factory card.
