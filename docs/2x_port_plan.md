@@ -151,8 +151,10 @@ environment.
    not installed on this PC any more).
 3. A stick root and the warm takeover with a look-only config
    (stage 4 of the 1X plan): both cores up, sensors and thermistors
-   read, nothing driven. Board check and pin list for `TOC` in
-   `x1_stage4.sh`, `x1_web.sh`.
+   read, nothing driven. The config is written
+   (`klipper/config/x2/bringup/x2_stage4.cfg`, not run); still to
+   do: the board check and pin list for `TOC` in `x1_stage4.sh` and
+   `x1_web.sh`, and the stick root.
 4. TMC read-back of all eight drivers (stock stopped).
 5. Outputs one at a time, owner watching: fans (126, 14, 22, 225),
    heater 2 with low limits, the three new motors.
