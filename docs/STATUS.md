@@ -209,6 +209,11 @@ On 11-24 night it runs our stack (started over SSH), idle, not homed.
   copy of the 1X's root with the 1X configs renamed `*.1x`. Open:
   a 2X config, what starts it at power-on, the serial boot capture,
   the look-only takeover.
+- **Klipper ran on it 2026-11-28, look only** (warm takeover from
+  the card, `x2_stage4.cfg`): both cores, both nozzle thermistors,
+  bed, filament sensors, all eight motor drivers answering; Mainsail,
+  Moonraker, camera and screen app up. Nothing driven yet. Next: the
+  right head's home sensor (hand test), then outputs one at a time.
 - Stock's web status request (what its web page polls) wakes the
   printer from power saving, and stock then warms nozzles and bed.
   Check stock over SSH instead.

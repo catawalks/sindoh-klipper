@@ -191,13 +191,23 @@ environment.
 2. Done 2026-11-28: the 2X's two motion-core programs emulated on the
    PC. Their start-up is the 1X's, except that the FM program sets
    up GPIO 134/135 where the 1X's sets up 120/121.
-3. A stick root and the warm takeover with a look-only config
-   (stage 4 of the 1X plan): both cores up, sensors and thermistors
-   read, nothing driven. The config is written
-   (`klipper/config/x2/bringup/x2_stage4.cfg`, not run); still to
-   do: the board check and pin list for `TOC` in `x1_stage4.sh` and
-   `x1_web.sh`, and the stick root.
-4. TMC read-back of all eight drivers (stock stopped).
+3. **Done 2026-11-28: the warm takeover with the look-only config**,
+   from the card's partition 4 (`X1_ROOT=/tmp/k2x/root`):
+   `x1_stop.sh` froze stock's watcher, stopped the motion program and
+   left the heater outputs off; the 1X firmware (fork c9887565) runs
+   on both cores; Klipper is ready with `x2_stage4.cfg`. Read: both
+   nozzle thermistors (ADC select 4 is head 1's, as expected), the
+   bed, all four filament sensors, head 2's X home. `x1_web.sh` then
+   started Moonraker, Mainsail on port 80, the camera and the screen
+   app (which shows its waiting page on a bring-up config). No
+   recovery stamp was written. Not run on the 2X yet: our power-off
+   and reboot path.
+4. **Done 2026-11-28: all eight drivers answer** (`x1_tmc.py scan`
+   and `read`, selects 0 to 7; the select and gate lines are the
+   1X's). As stock left them: 16 microsteps by the pins, GCONF 0x101
+   (stealthChop) on six, 0x105 (spreadCycle) on motors 1 and 5,
+   PWMCONF 0xc80d0e24. Stock's set-up routine for this model is not
+   decoded in full (needed for a cold start only).
 5. Outputs one at a time, owner watching: fans (126, 14, 22, 225),
    heater 2 with low limits, the three new motors.
 6. Homing both heads, then the tool macros and offsets.
