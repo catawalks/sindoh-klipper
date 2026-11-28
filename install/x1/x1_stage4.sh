@@ -49,9 +49,11 @@ mounts() {
 # comparison with a stock start. Without it the printer homed, heated and
 # printed that day, so the rest of that table is not needed on a 1X: the
 # step and direction lines, the microstep pins (x1_tmc.py selects 16
-# microsteps by register), 69 "nozzle voltage on", 156, the press clutch
+# microsteps by register), 156, the press clutch
 # (148, 191), the test pin (107), 174, 177, the enables of motor slots a
-# 1X does not have (53, 96) and the second hot end fan (225, 2X). The
+# 1X does not have (53, 96) and the second hot end fan (225, 2X). 69
+# ("nozzle voltage on") was not needed for that either, but may belong
+# to the nozzle touch: x1_printer.cfg holds it high, as stock does. The
 # table is in git history (commit 8af09c5) and in sindoh docs/1x.md.
 case "$1" in
 start)

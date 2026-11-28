@@ -210,7 +210,10 @@ init scripts), the screen's backlight, and the unknowns in
   heated and printed the 20 mm box without it (329 s). `x1_tmc.py
   setup` now always selects 16 microsteps by register: the microstep
   pins float, and a set-up that trusted them once failed the start.
-  Which pins a 1X needs: sindoh `docs/1x.md`.
+  Which pins a 1X needs: sindoh `docs/1x.md`. GPIO 69 ("nozzle
+  voltage on") is held high by `x1_printer.cfg` as stock holds it: it
+  was not needed to home, heat or print, but may be the voltage of
+  the nozzle touch, which has not been tried without it.
 - Still open: the reference blocks' second register, the estop route
   (`X1_PC`) at boot, and
   `build_root_1x.sh` putting the three network scripts into
