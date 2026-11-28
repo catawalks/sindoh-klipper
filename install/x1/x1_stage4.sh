@@ -41,45 +41,18 @@ mounts() {
     # root-only devices for upctool (UPC cores, DTCM through /dev/mem)
     for d in upc0 upc1 mem; do [ -e $ROOT/dev/$d ] || cp -a /dev/$d $ROOT/dev/; done
 }
-# Cold start only (no Sindoh program has run since power-on): the output
-# pins. Sindoh's motion program makes these SoC GPIOs outputs at its
-# start; our firmware only sets levels (src/upc/gpio.c), so without this
-# the motor drivers are never enabled and nothing moves (found on the
-# first cold start, 2026-11-27: "No trigger after full movement" with
-# the head standing still). The table is the difference between a cold
-# start and the normal takeover, both idle under Klipper with the same
-# config, read from the GPIO block on the owner's 1X that day: per bank,
-# the new outputs and their level. They are the driver enables (high =
-# off), step and direction lines, the microstep pins, and (names from
-# Sindoh's motion program and microcode, sindoh docs/1x.md):
-#   127 PSU fan enable, 112 back left exhaust fan, 188 hot end fan,
-#   153 level sensor enable (all four are in x1_printer.cfg);
-#   69  "nozzle voltage on" (high whenever stock runs);
-#   148, 191 the press clutch;  107 the motion program's test pin;
-#   53, 96  driver enables of two motor slots a 1X does not have;
-#   225 the second hot end fan (2X);  174, 177 made outputs, never
-#   written;  156 set high once at start, use not known.
-# Level, direction, level again.
-#        bank  outputs     high        low
-COLD_PINS="1 0x073c71c0 0x05345140 0x02082080
-2 0x00000020 0x00000020 0x00000000
-3 0x80010831 0x80000021 0x00010810
-4 0x12100000 0x10000000 0x02100000
-5 0x90025c70 0x10001450 0x80024820
-6 0x000033de 0x00002294 0x0000114a
-7 0x00000002 0x00000002 0x00000000"
-cold_pins() {
-    echo "$COLD_PINS" | while read b out hi lo; do
-        base=$((0xd4019000 + b * 256))
-        reg() { printf "0x%x" $((base + $1)); }
-        devmem $(reg 0x08) 32 $hi; devmem $(reg 0x0c) 32 $lo
-        devmem $(reg 0x1c) 32 $out
-        devmem $(reg 0x08) 32 $hi; devmem $(reg 0x0c) 32 $lo
-        dir=$(devmem $(reg 0x04)); lvl=$(devmem $(reg 0x00))
-        [ $(( dir & out )) -eq $(( out )) ] && [ $(( lvl & out )) -eq $(( hi )) ] ||
-            echo "x1_stage4: bank $b pins not as set (direction $dir, levels $lvl)"
-    done
-}
+# Cold start (no Sindoh program has run since power-on): every SoC GPIO is
+# an input until someone makes it an output. Sindoh's motion program does
+# that at its start; ours is the firmware's pin set-up (fork c98875651),
+# for the pins the config names: the driver enables, the fans, the level
+# sensor enable. Until 2026-11-27 a table here set 40 pins from a
+# comparison with a stock start. Without it the printer homed, heated and
+# printed that day, so the rest of that table is not needed on a 1X: the
+# step and direction lines, the microstep pins (x1_tmc.py selects 16
+# microsteps by register), 69 "nozzle voltage on", 156, the press clutch
+# (148, 191), the test pin (107), 174, 177, the enables of motor slots a
+# 1X does not have (53, 96) and the second hot end fan (225, 2X). The
+# table is in git history (commit 8af09c5) and in sindoh docs/1x.md.
 case "$1" in
 start)
     # (the card is a mount of its own; an installed root is a folder on /userdata)
@@ -107,7 +80,6 @@ start)
     # (the stock system has no Python: the card's, with the UART node)
     [ -e $ROOT/dev/ttyS2 ] || cp -a /dev/ttyS2 $ROOT/dev/
     if [ -e /tmp/x1_cold ]; then        # cold start (x1_hook.sh): we write the set-up
-        cold_pins
         inroot /usr/bin/python3 /stage/x1_tmc.py setup --yes > /tmp/x1_tmc.log 2>&1
         rc=$?
         cat /tmp/x1_tmc.log

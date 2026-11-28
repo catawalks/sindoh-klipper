@@ -182,11 +182,14 @@ def main():
                 writes = [(0x13, TPWMTHRS[n]), (0x10, IHOLD_IRUN),
                           (0x70, PWMCONF), (0x00, GCONF[n])]
                 # Microsteps: stock leaves them to the MS pins, which its
-                # own microcode drives. Without it the pins read 32 (4 on
-                # the cartridge feed; cold start 2026-11-27), so take
-                # them from the register instead: mstep_reg_select, and
-                # MRES for 16 in the CHOPCONF the driver already has.
-                if chop is not None and (256 >> ((chop >> 24) & 0xf)) != MSTEPS:
+                # own microcode drives. Without it the pins are inputs
+                # and float: they read 32 (4 on the cartridge feed; cold
+                # start 2026-11-27), or 16 for a moment after a reboot
+                # and 32 later (same day: set-up skipped the register,
+                # the check then failed). So always take them from the
+                # register: mstep_reg_select, and MRES for 16 in the
+                # CHOPCONF the driver already has.
+                if chop is not None:
                     writes[3] = (0x00, GCONF[n] | MSTEP_REG)
                     writes.append((0x6c, (chop & ~0x0f000000) | (MRES16 << 24)))
                 for reg, val in writes:

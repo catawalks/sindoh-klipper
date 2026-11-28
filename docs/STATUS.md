@@ -34,8 +34,11 @@ becomes the full kernel-swap test machine.
 - **Repositories:** split on 2026-11-20 (this one, sindoh-kernel,
   sindoh); see the top README.
 - **A third machine, the owner's 3DWOX 1X:** see "1X" below.
-- **Fork pin:** `klipper/FORK` = `b3b8d837` (tag `v0.14.0-sindoh-1` +
-  `sindoh_sound` + a README link): upstream Klipper v0.14.0 merged. Its
+- **Fork pin:** `klipper/FORK` = `c9887565` since 11-27: `b3b8d837`
+  plus the GPIO block output direction (1X and 2X firmware only; the
+  DP200's firmware code is the same). `b3b8d837` = tag
+  `v0.14.0-sindoh-1` + `sindoh_sound` + a README link: upstream
+  Klipper v0.14.0 merged. Its
   DP200 firmware (fm `76a5dc0b`, io `86e3328e`, built in WSL with
   `tools/wsl_fw_build.sh`) runs on the dev printer since 11-24; the
   v0.1.2 payload still carries v0.1.0's firmware.

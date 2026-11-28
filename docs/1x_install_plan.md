@@ -205,8 +205,14 @@ init scripts), the screen's backlight, and the unknowns in
   try failed: `x1_stage4.sh` insisted on a mounted card (fixed; it left
   `COLD_FAILED`, as designed). `x1_web.sh` and `x1_stage4.sh` find the
   installed root by themselves when `X1_ROOT` is not set.
+- **The firmware sets its output pins itself since 2026-11-27** (fork
+  `c9887565`): the 40-pin table in `x1_stage4.sh` is gone. Homed,
+  heated and printed the 20 mm box without it (329 s). `x1_tmc.py
+  setup` now always selects 16 microsteps by register: the microstep
+  pins float, and a set-up that trusted them once failed the start.
+  Which pins a 1X needs: sindoh `docs/1x.md`.
 - Still open: the reference blocks' second register, the estop route
-  (`X1_PC`) at boot, the firmware setting pin directions itself, and
+  (`X1_PC`) at boot, and
   `build_root_1x.sh` putting the three network scripts into
   `<root>/dp200/` (copied by hand so far).
 
