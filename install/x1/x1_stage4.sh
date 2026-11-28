@@ -19,6 +19,10 @@ ROOT=$X1_ROOT
 [ -n "$ROOT" ] || { ROOT=/tmp/sd; [ -x /userdata/klipper/root/usr/bin/python3 ] && ROOT=/userdata/klipper/root; }
 ST=$ROOT/stage
 U=$ST/bin/upctool
+# The 2X (board name TOC, sindoh docs/2x.md) has other pins and two heads:
+# only its own configs (x2_*) may be started there, and the 1X's motor
+# driver tool is not run (its select lines are not checked on that board).
+BOARD=$(cat /sys/kernel/board_name 2>/dev/null)
 K=/home/klipper
 inroot() { chroot $ROOT /usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/root "$@"; }
 mounts() {
@@ -60,18 +64,23 @@ case "$1" in
 start)
     # (the card is a mount of its own; an installed root is a folder on /userdata)
     [ -x $ROOT/usr/bin/python3 ] || { echo "no Debian root at $ROOT (card not mounted?)"; exit 1; }
+    # (checked before anything is stopped)
+    CFG=${2:-x1_stage4.cfg}
+    [ "$BOARD" != 1X_r1 ] && [ -z "$2" ] && CFG=x2_stage4.cfg
+    [ -f $ST/$CFG ] || { echo "no $ST/$CFG"; exit 1; }
+    if [ "$BOARD" != 1X_r1 ]; then
+        case "$CFG" in x2_*) ;; *) echo "x1_stage4: board $BOARD is not a 1X: only x2_* configs start here"; exit 1 ;; esac
+    fi
     sh $ST/x1_stop.sh $U || exit 1
     mounts
     install -m 755 $U $ROOT/usr/local/bin/upctool
     mkdir -p $ROOT$K/printer_data/config $ROOT$K/printer_data/logs $ROOT$K/printer_data/comms
-    CFG=${2:-x1_stage4.cfg}
-    [ -f $ST/$CFG ] || { echo "no $ST/$CFG"; exit 1; }
     C=$ROOT$K/printer_data/config
     # The real config is three files, as on the DP200: printer.cfg (the
     # owner's: kept once it is there, SAVE_CONFIG writes into it) and the
     # two includes, replaced at every start. Any other CONFIG is a test
     # config and replaces printer.cfg.
-    for f in x1_printer.cfg x1_macros.cfg; do [ -f $ST/$f ] && cp $ST/$f $C/; done
+    [ "$BOARD" = 1X_r1 ] && for f in x1_printer.cfg x1_macros.cfg; do [ -f $ST/$f ] && cp $ST/$f $C/; done
     if [ "$CFG" = printer.cfg ] && grep -q "include x1_printer.cfg" $C/printer.cfg 2>/dev/null; then
         echo "x1_stage4: keeping the printer.cfg already there"
     else
@@ -82,7 +91,9 @@ start)
     # by us on a start without it.
     # (the stock system has no Python: the card's, with the UART node)
     [ -e $ROOT/dev/ttyS2 ] || cp -a /dev/ttyS2 $ROOT/dev/
-    if [ -e /tmp/x1_cold ]; then        # cold start (x1_hook.sh): we write the set-up
+    if [ "$BOARD" != 1X_r1 ]; then
+        echo "x1_stage4: board $BOARD: motor drivers left as stock set them"
+    elif [ -e /tmp/x1_cold ]; then        # cold start (x1_hook.sh): we write the set-up
         inroot /usr/bin/python3 /stage/x1_tmc.py setup --yes > /tmp/x1_tmc.log 2>&1
         rc=$?
         cat /tmp/x1_tmc.log

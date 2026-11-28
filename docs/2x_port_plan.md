@@ -159,8 +159,13 @@ The Debian root is about 920 MB; the NAND root has 42 MB free.
    printer configs in it are renamed `*.1x` (config folder and
    `stage/`) so that nothing can load them on this board; a
    `README.txt` at the top says so. Nothing starts it, and it is
-   left unmounted. Next: a 2X config and the board check, then the
-   look-only start. It
+   left unmounted. `stage/` there also has `x2_stage4.cfg` and the
+   start script with its board check (on any board but `1X_r1` only
+   `x2_*` configs start, the 1X config files are not copied in and
+   the 1X's motor driver tool is not run). Look-only start, when the
+   owner says so: mount the card at `/tmp/k2x`, then
+   `X1_ROOT=/tmp/k2x/root sh /tmp/k2x/root/stage/x1_stage4.sh start x2_stage4.cfg`.
+   Not run yet. It
    still needs something to start us after each power-on: a stick
    script, or the hook of 4.
 3. **Our card in the SD socket** in place of Sindoh's factory card.
