@@ -70,7 +70,7 @@ each line needs its own test with the owner at the printer:
 | Driver enables | X1 GPIO 56, extruder 1 GPIO 53, cartridge feed 1 GPIO 96 | the engine's hold masks pair 56 with the axes, 53 with 96, and 44 with 50 (the 1X's pair) |
 | Motor current references | PWM blocks 13 and 23 | run on the 1X without a motor; both at 100 on the idle 2X |
 | TMC numbers | 1, 5, 7 | empty on the 1X |
-| X1 step engine, X1 home sensor | not known | |
+| X1 step engine, X1 home sensor line | not known (the sensor's positions are: edge 243.35, home 262.70) | |
 | Head 1 filament sensors | cartridge bay GPIO 76, extruder entry GPIO 135 (head 2: 80 and 134) | the 2X's FM program picks them by the enabled driver |
 | Head 1 feed encoders | not known | |
 | Step generators | X1 its own (block 5, the one the 1X leaves unused); the two extruders share block 3 and the two feeds block 4, picked by the enable | six blocks, eight drivers; the engine always enables one head's extruder and feed together. To be shown by a test |
@@ -79,6 +79,17 @@ Stock's X current setting on this printer is `MOTOR_PWM_XOFFSET` -15
 (X1) and `X2OFFSET` 0; Z is +30 (1X: +40).
 
 ## Klipper side
+
+Stock's numbers for both heads (homing, wipe ends, purge, load,
+unload and bin positions, the tool change sequence, head 2's
+offsets, leveling) are in sindoh
+[`docs/2x_stock_routines.md`](https://github.com/catawalks/sindoh/blob/main/docs/2x_stock_routines.md),
+read from the 2X's motion program with `tools/sindoh_engine_trace.py`.
+Head 2's values are the ones `x1_macros.cfg` already holds; head 1
+(right) homes in the positive direction, sensor edge at X 243.35,
+parked at 262.70, wipes between 257.30 and 231.30 and purges at
+252.30.
+
 
 - Kinematics: `cartesian` with `[dual_carriage]` on X. X2 (left,
   `stepper_x` of the 1X config) and X1 (right) share the rail.
