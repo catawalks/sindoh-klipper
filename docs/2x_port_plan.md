@@ -51,11 +51,13 @@ When one is gone it writes a stamp to the NAND root, and the next
 start is a long file check; with `/` read-only it asks for a recovery
 boot from Sindoh's SD card. The 1X scripts freeze the 1X's watchdog
 (`recovery_watchdog.sh`), which does not run here. **The 2X takeover
-must stop this watcher first** (`x1_stop.sh` for `TOC`: find
-`recovery.check.sh`, `kill -STOP`, check it is stopped, only then
-stop the motion program), and our power-off helper must not leave
-`/` read-only while it is alive. Until that is written and tested,
-no stock program on the 2X is stopped.
+must stop this watcher first**, and our power-off helper must not
+leave `/` read-only while it is alive. `x1_stop.sh` does this since
+2026-11-28: on any board but `1X_r1` it freezes the watcher
+(`kill -STOP`), checks that it is frozen, and stops nothing
+otherwise. The freeze alone was tried on the 2X the same night
+(state S, T after the freeze, S again after `kill -CONT`; no stamp
+written); the rest of the script has not run there.
 
 Second head, expected from the 1X work and the 2X's live registers;
 each line needs its own test with the owner at the printer:
@@ -69,7 +71,8 @@ each line needs its own test with the owner at the printer:
 | Motor current references | PWM blocks 13 and 23 | run on the 1X without a motor; both at 100 on the idle 2X |
 | TMC numbers | 1, 5, 7 | empty on the 1X |
 | X1 step engine, X1 home sensor | not known | |
-| Cartridge 1 feed, its sensors and encoder | GPIO 76 (`gp_cartFilaSensor[0]`), rest not known | |
+| Head 1 filament sensors | cartridge bay GPIO 76, extruder entry GPIO 135 (head 2: 80 and 134) | the 2X's FM program picks them by the enabled driver |
+| Head 1 feed encoders | not known | |
 | Step generators | X1 its own (block 5, the one the 1X leaves unused); the two extruders share block 3 and the two feeds block 4, picked by the enable | six blocks, eight drivers; the engine always enables one head's extruder and feed together. To be shown by a test |
 
 Stock's X current setting on this printer is `MOTOR_PWM_XOFFSET` -15

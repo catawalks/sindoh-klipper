@@ -15,6 +15,22 @@ ELF=marvell_lspsdk_3dp_granite2-debug_stripped.elf
 HEATERS="0xf9304500 0xf9305900 0xf9305c00"
 [ -f /sys/kernel/board_name ] || { echo "x1_stop: not a 1X/2X board"; exit 1; }
 [ "$(cat /sys/kernel/watchdog_reason 2>/dev/null)" = 1 ] && { echo "x1_stop: recovery boot is pending, not touching anything"; exit 1; }
+# 2X on its NAND board (board name TOC; sindoh docs/2x.md): stock's
+# /recovery/recovery.check.sh --post-process-integrity looks every 60 s
+# for the motion program, UIManager and appBrowser. When one is gone it
+# writes a stamp to the NAND root (a long file check at the next start)
+# and, with / read-only, asks for a recovery boot from Sindoh's SD card.
+# So on any board but the 1X's that watcher is frozen FIRST, and nothing
+# is stopped unless it is. (The 1X's own watcher only prints a message.)
+watchers() { ps w | grep '[r]ecovery.check.sh --post-process-integrity' | awk '{print $1}'; }
+if [ "$(cat /sys/kernel/board_name)" != 1X_r1 ]; then
+    for p in $(watchers); do kill -STOP $p; done
+    usleep 300000
+    for p in $(watchers); do
+        [ "$(awk '{print $3}' /proc/$p/stat 2>/dev/null)" = T ] || { echo "x1_stop: stock's watcher (pid $p) is not frozen, not touching anything"; exit 1; }
+    done
+    echo "x1_stop: stock's watcher frozen (pid $(echo $(watchers)))"
+fi
 pid=$(pidof $ELF)
 if [ -n "$pid" ]; then
     kill -TERM $pid
