@@ -44,6 +44,19 @@ This page is the plan that follows from it. The 1X pages it builds on:
 | `/userdata/klipper` (root, flags, keys) | eMMC | does not exist | see "Where it lives" |
 | Stock power-off | plain | remounts `/` read-only, drops GPIO 111 ("write-protect") | to be copied by our power-off helper |
 
+**Stock's watcher (read 2026-11-28, sindoh `docs/2x.md`).** On this
+board `/recovery/recovery.check.sh --post-process-integrity` checks
+every 60 s that the motion program, `UIManager` and `appBrowser` run.
+When one is gone it writes a stamp to the NAND root, and the next
+start is a long file check; with `/` read-only it asks for a recovery
+boot from Sindoh's SD card. The 1X scripts freeze the 1X's watchdog
+(`recovery_watchdog.sh`), which does not run here. **The 2X takeover
+must stop this watcher first** (`x1_stop.sh` for `TOC`: find
+`recovery.check.sh`, `kill -STOP`, check it is stopped, only then
+stop the motion program), and our power-off helper must not leave
+`/` read-only while it is alive. Until that is written and tested,
+no stock program on the 2X is stopped.
+
 Second head, expected from the 1X work and the 2X's live registers;
 each line needs its own test with the owner at the printer:
 
@@ -112,8 +125,12 @@ The Debian root is about 920 MB; the NAND root has 42 MB free.
 2. **Our card in the SD socket** in place of Sindoh's factory card.
    Needs the printer opened, and the factory card kept safe (it is
    stock's recovery image; a copy of such a card is already on the
-   PC). Stock's `recovery.check.sh` refers to the card's partitions;
-   what it does when the card is not Sindoh's has to be read first.
+   PC). Read 2026-11-28: in normal running stock does not mount
+   the card, but its recovery script asks the card what it is, and
+   its card utility can format partition 3 as an encrypted volume.
+   A card of ours would have to keep partition 3 free for that, and
+   with it in the socket the printer has no card recovery (stock
+   then says "Please Use USB Tool").
 3. **A boot hook in the NAND root** (`/etc/init.d/S99klipper`, one
    small file, as on the 1X) so that 1 or 2 start without a stick
    script. This is a NAND write: the owner's OK, and only after the
