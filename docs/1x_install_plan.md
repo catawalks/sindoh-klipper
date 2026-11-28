@@ -211,8 +211,8 @@ init scripts), the screen's backlight, and the unknowns in
   setup` now always selects 16 microsteps by register: the microstep
   pins float, and a set-up that trusted them once failed the start.
   Which pins a 1X needs: sindoh `docs/1x.md`. GPIO 69 ("nozzle
-  voltage on") is held high by `x1_printer.cfg` only because stock
-  holds it so: it was not needed to home, heat or print, and the
+  voltage on") powers the nozzle assembly's I2C chip, which Klipper
+  does not use; `x1_printer.cfg` holds it high as stock does: it was not needed to home, heat or print, and the
   nozzle touch registers at the same height with it driven low
   (tested the same night; `BED_LEVEL` also ran on a cold start).
 - Still open: the reference blocks' second register, the estop route
