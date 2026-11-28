@@ -28,6 +28,10 @@ RUN=$ROOT/run/dp200                # the screen app's /run/dp200 (in the Debian 
 BASE=${X1_BASE:-/userdata/klipper}  # our folder on the printer: boot.sh and its flags
 K=/home/klipper
 PORT=80
+# The 2X on its NAND board (board name TOC; sindoh docs/2x.md): the power
+# button's line is GPIO 130 (1X: 116), there is no /userdata, and stock's
+# power-off also stops its watcher and sets the NAND write-protect line.
+BOARD=$(cat /sys/kernel/board_name 2>/dev/null)
 CONF=/tmp/x1_nginx.conf            # inside the Debian root
 inroot() { chroot $ROOT /usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME=/root "$@"; }
 pids() { ps | grep "$1" | grep -v grep | awk '{print $1}'; }
@@ -79,7 +83,7 @@ time_zone() {
 # only read.
 stock_info() {
     mkdir -p $RUN
-    fw=$(sed -n "s/.*echo '\(ROD[^']*\)'.*/\1/p" /snapshot_version.sh 2>/dev/null | head -n 1)
+    fw=$(sed -n "s/.*echo '\([A-Z0-9]*_[0-9]*_[0-9]*\)'.*/\1/p" /snapshot_version.sh 2>/dev/null | head -n 1)
     tli=$(sqlite3 /app/nvram/karas.db 'select MachineTLI from INST_MACHINE' 2>/dev/null | head -n 1)
     sn=$(sqlite3 /app/nvram/karas.db 'select MachineSerialNo from INST_MACHINE' 2>/dev/null | head -n 1)
     { echo "kernel=$(uname -r)"; echo "firmware=$fw"; echo "model=$tli"; echo "serial=$sn"; } > $RUN/stock_info
@@ -157,7 +161,7 @@ power_do() {
     frame done
     if [ -n "$dry" ]; then say "dry run: stopping before the $what"; return 0; fi
     if [ "$what" = reboot ]; then
-        [ -n "$stock" ] && { : > $BASE/BOOT_STOCK_ONCE; sync; say "the next start is Sindoh's firmware, once"; }
+        [ -n "$stock" ] && [ -d $BASE ] && { : > $BASE/BOOT_STOCK_ONCE; sync; say "the next start is Sindoh's firmware, once"; }
         say "reboot"
         reboot
         return 0
@@ -169,9 +173,19 @@ power_do() {
     # off after all, that must not happen: freeze the watchdog script
     # first (a reboot brings it back).
     for p in $(pids recovery_watchdog); do kill -STOP $p; done
+    # 2X (NAND board): stock's /app/screen_pwroff.sh ends its watcher
+    # (/recovery/recovery.check.sh, which would ask for a recovery boot
+    # from the SD card on finding / read-only) before the remount, and
+    # drives GPIO 111 low after it ("write-protect"). The same here.
+    [ "$BOARD" = 1X_r1 ] || for p in $(pids recovery.check.sh); do kill -9 $p; done
     echo s > /proc/sysrq-trigger
     echo u > /proc/sysrq-trigger
     sleep 1
+    if [ "$BOARD" != 1X_r1 ]; then
+        [ -d /sys/class/gpio/gpio111 ] || echo 111 > /sys/class/gpio/export
+        echo out > /sys/class/gpio/gpio111/direction
+        echo 0 > /sys/class/gpio/gpio111/value
+    fi
     if [ -n "$key" ]; then
         echo 1 > $POWER_GPIO
         sleep 5
@@ -223,6 +237,7 @@ power_shims() {
 # "stop" lets it run again. powerd below covers the screen app being
 # gone: then a pulse shuts down, as stock does.
 KEY_GPIO=/sys/class/gpio/gpio116/value
+[ "$BOARD" = TOC ] && KEY_GPIO=/sys/class/gpio/gpio130/value
 powerkey_hold() { for p in $(pidof powerkeyd); do kill -STOP $p; done; }
 powerkey_release() { for p in $(pidof powerkeyd); do kill -CONT $p; done; }
 powerd_start() {

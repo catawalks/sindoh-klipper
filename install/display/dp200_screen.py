@@ -503,6 +503,10 @@ def query():
     q = '&'.join(urllib.parse.quote(o) for o in OBJECTS)
     with urllib.request.urlopen(API + '/printer/objects/query?' + q, timeout=3) as r:
         st = json.load(r)['result']['status']
+    # A bring-up config (sensors only: no [virtual_sdcard], no extruder)
+    # has none of the objects the pages read: show the waiting page.
+    if 'state' not in st.get('print_stats', {}) or 'target' not in st.get('extruder', {}):
+        raise RuntimeError('Klipper runs a bring-up config (no printer yet)')
     # The DP201 has no heated bed (klipper/config/dp200_model_dp201.cfg):
     # Klipper then reports no heater_bed. A cold, idle stand-in keeps the
     # pages simple; NO_BED hides the bed's buttons and readings.
