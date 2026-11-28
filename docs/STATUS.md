@@ -189,6 +189,23 @@ On 11-24 night it runs our stack (started over SSH), idle, not homed.
 - Stock facts and recordings: [sindoh: 1x.md](https://github.com/catawalks/sindoh/blob/main/docs/1x.md),
   [sindoh: 1x_stock_routines.md](https://github.com/catawalks/sindoh/blob/main/docs/1x_stock_routines.md).
 
+## 2X (the owner's, stock firmware `PRIME_210419_2`), as of 2026-11-28
+
+- Arrived and set up 2026-11-27; runs stock. Surveyed with the stick
+  and read over the stick's remote shell (port 2222, key login; it
+  ends at the next reboot). Nothing on it was changed; no motion, no
+  heat. Facts: sindoh `docs/2x.md`; plan: [2x_port_plan.md](2x_port_plan.md).
+- It is the family's NAND board (stock's "Prime_r1", board name
+  `TOC`): the 1X's hardware with a NAND root (42 MB free), no eMMC,
+  Sindoh's factory SD card in the socket. Five lines sit on other
+  pins than on the 1X and there is no pin 69.
+- Stock's watcher on it must be frozen before any stock program is
+  stopped (`x1_stop.sh` does that on this board; only the freeze
+  itself has been tried there).
+- The screen app knows the board and shows two nozzles; Klipper has
+  not run on it. Open: where our system lives (owner's choice),
+  the serial boot capture, the look-only takeover.
+
 ## Who owns what
 
 One session coordinates: it alone drives the dev printer (serial, deploys,
