@@ -387,7 +387,12 @@ stages 1-5 done on the dev printer):
       Also found: a 3DWOX 5X
       on the 7X line, OEM 2X IDs (`B101500`, `RIZE2XCKH`), Stanley
       `ST3000`.
-    - **2X:** second carriage and nozzle (a 2X is on its way).
+    - **2X:** second carriage and nozzle. The 2X arrived and was
+      surveyed 11-28 (sindoh `docs/2x.md`): it is the NAND board
+      ("Prime_r1"), no eMMC, 42 MB free in its root, and the PSU fan,
+      power button and filament sensor pins differ from the 1X. Next:
+      capture its serial boot, read its pin and motor map live, and
+      decide where an install can live (its own SD card).
     - Paper work: the stepper engine clock against the timer (step
       batching is off on the 1X), the microstep pins of the drivers.
     - The DP200 firmware built from the 1X-capable fork has not run on
