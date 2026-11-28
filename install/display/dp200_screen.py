@@ -43,8 +43,15 @@ def _read(path, default=''):
 # /sys/kernel/board_name ("1X_r1"); its panel is the DP200's (800x480,
 # mounted the same way, same touch controller) but 24 bits per pixel.
 BOARD = _read('/sys/kernel/board_name')
-IS_1X = BOARD.startswith(('1X', '2X'))
-MODEL = '1X' if IS_1X else 'DP200'
+# The 2X is the same machine with a second head. Its older board (stock's
+# "Prime_r1": NAND, no eMMC) names itself after Marvell's reference card,
+# "TOC" (surveyed 2026-11-28); the device tree tells it from anything
+# else that might say so. Its eMMC board would say "Prime_r2" (not seen).
+IS_2X = BOARD.startswith(('2X', 'Prime')) or (
+    BOARD == 'TOC' and 'mv6270' in _read('/proc/device-tree/compatible'))
+# IS_1X: the 1X family (1X and 2X), for everything they share.
+IS_1X = BOARD.startswith('1X') or IS_2X
+MODEL = '2X' if IS_2X else '1X' if IS_1X else 'DP200'
 # One app for every model (owner 11-21/22): the functions are the same on
 # each printer, but a model's Klipper config may not have the macro for
 # one yet. A button is greyed out ("not set up yet") when the G-code it
@@ -106,7 +113,9 @@ KEY_REG, KEY_BIT = 0xF8045000, 1 << 27
 # pulse first sends the emergency stop (the owner's habit on stock: the
 # power button is the e-stop). Sindoh's own power key program would cut
 # at once; install/x1/x1_web.sh freezes it while we run.
-KEY_GPIO_1X = '/sys/class/gpio/gpio116/value'
+# On the 2X's "Prime_r1" board the same line is GPIO 130 (stock there
+# runs "powerkeyd 130 158 ..."; not tried with this app yet).
+KEY_GPIO_1X = '/sys/class/gpio/gpio%d/value' % (130 if BOARD == 'TOC' else 116)
 KEY_CANCEL_1X = 3.0
 HW_CUT = 2.0                          # measured roughly: "2 s hold" switched it off
 HOLD_WARN = 0.4                       # s held before the warning appears
@@ -247,7 +256,7 @@ BL_OK = 0.05                                      # mm: a screw closer than this
 BL_MM_PER_TURN = 0.8
 SHAPER_RE = re.compile(r'Recommended shaper_type_([xy]) = (\w+), shaper_freq_\1 = ([\d.]+) Hz')
 
-OBJECTS = ('webhooks', 'print_stats', 'virtual_sdcard', 'display_status', 'extruder',
+OBJECTS = ('webhooks', 'print_stats', 'virtual_sdcard', 'display_status', 'extruder', 'extruder1',
            'heater_bed', 'output_pin lamp', 'gcode_move', 'toolhead', 'idle_timeout',
            'filament_switch_sensor cartridge_lever', 'filament_motion_sensor filament_encoder',
            'dp200_cartridge', 'gcode_macro _DRY', 'gcode_macro BED_CLEAR', 'manual_probe',
@@ -2231,13 +2240,21 @@ class UI:
         txt = state.upper()
         d.text((PW - 20 - d.textlength(txt, font=font(20)), 22), txt, font=font(20), fill=col)
         e, b = st['extruder'], st['heater_bed']
-        d.text((20, 78), 'Nozzle', font=font(18), fill=C_DIM)
-        d.text((20, 102), '%.0f/%.0f°' % (e['temperature'], e['target']), font=font(32), fill=C_NOZ)
-        d.text((200, 78), 'Bed', font=font(18), fill=C_DIM)
-        if NO_BED:
-            d.text((200, 108), 'not heated', font=font(22), fill=C_DIM)
+        e1 = st.get('extruder1') or {}
+        if 'temperature' in e1:
+            # two nozzles (2X; Klipper's second extruder): three narrower
+            # columns. The pages themselves still drive the first nozzle only.
+            for x, name, h, col in ((20, 'Nozzle 1', e, C_NOZ), (144, 'Nozzle 2', e1, C_NOZ), (268, 'Bed', b, C_BED)):
+                d.text((x, 78), name, font=font(18), fill=C_DIM)
+                d.text((x, 106), '%.0f/%.0f°' % (h['temperature'], h['target']), font=font(22), fill=col)
         else:
-            d.text((200, 102), '%.0f/%.0f°' % (b['temperature'], b['target']), font=font(32), fill=C_BED)
+            d.text((20, 78), 'Nozzle', font=font(18), fill=C_DIM)
+            d.text((20, 102), '%.0f/%.0f°' % (e['temperature'], e['target']), font=font(32), fill=C_NOZ)
+            d.text((200, 78), 'Bed', font=font(18), fill=C_DIM)
+            if NO_BED:
+                d.text((200, 108), 'not heated', font=font(22), fill=C_DIM)
+            else:
+                d.text((200, 102), '%.0f/%.0f°' % (b['temperature'], b['target']), font=font(32), fill=C_BED)
         # HOME: straight back to the home page from anywhere in the menus
         # (from the print page only while paused: a print shows that page)
         if self.screen != 'home' and (self.screen != 'print' or job_state(st) == 'paused'):
