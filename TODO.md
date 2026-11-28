@@ -390,9 +390,13 @@ stages 1-5 done on the dev printer):
     - **2X:** second carriage and nozzle. The 2X arrived and was
       surveyed 11-28 (sindoh `docs/2x.md`): it is the NAND board
       ("Prime_r1"), no eMMC, 42 MB free in its root, and the PSU fan,
-      power button and filament sensor pins differ from the 1X. Next:
-      capture its serial boot, read its pin and motor map live, and
-      decide where an install can live (its own SD card).
+      back left fan, power button and extruder filament sensor pins
+      differ from the 1X; no pin 69. Read over SSH the same night
+      (pins, PWM blocks, settings, device tree, stock screen pages).
+      Plan and open items: [docs/2x_port_plan.md](docs/2x_port_plan.md).
+      Next: serial boot capture, the owner's choice of where our
+      system lives (USB stick root recommended), then the look-only
+      takeover. The screen app knows the board (not run on it yet).
     - Paper work: the stepper engine clock against the timer (step
       batching is off on the 1X), the microstep pins of the drivers.
     - The DP200 firmware built from the 1X-capable fork has not run on
