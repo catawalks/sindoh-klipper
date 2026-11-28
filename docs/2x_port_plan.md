@@ -143,7 +143,11 @@ The Debian root is about 920 MB; the NAND root has 42 MB free.
    recovery boot and stay as they are. Our root (about 920 MB) fits
    seven times. Cost: one `mkfs.ext4` on that partition, which is a
    write to Sindoh's card (owner's OK; the card's used part is
-   backed up on the PC first). The printer need not be opened. It
+   backed up on the PC first). The printer need not be opened. The
+   partition was scanned in full on 2026-11-28: nothing of value in
+   it (sindoh `docs/2x.md`), but the card's last sector holds 512
+   unexplained bytes, so make the file system a few MiB shorter than
+   the partition. It
    still needs something to start us after each power-on: a stick
    script, or the hook of 4.
 3. **Our card in the SD socket** in place of Sindoh's factory card.
