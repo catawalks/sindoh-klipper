@@ -147,7 +147,13 @@ The Debian root is about 920 MB; the NAND root has 42 MB free.
    partition was scanned in full on 2026-11-28: nothing of value in
    it (sindoh `docs/2x.md`), but the card's last sector holds 512
    unexplained bytes, so make the file system a few MiB shorter than
-   the partition. It
+   the partition. **Done 2026-11-28 (owner's OK):** ext4, label
+   `klipper2x`, 1729792 blocks of 4 KiB (4 MiB short of the
+   partition's end), made with the printer's own `mke2fs 1.42.13`
+   and `-E nodiscard`; 6.3 GB free. Afterwards the boot area and
+   partitions 1 to 3 and the last 1 MiB had the md5s from before,
+   and stock ran on undisturbed. Mount it by label; nothing is on it
+   yet. It
    still needs something to start us after each power-on: a stick
    script, or the hook of 4.
 3. **Our card in the SD socket** in place of Sindoh's factory card.
