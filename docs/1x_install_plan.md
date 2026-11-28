@@ -185,9 +185,11 @@ init scripts), the screen's backlight, and the unknowns in
   touch screen's WIFI and WIFI IP pages work (they are on once
   `/run/dp200/net.ok` exists, so not on a takeover boot). Checked: joined
   8 s after start, fixed address kept, Moonraker ready over WiFi 33 s
-  after power-on, a scan through `dp200_wifi.py` lists networks. Not
-  checked: the pages by touch, joining another network, and a boot with
-  the wired port unplugged. The stock 1X has no `mlanutl`, so a scan
+  after power-on, a scan through `dp200_wifi.py` lists networks. Owner,
+  same day: the WIFI IP page switched the address to DHCP, and a cold
+  start with the wired port unplugged came up on WiFi alone (Moonraker
+  ready about 30 s after power-on). Not checked: joining another
+  network from the WIFI page. The stock 1X has no `mlanutl`, so a scan
   uses `wpa_supplicant`'s own (the link drops for about 10 s).
 - **The cold start is the default since 2026-11-27** (owner):
   `/userdata/klipper/BOOT_COLD`. The card also runs the screen app of

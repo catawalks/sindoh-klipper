@@ -557,15 +557,13 @@ stages 1-5 done on the dev printer):
     a sudo rule lets Moonraker's user run it; a root without sudo (the
     1X card) gets a stand-in. Open:
     - 1X: reboot through Moonraker's API worked 11-23. Still to try
-      (owner present): Shutdown from Mainsail (same helper; does it
-      show the "safe to turn off" frame without the screen app's
-      frames?). The screen's POWER page: 11-27 the first power off
+      (owner present): nothing; Shutdown from Mainsail showed the
+      "safe to turn off" frame 11-27. Open: the shutdown leaves
+      `x1_sound.sh soundd` running. The screen's POWER page: 11-27 the first power off
       hung on "Switching off..." (halted, power on: the power board
       ignores GPIO 158 without a button hold). Now it shuts down,
       shows the DP200's "It's now safe to turn off your printer" and
-      answers the next hold; that switched off 11-27 (the frame then
-      still said 3 seconds; the identical DP200 frame is not yet on
-      the card).
+      answers the next hold; that switched off 11-27.
     - DP200: in the v0.1.2 test payload (helper, the three links, the
       sudo rule). **Dev DP200 11-24 (our kernel): `reboot` over SSH and
       Moonraker's reboot request (Mainsail's menu) both rebooted it**;
