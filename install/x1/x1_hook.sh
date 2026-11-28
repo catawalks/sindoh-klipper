@@ -15,6 +15,8 @@
 #    otherwise the SD card (mounted at /tmp/sd). Its stage/x1_boot.sh
 #    then waits for stock's motion program and takes over.
 #
+# $BASE/BOOT_STOCK_ONCE (the screen's POWER page, "SINDOH") is BOOT_STOCK
+# for one start: it is removed at once, so the start after is ours again.
 # It does nothing more when $BASE/BOOT_STOCK exists, when neither root
 # is there, or when x1_boot.sh finds a reason not to start (see there):
 # the printer stays a stock printer.
@@ -44,6 +46,12 @@ say() { echo "x1_hook: $*"; echo "x1_hook: $*" >> $LOG; }
 
 
 cold_early() {
+    if [ -e $BASE/BOOT_STOCK_ONCE ]; then
+        rm -f $BASE/BOOT_STOCK_ONCE; sync
+        touch /tmp/x1_stock_once
+        say "$BASE/BOOT_STOCK_ONCE was set: stock boot, this start only"
+        return
+    fi
     [ -e $BASE/BOOT_STOCK ] && return
     [ -e $BASE/BOOT_COLD_ONCE ] || [ -e $BASE/BOOT_COLD ] || return
     [ -e $BASE/COLD_FAILED ] && [ ! -e $BASE/BOOT_COLD_ONCE ] &&
@@ -118,6 +126,7 @@ say "$(date) uptime $(cut -d' ' -f1 /proc/uptime)"
 ssh_start
 
 [ -e $BASE/BOOT_STOCK ] && { say "$BASE/BOOT_STOCK is set: stock boot"; exit 0; }
+[ -e /tmp/x1_stock_once ] && { say "stock boot, this start only"; exit 0; }
 if [ -x $BASE/root/usr/bin/python3 ]; then
     ROOT=$BASE/root
 else

@@ -117,6 +117,10 @@ POWER_REQ = '/run/dp200/power'        # "reboot" / "poweroff" for dp200-powerkey
 # ignores the processor's power-off output otherwise), so without this
 # file the helper shuts down, shows hold.fb and waits for the button.
 POWER_KEY = '/run/dp200/power.key'
+# 1X: there after a cold start (x1_web.sh): a reboot then comes back to
+# Klipper, and the POWER page offers one start of Sindoh's firmware
+# (request "stock"). Without it a reboot starts Sindoh's firmware anyway.
+BOOT_COLD = '/run/dp200/boot_cold'
 # Hand-over with the stick installer/remover after a cancel: their message
 # window (the stock tinydebug) keeps redrawing itself over this app until
 # it is ended. This app writes DRAWN after its first frame; the installer
@@ -1010,12 +1014,13 @@ class UI:
     def power_request(self, what, key=False):
         """Ask dp200-powerkey.sh (stock side) to reboot or power off. It stops
         this app first, so the progress frames are written before asking."""
-        self.screen = 'powering_' + what
+        shown = 'reboot' if what == 'stock' else what   # 1X "stock": a reboot, see BOOT_COLD
+        self.screen = 'powering_' + shown
         self.power_at = time.time()
 
         def work():
             try:
-                write_shutdown_frames(what)
+                write_shutdown_frames(shown)
             except Exception as e:             # no progress frames: still go ahead
                 print('shutdown frames: %s' % e, flush=True)
             if IS_1X:
@@ -3244,11 +3249,13 @@ class UI:
         warn = ' The running print will be lost.' if printing else ''
         if printing:
             d.text((20, y), 'A print is running!', font=font(22), fill=C_WARN)
+        cold = IS_1X and os.path.exists(BOOT_COLD)
         if IS_1X:
             lines = [('Power button: hold it about 3 s to shut down (3 s to cancel). '
                       'During a print it is the emergency stop.', font(18), C_DIM)]
-            lines.append(('A reboot starts Sindoh\'s firmware; Klipper has to be started '
-                          'again.', font(18), C_DIM))
+            if not cold:
+                lines.append(('A reboot starts Sindoh\'s firmware; Klipper has to be started '
+                              'again.', font(18), C_DIM))
             yy = y + 30
             for text, f, col in lines:
                 for l in wrap(d, text, f, PW - 40):
@@ -3264,10 +3271,14 @@ class UI:
             ('SHUT DOWN', ('confirm', 'Shut down the printer?' + warn, ('power', 'poweroff')),
              C_RED, 28, 'power off'),
             ('REBOOT', ('confirm', ('Reboot the printer? It starts Sindoh\'s firmware; Klipper has '
-                                    'to be started again.' if IS_1X else 'Reboot the printer?') + warn,
+                                    'to be started again.' if IS_1X and not cold else 'Reboot the printer?') + warn,
                         ('power', 'reboot')),
-             C_BTN, 28, 'to Sindoh firmware' if IS_1X else 'whole printer'),
+             C_BTN, 28, 'to Sindoh firmware' if IS_1X and not cold else 'whole printer'),
         ]
+        if cold:
+            items.append(('SINDOH', ('confirm', 'Start Sindoh\'s firmware once? The restart after that '
+                                     'comes back to Klipper.' + warn, ('power', 'stock')),
+                          C_BTN, 28, 'next start only'))
         if st is not None:
             items.append(('KLIPPER', ('confirm', 'Restart Klipper host?' + warn,
                                       ('post', '/printer/restart', 'Restart')), C_BTN, 28, 'restart'))

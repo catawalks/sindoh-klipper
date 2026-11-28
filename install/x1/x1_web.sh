@@ -24,7 +24,8 @@ export PATH=/usr/sbin:/sbin:/usr/bin:/bin:$PATH
 ROOT=$X1_ROOT
 [ -n "$ROOT" ] || { ROOT=/tmp/sd; [ -x /userdata/klipper/root/usr/bin/python3 ] && ROOT=/userdata/klipper/root; }
 ST=$ROOT/stage
-RUN=$ROOT/run/dp200                # the screen app's /run/dp200 (on the card)
+RUN=$ROOT/run/dp200                # the screen app's /run/dp200 (in the Debian root)
+BASE=${X1_BASE:-/userdata/klipper}  # our folder on the printer: boot.sh and its flags
 K=/home/klipper
 PORT=80
 CONF=/tmp/x1_nginx.conf            # inside the Debian root
@@ -82,6 +83,8 @@ stock_info() {
     tli=$(sqlite3 /app/nvram/karas.db 'select MachineTLI from INST_MACHINE' 2>/dev/null | head -n 1)
     sn=$(sqlite3 /app/nvram/karas.db 'select MachineSerialNo from INST_MACHINE' 2>/dev/null | head -n 1)
     { echo "kernel=$(uname -r)"; echo "firmware=$fw"; echo "model=$tli"; echo "serial=$sn"; } > $RUN/stock_info
+    # for the POWER page: after a cold start a reboot comes back to Klipper
+    rm -f $RUN/boot_cold; [ -e /tmp/x1_cold ] && : > $RUN/boot_cold
 }
 # SHUT DOWN / REBOOT (touch screen, SYSTEM -> POWER). The screen app turns
 # heaters and motors off through Klipper, draws its progress frames and
@@ -104,6 +107,9 @@ stock_info() {
 #             3 s hold is enough (halted, as on 11-27, the power stays
 #             on until the button is held longer: owner, the hardware
 #             then cuts it by itself).
+#   stock:    a reboot with $BASE/BOOT_STOCK_ONCE set: x1_hook.sh then
+#             leaves that one start to Sindoh's firmware (SSH still
+#             starts); the start after it is ours again.
 # "dry" as third word stops before that last step (the stack stays down).
 POWER_GPIO=/sys/class/gpio/gpio158/value
 power_do() {
@@ -112,6 +118,7 @@ power_do() {
     say() { echo "x1_power: $*"; echo "x1_power: $*" > /dev/console 2>/dev/null; }
     frame() { [ -f /tmp/x1_shut/$1.fb ] && cat /tmp/x1_shut/$1.fb > /dev/fb0 2>/dev/null; }
     key=; [ "$dry" = key ] && { key=1; dry=; }
+    stock=; [ "$what" = stock ] && { stock=1; what=reboot; }
     [ -f $RUN/power.key ] && key=1
     say "$what requested${dry:+ (dry run)}${key:+ (button held)}"
     n=0                             # the screen app's frames (in the card's /tmp)
@@ -150,6 +157,7 @@ power_do() {
     frame done
     if [ -n "$dry" ]; then say "dry run: stopping before the $what"; return 0; fi
     if [ "$what" = reboot ]; then
+        [ -n "$stock" ] && { : > $BASE/BOOT_STOCK_ONCE; sync; say "the next start is Sindoh's firmware, once"; }
         say "reboot"
         reboot
         return 0
@@ -435,13 +443,13 @@ powerd)                             # the loop behind SHUT DOWN / REBOOT (starte
             w=$(cat $RUN/power)
             # empty: caught between create and write; read it again next round
             [ -n "$w" ] && rm -f $RUN/power
-            case "$w" in poweroff|reboot) power_do $w; exit 0 ;; esac
+            case "$w" in poweroff|reboot|stock) power_do $w; exit 0 ;; esac
         fi
         sleep 1
     done
     ;;
 power)
-    case "$2" in poweroff|reboot) power_do $2 $3 ;; *) echo "usage: $0 power reboot|poweroff [dry]"; exit 1 ;; esac
+    case "$2" in poweroff|reboot|stock) power_do $2 $3 ;; *) echo "usage: $0 power reboot|poweroff|stock [dry]"; exit 1 ;; esac
     ;;
 soundd)                             # the speaker loop (started by "start")
     cd /
