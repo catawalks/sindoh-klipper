@@ -132,6 +132,7 @@ power_do() {
     frame 4; say "heaters and motors"
     sh $ST/x1_stop.sh $ST/bin/upctool || say "HEATER CHECK FAILED - going on, the $what ends it"
     frame 5; say "saving files"
+    soundd_stop
     net_stop
     rm -f $RUN/power.ok $RUN/power $RUN/power.key
     sync

@@ -558,8 +558,7 @@ stages 1-5 done on the dev printer):
     1X card) gets a stand-in. Open:
     - 1X: reboot through Moonraker's API worked 11-23. Still to try
       (owner present): nothing; Shutdown from Mainsail showed the
-      "safe to turn off" frame 11-27. Open: the shutdown leaves
-      `x1_sound.sh soundd` running. The screen's POWER page: 11-27 the first power off
+      "safe to turn off" frame 11-27. The screen's POWER page: 11-27 the first power off
       hung on "Switching off..." (halted, power on: the power board
       ignores GPIO 158 without a button hold). Now it shuts down,
       shows the DP200's "It's now safe to turn off your printer" and
